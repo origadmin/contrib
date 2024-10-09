@@ -5,6 +5,7 @@ package opentelemetry
 
 import (
 	"maps"
+	"net/http"
 	"sync/atomic"
 
 	"go.opentelemetry.io/otel"
@@ -27,7 +28,7 @@ type OpenTelemetry struct {
 	requestsInFlight        metric.Float64UpDownCounter
 	counterSendBytes        metric.Int64Histogram
 	counterRecvBytes        metric.Int64Histogram
-	requestsDurationSeconds metric.Int64Histogram
+	requestsDurationSeconds metric.Float64Histogram
 	requestsTotal           metric.Int64Counter
 	requestsSlowTotal       metric.Int64Counter
 	exception               metric.Int64Counter
@@ -163,17 +164,17 @@ func (t *OpenTelemetry) register() error {
 // The method does not return any value; its primary purpose is to update and maintain
 // the internal metric collectors of OpenTelemetry. By calling this method, one can ensure
 // that relevant metric data is correctly collected and stored for subsequent analysis and querying.
-func (t *OpenTelemetry) Observe(ctx context.Context, reporter metrics.Report) {
+func (t *OpenTelemetry) Observe(ctx context.Context, data metrics.MetricData) {
 	if !t.Enabled() {
 		return
 	}
-	t.Log(ctx, reporter.Endpoint, reporter.Method, reporter.Code, reporter.SendSize, reporter.RecvSize, reporter.Latency)
+	t.Log(ctx, data.Endpoint, data.Method, data.Code, data.SendSize, data.RecvSize, data.Latency)
 }
 
 // Log logs the Handler request and its details.
 //
 // Parameters: code string, method string, handler string, sendBytes float64, recvBytes float64, latency float64.
-func (t *OpenTelemetry) Log(ctx context.Context, code string, method, handler string, sendBytes, recvBytes, latency int64) {
+func (t *OpenTelemetry) Log(ctx context.Context, handler string, method string, code int, sendBytes, recvBytes int64, latency float64) {
 	if !t.Enabled() {
 		return
 	}
@@ -187,10 +188,10 @@ func (t *OpenTelemetry) Log(ctx context.Context, code string, method, handler st
 			return // ignore
 		}
 	}
-
-	t.RequestTotal("this", handler, method, code)
-	t.CounterSendBytes("this", handler, method, code, sendBytes)
-	t.CounterRecvBytes("this", handler, method, code, recvBytes)
+	codeStr := http.StatusText(code)
+	t.RequestTotal("this", handler, method, codeStr)
+	t.CounterSendBytes("this", handler, method, codeStr, sendBytes)
+	t.CounterRecvBytes("this", handler, method, codeStr, recvBytes)
 	t.RequestsDurationSeconds("this", handler, method, latency)
 }
 
@@ -259,7 +260,7 @@ func (t *OpenTelemetry) RequestsInFlight(module, state string, value float64) {
 // handler: the name of the Handler handler.
 // method: the name of the method.
 // latency: the latency of the Handler call.
-func (t *OpenTelemetry) RequestsDurationSeconds(module string, handler string, method string, latency int64) {
+func (t *OpenTelemetry) RequestsDurationSeconds(module string, handler string, method string, latency float64) {
 	t.requestsDurationSeconds.Record(t.Context(), latency, metric.WithAttributes(
 		//attribute.String(metrics.MetricLabelInstance, t.config.Application),
 		attribute.String(metrics.MetricLabelModule, module),
