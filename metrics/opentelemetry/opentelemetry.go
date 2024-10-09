@@ -5,6 +5,7 @@ package prometheus
 
 import (
 	"maps"
+	"sync/atomic"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -21,7 +22,7 @@ import (
 // summaryLatency statistics count,sum in prometheus
 type OpenTelemetry struct {
 	ctx                     context.Context
-	enabled                 bool
+	enabled                 atomic.Bool
 	meter                   metric.Meter
 	requestsInFlight        metric.Float64UpDownCounter
 	counterSendBytes        metric.Int64Histogram
@@ -37,7 +38,11 @@ type OpenTelemetry struct {
 }
 
 func (t *OpenTelemetry) Enabled() bool {
-	return t.enabled
+	return t.enabled.Load()
+}
+
+func (t *OpenTelemetry) Disable() {
+	t.enabled.Store(false)
 }
 
 func (t *OpenTelemetry) CounterException(module, errors string) {
@@ -159,6 +164,9 @@ func (t *OpenTelemetry) register() error {
 // the internal metric collectors of OpenTelemetry. By calling this method, one can ensure
 // that relevant metric data is correctly collected and stored for subsequent analysis and querying.
 func (t *OpenTelemetry) Observe(ctx context.Context, reporter metrics.Report) {
+	if !t.Enabled() {
+		return
+	}
 	t.Log(ctx, reporter.Endpoint, reporter.Method, reporter.Code, reporter.SendSize, reporter.RecvSize, reporter.Latency)
 }
 
@@ -166,6 +174,9 @@ func (t *OpenTelemetry) Observe(ctx context.Context, reporter metrics.Report) {
 //
 // Parameters: code string, method string, handler string, sendBytes float64, recvBytes float64, latency float64.
 func (t *OpenTelemetry) Log(ctx context.Context, code string, method, handler string, sendBytes, recvBytes, latency int64) {
+	if !t.Enabled() {
+		return
+	}
 	if len(t.logMethod) > 0 {
 		if _, ok := t.logMethod[method]; !ok {
 			return // ignore
@@ -229,18 +240,6 @@ func (t *OpenTelemetry) CounterRecvBytes(module, handler, method, code string, l
 	}
 }
 
-// RequestDurationSeconds logs the latency of a requestDurationSeconds module, Handler, and method.
-//
-// module: the name of the module.
-// handler: the name of the Handler handler.
-// method: the name of the method.
-// latency: the latency of the Handler call.
-//func (t *OpenTelemetry) RequestDurationSeconds(module, handler, method string, latency float64) {
-//	if len(t.config.DurationBuckets) > 0 {
-//		t.requestDurationSeconds.WithLabelValues(t.config.Application, module, handler, method).Observe(latency)
-//	}
-//}
-
 // RequestsInFlight logs a state in a module.
 //
 // module: the name of the module.
@@ -283,7 +282,6 @@ func New(ctx context.Context, configs ...*Config) (*OpenTelemetry, error) {
 
 	m := &OpenTelemetry{
 		ctx:        ctx,
-		enabled:    conf.Enabled,
 		logMethod:  maps.Clone(conf.LogMethod),
 		logHandler: maps.Clone(conf.LogHandler),
 		meter:      otel.Meter(conf.Application),
