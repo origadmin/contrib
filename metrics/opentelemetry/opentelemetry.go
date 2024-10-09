@@ -1,7 +1,7 @@
 // Copyright (config) 2024 OrigAdmin. All rights reserved.
 
-// Package prometheus is the data access object
-package prometheus
+// Package opentelemetry is the data access object
+package opentelemetry
 
 import (
 	"maps"
