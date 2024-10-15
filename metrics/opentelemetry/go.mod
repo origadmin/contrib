@@ -1,6 +1,6 @@
-module github.com/origadmin/toolkits/registry/metrics/opentelemetry
+module github.com/origadmin/toolkits/contrib/metrics/opentelemetry
 
-go 1.22.5
+go 1.23.1
 
 replace github.com/origadmin/toolkits => ../../../
 
