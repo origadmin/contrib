@@ -4,6 +4,8 @@ import (
 	"github.com/go-kratos/kratos/contrib/registry/consul/v2"
 	registryv2 "github.com/go-kratos/kratos/v2/registry"
 	"github.com/hashicorp/consul/api"
+
+	"github.com/origadmin/toolkits/registry"
 )
 
 type consulBuilder struct {
@@ -74,19 +76,6 @@ func FromConfig(config registry.Config) *api.Config {
 		InsecureSkipVerify: consulConfig.TLSConfig.InsecureSkipVerify,
 	}
 	return apiconfig
-	//return &api.Config{
-	//	Address:    consulConfig.Address,
-	//	Scheme:     consulConfig.Scheme,
-	//	PathPrefix: consulConfig.PathPrefix,
-	//	Datacenter: consulConfig.Datacenter,
-	//	Transport:  consulConfig.Transport,
-	//	HttpClient: consulConfig.HttpClient,
-	//	WaitTime:   consulConfig.WaitTime,
-	//	Token:      consulConfig.Token,
-	//	TokenFile:  consulConfig.TokenFile,
-	//	Namespace:  consulConfig.Namespace,
-	//	Partition:  consulConfig.Partition,
-	//}
 }
 
 func init() {

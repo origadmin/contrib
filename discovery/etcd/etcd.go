@@ -4,6 +4,8 @@ import (
 	"github.com/go-kratos/kratos/contrib/registry/etcd/v2"
 	registryv2 "github.com/go-kratos/kratos/v2/registry"
 	etcdclient "go.etcd.io/etcd/client/v3"
+
+	"github.com/origadmin/toolkits/registry"
 )
 
 type etcdBuilder struct {
@@ -54,19 +56,6 @@ func FromConfig(config registry.Config) etcdclient.Config {
 	}
 	apiconfig.TLS = etcdConfig.TLS
 	return apiconfig
-	//return &api.Config{
-	//	Address:    consulConfig.Address,
-	//	Scheme:     consulConfig.Scheme,
-	//	PathPrefix: consulConfig.PathPrefix,
-	//	Datacenter: consulConfig.Datacenter,
-	//	Transport:  consulConfig.Transport,
-	//	HttpClient: consulConfig.HttpClient,
-	//	WaitTime:   consulConfig.WaitTime,
-	//	Token:      consulConfig.Token,
-	//	TokenFile:  consulConfig.TokenFile,
-	//	Namespace:  consulConfig.Namespace,
-	//	Partition:  consulConfig.Partition,
-	//}
 }
 
 func init() {
