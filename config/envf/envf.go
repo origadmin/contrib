@@ -23,6 +23,13 @@ func NewSource(files []string, prefixes ...string) config.Source {
 	}
 }
 
+func NewSourceWithEnv(envs map[string]string, prefixes ...string) config.Source {
+	return &envf{
+		data:     envs,
+		prefixes: prefixes,
+	}
+}
+
 func (e *envf) Load() (kv []*config.KeyValue, err error) {
 	if len(e.files) > 0 {
 		for _, f := range e.files {
