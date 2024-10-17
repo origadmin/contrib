@@ -10,7 +10,7 @@ replace (
 require (
 	github.com/go-kratos/kratos/v2 v2.8.0
 	github.com/origadmin/toolkits v0.0.0-00010101000000-000000000000
-	github.com/origadmin/toolkits/codec v0.0.12
+	github.com/origadmin/toolkits/codec v0.0.14
 )
 
 require (
