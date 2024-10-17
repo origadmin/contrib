@@ -23,7 +23,7 @@ func NewSource(files []string, prefixes ...string) config.Source {
 	}
 }
 
-func NewSourceWithEnv(envs map[string]string, prefixes ...string) config.Source {
+func WithEnv(envs map[string]string, prefixes ...string) config.Source {
 	return &envf{
 		data:     envs,
 		prefixes: prefixes,
