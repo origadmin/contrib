@@ -1,6 +1,8 @@
 module github.com/origadmin/toolkits/contrib/metrics/opentelemetry
 
-go 1.23
+go 1.23.1
+
+toolchain go1.23.2
 
 replace github.com/origadmin/toolkits => ../../../
 
