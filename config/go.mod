@@ -5,8 +5,10 @@ go 1.23.1
 toolchain go1.23.2
 
 replace (
+	github.com/BurntSushi/toml v1.4.0 => github.com/origadmin/proto-toml v0.0.0-20241025105435-c375e5f547c2
 	github.com/origadmin/toolkits => ../../
 	github.com/origadmin/toolkits/codec => ../../codec
+	gopkg.in/yaml.v3 v3.0.1 => github.com/origadmin/proto-yaml v0.0.0-20241025105048-79bdd9d4565e
 )
 
 require (

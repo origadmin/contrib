@@ -123,7 +123,7 @@ func TestFile(t *testing.T) {
 func testWatchFile(t *testing.T, path string) {
 	t.Log(path)
 
-	s := NewSource(path, new(TestJSON))
+	s := NewSource(new(TestJSON))
 	watch, err := s.Watch()
 	if err != nil {
 		t.Error(err)
@@ -172,7 +172,7 @@ func testWatchDir(t *testing.T, path, file string) {
 	t.Log(path)
 	t.Log(file)
 
-	s := NewSource(path, new(TestJSON))
+	s := NewSource(new(TestJSON))
 	watch, err := s.Watch()
 	if err != nil {
 		t.Error(err)
@@ -200,7 +200,7 @@ func testWatchDir(t *testing.T, path, file string) {
 func testSource(t *testing.T, path string, data []byte) {
 	t.Log(path)
 
-	s := NewSource(path, new(TestJSON))
+	s := NewSource(new(TestJSON))
 	kvs, err := s.Load()
 	if err != nil {
 		t.Error(err)
@@ -235,7 +235,7 @@ func TestConfig(t *testing.T) {
 		} `json:"foo"`
 	}
 	c := config.New(config.WithSource(
-		NewSource(path, new(TestJSON)),
+		NewSource(new(TestJSON)),
 	))
 	testScan(t, c)
 
@@ -329,7 +329,7 @@ func TestMergeDataRace(t *testing.T) {
 		t.Error(err)
 	}
 	c := config.New(config.WithSource(
-		NewSource(path, new(TestJSON)),
+		NewSource(new(TestJSON)),
 	))
 	const count = 80
 	wg := &sync.WaitGroup{}

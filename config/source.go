@@ -4,8 +4,9 @@ import (
 	"strings"
 
 	"github.com/go-kratos/kratos/v2/config"
+	"github.com/go-kratos/kratos/v2/encoding"
 
-	"github.com/origadmin/toolkits/codec"
+	_ "github.com/origadmin/toolkits/codec/toml"
 	"github.com/origadmin/toolkits/errors"
 )
 
@@ -24,9 +25,9 @@ type (
 	Resolver = config.Resolver
 	// Merge is config merge func.
 	Merge = config.Merge
-	// KeyValue is config key value.
+	// KeyValue is config key atomicValue.
 	KeyValue = config.KeyValue
-	// Value is config value.
+	// Value is config atomicValue.
 	Value = config.Value
 	// Reader is config reader.
 	Reader = config.Reader
@@ -75,8 +76,16 @@ func SourceDecoder(src *config.KeyValue, target map[string]interface{}) error {
 		}
 		return nil
 	}
-	if codec := codec.TypeFromString(src.Format); codec.IsSupported() {
-		return codec.Unmarshal(src.Value, &target)
+
+	if src.Format == "yml" {
+		src.Format = "yaml"
+	}
+
+	if codec := encoding.GetCodec(src.Format); codec != nil {
+		err := codec.Unmarshal(src.Value, &target)
+		if err != nil {
+			return err
+		}
 	}
 	return errors.Errorf("unsupported key: %s format: %s", src.Key, src.Format)
 }

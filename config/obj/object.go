@@ -2,11 +2,7 @@ package obj
 
 import (
 	"encoding/json"
-	"io"
-	"os"
-	"path/filepath"
 	"reflect"
-	"strings"
 
 	"github.com/go-kratos/kratos/v2/config"
 	"github.com/go-kratos/kratos/v2/encoding"
@@ -17,75 +13,31 @@ import (
 var _ config.Source = (*object)(nil)
 
 type object struct {
-	path string
-	obj  any
+	obj    any
+	indent string
 }
 
 // NewSource new a object source.
-func NewSource(path string, obj any) config.Source {
-	return &object{path: path, obj: obj}
-}
-
-func (o *object) loadFile(path string) (*config.KeyValue, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-	data, err := io.ReadAll(file)
-	if err != nil {
-		return nil, err
-	}
-	info, err := file.Stat()
-	if err != nil {
-		return nil, err
-	}
-	codec := encoding.GetCodec(format(info.Name()))
-	return unmarshalToKeyValue(codec, data, o.obj)
-}
-
-func (o *object) loadDir(path string) (kvs []*config.KeyValue, err error) {
-	files, err := os.ReadDir(path)
-	if err != nil {
-		return nil, err
-	}
-	for _, file := range files {
-		// ignore hidden files
-		if file.IsDir() || strings.HasPrefix(file.Name(), ".") {
-			continue
-		}
-		kv, err := o.loadFile(filepath.Join(path, file.Name()))
-		if err != nil {
-			return nil, err
-		}
-		kvs = append(kvs, kv)
-	}
-	return
+func NewSource(obj any) config.Source {
+	return &object{obj: obj}
 }
 
 func (o *object) Load() (kvs []*config.KeyValue, err error) {
-	fi, err := os.Stat(o.path)
+	value, err := marshalObject(o.obj, o.indent)
 	if err != nil {
 		return nil, err
 	}
-	if fi.IsDir() {
-		return o.loadDir(o.path)
-	}
-	kv, err := o.loadFile(o.path)
-	if err != nil {
-		return nil, err
-	}
-	return []*config.KeyValue{kv}, nil
+	return []*config.KeyValue{value}, nil
 }
 
 func (o *object) Watch() (config.Watcher, error) {
 	return NewWatcher()
 }
 
-func marshalObject(obj any) (*config.KeyValue, error) {
+func marshalObject(obj any, indent string) (*config.KeyValue, error) {
 	if m, ok := obj.(proto.Message); ok {
 		src, err := protojson.MarshalOptions{
-			Indent:          " ",
+			Indent:          indent,
 			EmitUnpopulated: true,
 		}.Marshal(m)
 		if err != nil {
@@ -97,7 +49,7 @@ func marshalObject(obj any) (*config.KeyValue, error) {
 			Value:  src,
 		}, nil
 	}
-	src, err := json.MarshalIndent(obj, "", " ")
+	src, err := json.MarshalIndent(obj, "", indent)
 	if err != nil {
 		return nil, err
 	}
@@ -113,5 +65,5 @@ func unmarshalToKeyValue(codec encoding.Codec, data []byte, obj any) (*config.Ke
 	if err != nil {
 		return nil, err
 	}
-	return marshalObject(obj)
+	return marshalObject(obj, " ")
 }
