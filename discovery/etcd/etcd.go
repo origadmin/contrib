@@ -4,6 +4,8 @@ import (
 	"github.com/go-kratos/kratos/contrib/registry/etcd/v2"
 	registryv2 "github.com/go-kratos/kratos/v2/registry"
 	etcdclient "go.etcd.io/etcd/client/v3"
+
+	"github.com/origadmin/toolkits/runtime/kratos/discovery"
 )
 
 type etcdBuilder struct {
