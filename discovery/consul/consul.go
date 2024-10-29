@@ -5,13 +5,13 @@ import (
 	registryv2 "github.com/go-kratos/kratos/v2/registry"
 	"github.com/hashicorp/consul/api"
 
-	"github.com/origadmin/toolkits/registry"
+	"github.com/origadmin/toolkits/runtime/kratos/discovery"
 )
 
 type consulBuilder struct {
 }
 
-func (c *consulBuilder) NewClient(conf registry.Config) (registryv2.Discovery, error) {
+func (c *consulBuilder) NewClient(conf discovery.Config) (registryv2.Discovery, error) {
 	config := FromConfig(conf)
 	consulCli, err := api.NewClient(config)
 	if err != nil {
@@ -21,7 +21,7 @@ func (c *consulBuilder) NewClient(conf registry.Config) (registryv2.Discovery, e
 	return r, nil
 }
 
-func (c *consulBuilder) NewServer(conf registry.Config) (registryv2.Registrar, error) {
+func (c *consulBuilder) NewServer(conf discovery.Config) (registryv2.Registrar, error) {
 	config := FromConfig(conf)
 	consulCli, err := api.NewClient(config)
 	if err != nil {
@@ -31,7 +31,7 @@ func (c *consulBuilder) NewServer(conf registry.Config) (registryv2.Registrar, e
 	return r, nil
 }
 
-func FromConfig(config registry.Config) *api.Config {
+func FromConfig(config discovery.Config) *api.Config {
 	if config.Type != "consul" {
 		panic("consul config type error")
 	}
@@ -79,5 +79,5 @@ func FromConfig(config registry.Config) *api.Config {
 }
 
 func init() {
-	registry.Register("consul", &consulBuilder{})
+	discovery.Register("consul", &consulBuilder{})
 }
