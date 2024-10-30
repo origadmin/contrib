@@ -4,14 +4,12 @@ import (
 	"github.com/go-kratos/kratos/contrib/registry/etcd/v2"
 	registryv2 "github.com/go-kratos/kratos/v2/registry"
 	etcdclient "go.etcd.io/etcd/client/v3"
-
-	"github.com/origadmin/toolkits/runtime/kratos/discovery"
 )
 
 type etcdBuilder struct {
 }
 
-func (c *etcdBuilder) NewClient(conf discovery.Config) (registryv2.Discovery, error) {
+func (c *etcdBuilder) NewClient(conf registry.Config) (registryv2.Discovery, error) {
 	config := FromConfig(conf)
 	etcdCli, err := etcdclient.New(config)
 	if err != nil {
@@ -21,7 +19,7 @@ func (c *etcdBuilder) NewClient(conf discovery.Config) (registryv2.Discovery, er
 	return r, nil
 }
 
-func (c *etcdBuilder) NewServer(conf discovery.Config) (registryv2.Registrar, error) {
+func (c *etcdBuilder) NewServer(conf registry.Config) (registryv2.Registrar, error) {
 	config := FromConfig(conf)
 	etcdCli, err := etcdclient.New(config)
 	if err != nil {
@@ -31,7 +29,7 @@ func (c *etcdBuilder) NewServer(conf discovery.Config) (registryv2.Registrar, er
 	return r, nil
 }
 
-func FromConfig(config discovery.Config) etcdclient.Config {
+func FromConfig(config registry.Config) etcdclient.Config {
 	if config.Type != "etcd" {
 		panic("etcd config type error")
 	}
@@ -59,5 +57,5 @@ func FromConfig(config discovery.Config) etcdclient.Config {
 }
 
 func init() {
-	discovery.Register("consul", &etcdBuilder{})
+	registry.Register("consul", &etcdBuilder{})
 }
