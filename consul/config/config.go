@@ -9,7 +9,11 @@ import (
 	"github.com/origadmin/toolkits/runtime/kratos"
 )
 
-func NewConsulConfig(ccfg *config.DiscoveryConfig, opts ...config.Option) (config.Config, error) {
+func init() {
+	kratos.RegistryConfig("consul", NewConsulConfig)
+}
+
+func NewConsulConfig(ccfg *config.SourceConfig, opts ...config.Option) (config.Config, error) {
 	cfg := api.DefaultConfig()
 	cfg.Address = ccfg.Consul.Address
 	cfg.Scheme = ccfg.Consul.Scheme
@@ -27,8 +31,4 @@ func NewConsulConfig(ccfg *config.DiscoveryConfig, opts ...config.Option) (confi
 	}
 	opts = append(opts, config.WithSource(source))
 	return config.New(opts...), nil
-}
-
-func init() {
-	kratos.RegistryConfig("consul", NewConsulConfig)
 }

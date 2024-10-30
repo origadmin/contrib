@@ -4,12 +4,12 @@ go 1.23.1
 
 toolchain go1.23.2
 
-replace (
-	github.com/origadmin/toolkits => ../../
-)
+replace github.com/origadmin/toolkits => ../../
 
 require (
 	github.com/go-kratos/kratos/contrib/config/consul/v2 v2.0.0-20241028134144-850877209eaa
+	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20241030023738-861493a20524
+	github.com/go-kratos/kratos/v2 v2.8.2
 	github.com/hashicorp/consul/api v1.30.0
 	github.com/origadmin/toolkits v0.0.0-00010101000000-000000000000
 )
@@ -20,7 +20,6 @@ require (
 	github.com/envoyproxy/protoc-gen-validate v1.1.0 // indirect
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/go-kratos/kratos/v2 v2.8.1 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
 	github.com/hashicorp/go-hclog v1.6.3 // indirect
