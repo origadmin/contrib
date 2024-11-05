@@ -18,12 +18,13 @@ func NewConsulConfig(ccfg *config.SourceConfig, opts ...config.Option) (config.C
 	cfg.Address = ccfg.Consul.Address
 	cfg.Scheme = ccfg.Consul.Scheme
 
-	cli, err := api.NewClient(cfg)
+	apiClient, err := api.NewClient(cfg)
 	if err != nil {
 		return nil, err
 	}
 
-	source, err := consul.New(cli,
+	source, err := consul.New(
+		apiClient,
 		consul.WithPath(ccfg.Consul.Path),
 	)
 	if err != nil {
