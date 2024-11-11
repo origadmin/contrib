@@ -33,8 +33,11 @@ github.com/go-kit/kit v0.8.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2
 github.com/go-kit/kit v0.9.0/go.mod h1:xBxKIO96dXMWWy0MnWVtmwkA9/13aqxPnvrjFYMA2as=
 github.com/go-kratos/kratos/contrib/config/consul/v2 v2.0.0-20241028134144-850877209eaa h1:LfeIPs6dPFo7efxQUqll5amgFmlhE/8lt5vD+FgNBk0=
 github.com/go-kratos/kratos/contrib/config/consul/v2 v2.0.0-20241028134144-850877209eaa/go.mod h1:kn31/BsV/0mBwRFGI8ZQKbCqNCIBAXGRtYIFigznV/Y=
+github.com/go-kratos/kratos/contrib/config/consul/v2 v2.0.0-20241105072421-f8b97f675b32 h1:qNLakvBEl4i8xJYhScA+Tlc2JkAbMRYI1577AbgdF1s=
+github.com/go-kratos/kratos/contrib/config/consul/v2 v2.0.0-20241105072421-f8b97f675b32/go.mod h1:DmyRWIVGRLUBBUZ/JEdK4sAmaWX3hPHb/AuzbnCewUI=
 github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20241030023738-861493a20524 h1:WDQSvaCsQbyUXuxH3W0NG8jna+lem4bLdcZmTng/6Yg=
 github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20241030023738-861493a20524/go.mod h1:42GshWiz9DSO+sCkZGwffQOd2Cc/IYoSj/uhsWKpm/s=
+github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20241105072421-f8b97f675b32/go.mod h1:42GshWiz9DSO+sCkZGwffQOd2Cc/IYoSj/uhsWKpm/s=
 github.com/go-kratos/kratos/v2 v2.8.2 h1:EsEA7AmPQ2YQQ0FZrDWO2HgBNqeWM8z/mWKzS5UkQaQ=
 github.com/go-kratos/kratos/v2 v2.8.2/go.mod h1:+Vfe3FzF0d+BfMdajA11jT0rAyJWublRE/seZQNZVxE=
 github.com/go-logfmt/logfmt v0.3.0/go.mod h1:Qt1PoO58o5twSAckw1HlFXLmHsOX5/0LbT9GBnD5lWE=

@@ -10,8 +10,8 @@ replace (
 )
 
 require (
-	github.com/go-kratos/kratos/contrib/config/consul/v2 v2.0.0-20241028134144-850877209eaa
-	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20241030023738-861493a20524
+	github.com/go-kratos/kratos/contrib/config/consul/v2 v2.0.0-20241105072421-f8b97f675b32
+	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20241105072421-f8b97f675b32
 	github.com/hashicorp/consul/api v1.30.0
 	github.com/origadmin/toolkits v0.0.0-00010101000000-000000000000
 	github.com/origadmin/toolkits/runtime v0.0.0-00010101000000-000000000000
