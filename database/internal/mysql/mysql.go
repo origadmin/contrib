@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/goexts/ggb/types"
+	"github.com/goexts/generic/types"
 )
 
 const (
