@@ -1,18 +1,18 @@
 package config
 
 import (
-	"github.com/go-kratos/kratos/contrib/config/consul/v2"
 	"github.com/hashicorp/consul/api"
 
 	"github.com/origadmin/toolkits/errors"
+	"github.com/origadmin/toolkits/runtime"
 	"github.com/origadmin/toolkits/runtime/config"
-	"github.com/origadmin/toolkits/runtime/kratos"
 )
 
 func init() {
-	kratos.RegistryConfig("consul", NewConsulConfig)
+	runtime.RegisterConfigFunc("consul", NewConsulConfig)
 }
 
+// NewConsulConfig create a new consul config.
 func NewConsulConfig(ccfg *config.SourceConfig, opts ...config.Option) (config.Config, error) {
 	cfg := api.DefaultConfig()
 	cfg.Address = ccfg.Consul.Address
@@ -23,10 +23,7 @@ func NewConsulConfig(ccfg *config.SourceConfig, opts ...config.Option) (config.C
 		return nil, err
 	}
 
-	source, err := consul.New(
-		apiClient,
-		consul.WithPath(ccfg.Consul.Path),
-	)
+	source, err := New(apiClient, WithPath(ccfg.Consul.Path))
 	if err != nil {
 		return nil, errors.Wrap(err, "consul source error")
 	}

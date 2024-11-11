@@ -1,77 +1,74 @@
 package registry
 
 import (
-	"github.com/go-kratos/kratos/contrib/registry/consul/v2"
-	registryv2 "github.com/go-kratos/kratos/v2/registry"
 	"github.com/hashicorp/consul/api"
 
 	"github.com/origadmin/toolkits/errors"
+	"github.com/origadmin/toolkits/runtime"
 	"github.com/origadmin/toolkits/runtime/config"
-	"github.com/origadmin/toolkits/runtime/kratos"
+	"github.com/origadmin/toolkits/runtime/registry"
 )
 
 type consulBuilder struct {
 }
 
 func init() {
-	kratos.RegistryRegistry("consul", &consulBuilder{})
+	runtime.RegisterRegistry("consul", &consulBuilder{})
 }
 
-func optionsFromConfig(ccfg *config.RegistryConfig_Consul) []consul.Option {
-	var opts []consul.Option
+func optsFromConfig(ccfg *config.RegistryConfig_Consul) []Option {
+	var opts []Option
 
 	if ccfg.HealthCheck {
-		opts = append(opts, consul.WithHealthCheck(ccfg.HealthCheck))
+		opts = append(opts, WithHealthCheck(ccfg.HealthCheck))
 	}
 	if ccfg.HeartBeat {
-		opts = append(opts, consul.WithHeartbeat(ccfg.HeartBeat))
+		opts = append(opts, WithHeartbeat(ccfg.HeartBeat))
 	}
 	if ccfg.Timeout != nil {
-		opts = append(opts, consul.WithTimeout(ccfg.Timeout.AsDuration()))
+		opts = append(opts, WithTimeout(ccfg.Timeout.AsDuration()))
 	}
 	if ccfg.Datacenter != "" {
-		opts = append(opts, consul.WithDatacenter(consul.Datacenter(ccfg.Datacenter)))
+		opts = append(opts, WithDatacenter(Datacenter(ccfg.Datacenter)))
 	}
 	if ccfg.HealthCheckInterval > 0 {
-		opts = append(opts, consul.WithHealthCheckInterval(int(ccfg.HealthCheckInterval)))
+		opts = append(opts, WithHealthCheckInterval(int(ccfg.HealthCheckInterval)))
 	}
 	if ccfg.DeregisterCriticalServiceAfter > 0 {
-		opts = append(opts, consul.WithDeregisterCriticalServiceAfter(int(ccfg.DeregisterCriticalServiceAfter)))
+		opts = append(opts, WithDeregisterCriticalServiceAfter(int(ccfg.DeregisterCriticalServiceAfter)))
 	}
 	//if true {
-	//	consul.WithServiceResolver(func(ctx context.Context, entries []*api.ServiceEntry) []*registryv2.ServiceInstance {
-	//		return []*registryv2.ServiceInstance{}
+	//	consul.WithServiceResolver(func(ctx context.Context, entries []*api.ServiceEntry) []*registry.ServiceInstance {
+	//		return []*registry.ServiceInstance{}
 	//	})
 	//	consul.WithServiceCheck()
 	//}
 	return opts
 }
 
-func (c *consulBuilder) NewDiscovery(cfg *config.RegistryConfig) (registryv2.Discovery, error) {
+func (c *consulBuilder) NewDiscovery(cfg *config.RegistryConfig) (registry.Discovery, error) {
 	if cfg == nil || cfg.Consul == nil {
 		return nil, errors.New("configuration: consul config is required")
 	}
 	config := FromConfig(cfg.Consul)
-	consulCli, err := api.NewClient(config)
+	apiClient, err := api.NewClient(config)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create consul client")
 	}
-	opts := optionsFromConfig(cfg.Consul)
-	r := consul.New(consulCli, opts...)
+	r := New(apiClient, optsFromConfig(cfg.Consul)...)
 	return r, nil
 }
 
-func (c *consulBuilder) NewRegistrar(cfg *config.RegistryConfig) (registryv2.Registrar, error) {
+func (c *consulBuilder) NewRegistrar(cfg *config.RegistryConfig) (registry.Registrar, error) {
 	if cfg == nil || cfg.Consul == nil {
 		return nil, errors.New("configuration: consul config is required")
 	}
 	config := FromConfig(cfg.Consul)
-	consulCli, err := api.NewClient(config)
+	apiClient, err := api.NewClient(config)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create consul client")
 	}
-	opts := optionsFromConfig(cfg.Consul)
-	r := consul.New(consulCli, opts...)
+	r := New(apiClient, optsFromConfig(cfg.Consul)...)
 	return r, nil
 }
 
