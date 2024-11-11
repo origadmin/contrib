@@ -4,14 +4,17 @@ go 1.23.1
 
 toolchain go1.23.2
 
-replace github.com/origadmin/toolkits => ../../
+replace (
+	github.com/origadmin/toolkits => ../../
+	github.com/origadmin/toolkits/runtime => ../../runtime
+)
 
 require (
 	github.com/go-kratos/kratos/contrib/config/consul/v2 v2.0.0-20241028134144-850877209eaa
 	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20241030023738-861493a20524
 	github.com/hashicorp/consul/api v1.30.0
 	github.com/origadmin/toolkits v0.0.0-00010101000000-000000000000
-	github.com/origadmin/toolkits/runtime v0.0.5
+	github.com/origadmin/toolkits/runtime v0.0.0-00010101000000-000000000000
 )
 
 require (
