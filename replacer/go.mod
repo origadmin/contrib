@@ -10,7 +10,7 @@ replace (
 require (
 	github.com/goexts/generic v0.1.0
 	github.com/origadmin/toolkits v0.0.0-00010101000000-000000000000
-	github.com/origadmin/toolkits/codec v0.0.0-00010101000000-000000000000
+	github.com/origadmin/toolkits/codec v0.0.21
 )
 
 require (

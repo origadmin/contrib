@@ -170,8 +170,14 @@ func TestConfig(t *testing.T) {
 			Age  int    `json:"age"`
 		} `json:"foo"`
 	}
+
+	var source TestJSON
+	err := json.Unmarshal([]byte(_testJSON), &source)
+	if err != nil {
+		t.Error(err)
+	}
 	c := config.New(config.WithSource(
-		NewSource(new(TestJSON)),
+		NewSource(&source),
 	))
 	testScan(t, c)
 
@@ -242,7 +248,7 @@ func testConfig(t *testing.T, c config.Config) {
 	}
 
 	// not found
-	if _, err := c.Value("not_found_key").Bool(); errors.Is(err, config.ErrNotFound) {
+	if _, err := c.Value("not_found_key").Bool(); !errors.Is(err, config.ErrNotFound) {
 		t.Logf("not_found_key not match: %v", err)
 	}
 }

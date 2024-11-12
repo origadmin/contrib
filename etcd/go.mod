@@ -6,7 +6,6 @@ toolchain go1.23.2
 
 replace (
 	github.com/origadmin/toolkits => ../../
-	github.com/origadmin/toolkits/codec => ../../codec
 	github.com/origadmin/toolkits/runtime => ../../runtime
 )
 

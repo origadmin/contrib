@@ -28,7 +28,7 @@ func Middleware(cfg *config.Logger, l log.Logger) (middleware.Middleware, error)
 	return logging.Server(l), nil
 }
 
-func FromConfig(cfg *config.LoggerConfig) logger.Setting {
+func FromConfig(cfg *config.Logger) sloge.Setting {
 	return func(option *sloge.Option) {
 		//option.OutputPath = cfg.Path
 		//option.Format = cfg.Format

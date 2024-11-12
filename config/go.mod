@@ -4,15 +4,12 @@ go 1.23.1
 
 toolchain go1.23.2
 
-replace (
-	github.com/origadmin/toolkits => ../../
-	github.com/origadmin/toolkits/codec => ../../codec
-)
+replace github.com/origadmin/toolkits => ../../
 
 require (
 	github.com/go-kratos/kratos/v2 v2.8.2
 	github.com/origadmin/toolkits v0.0.0-00010101000000-000000000000
-	github.com/origadmin/toolkits/codec v0.0.0-00010101000000-000000000000
+	github.com/origadmin/toolkits/codec v0.0.21
 	google.golang.org/protobuf v1.35.1
 )
 

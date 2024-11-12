@@ -5,7 +5,7 @@ import (
 
 	"github.com/gorilla/handlers"
 
-	"github.com/origadmin/toolkits/middlewares"
+	"github.com/origadmin/toolkits/runtime/config"
 )
 
 const (
@@ -27,7 +27,7 @@ const (
 
 type FilterFunc = func(http.Handler) http.Handler
 
-func WithCors(cfg *middlewares.CorsConfig) FilterFunc {
+func WithCors(cfg *config.Cors) FilterFunc {
 	opts := []handlers.CORSOption{
 		handlers.AllowedOrigins(cfg.AllowOrigins),
 		handlers.AllowedHeaders(cfg.AllowHeaders),
