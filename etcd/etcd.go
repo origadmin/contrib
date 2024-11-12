@@ -5,15 +5,15 @@ import (
 	registryv2 "github.com/go-kratos/kratos/v2/registry"
 	etcdclient "go.etcd.io/etcd/client/v3"
 
+	"github.com/origadmin/toolkits/runtime"
 	"github.com/origadmin/toolkits/runtime/config"
-	"github.com/origadmin/toolkits/runtime/kratos"
 )
 
 type etcdBuilder struct {
 }
 
 func init() {
-	kratos.RegistryRegistry("etcd", &etcdBuilder{})
+	runtime.RegisterRegistry("etcd", &etcdBuilder{})
 }
 
 func (c *etcdBuilder) NewDiscovery(cfg *config.RegistryConfig) (registryv2.Discovery, error) {

@@ -1,4 +1,4 @@
-module github.com/origadmin/toolkits/contrib/framework/gins
+module github.com/origadmin/toolkits/contrib/framework/gin
 
 go 1.23.1
 

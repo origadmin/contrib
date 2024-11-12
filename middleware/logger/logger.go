@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
 package logger
 
 import (
@@ -24,7 +28,7 @@ func Middleware(cfg *config.Logger, l log.Logger) (middleware.Middleware, error)
 	return logging.Server(l), nil
 }
 
-func FromConfig(cfg *config.Logger) sloge.Setting {
+func FromConfig(cfg *config.LoggerConfig) logger.Setting {
 	return func(option *sloge.Option) {
 		//option.OutputPath = cfg.Path
 		//option.Format = cfg.Format

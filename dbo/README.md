@@ -1,5 +1,5 @@
-# Dorm package
+# Dbo package
 
 ## Introduction
 
-Dorm is duplicate of the [dorm](https://github.com/dorm/dorm) package.
+Dbo is a database client wrapper for popular orm frameworks.

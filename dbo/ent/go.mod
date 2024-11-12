@@ -1,4 +1,4 @@
-module github.com/origadmin/toolkits/contrib/dorm/ent
+module github.com/origadmin/toolkits/contrib/dbo/ent
 
 go 1.22.5
 

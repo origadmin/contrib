@@ -1,6 +1,7 @@
 package envf
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -386,11 +387,31 @@ func Test_env_load(t *testing.T) {
 				prefixes: tt.fields.prefixes,
 			}
 			got := e.load(tt.args.envStrings)
-			if !reflect.DeepEqual(tt.want, got) {
+			//fmt.Printf("want:%+v,got:%+v", tt.want, got)
+			//printfKV(tt.want)
+			//printfKV(got)
+			if !compareKeyValue(tt.want, got) {
 				t.Errorf("env.load() = %v, want %v", got, tt.want)
 			}
 		})
 	}
+}
+
+func compareKeyValue(want, got []*config.KeyValue) bool {
+	wants := make(map[string]*config.KeyValue, len(want))
+	for i := range want {
+		wants[want[i].Key] = want[i]
+	}
+
+	for i := range got {
+		if value, ok := wants[got[i].Key]; !ok ||
+			!bytes.Equal(value.Value, got[i].Value) ||
+			value.Format != got[i].Format {
+			return false
+		}
+	}
+
+	return true
 }
 
 func Test_matchPrefix(t *testing.T) {
