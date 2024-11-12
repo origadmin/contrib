@@ -1,4 +1,4 @@
-module github.com/origadmin/toolkits/runtime/web/fiber
+module github.com/origadmin/toolkits/contrib/framework/fiber
 
 go 1.23.1
 
