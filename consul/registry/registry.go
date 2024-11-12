@@ -16,7 +16,7 @@ func init() {
 	runtime.RegisterRegistry("consul", &consulBuilder{})
 }
 
-func optsFromConfig(ccfg *config.RegistryConfig_Consul) []Option {
+func optsFromConfig(ccfg *config.Registry_Consul) []Option {
 	var opts []Option
 
 	if ccfg.HealthCheck {
@@ -46,7 +46,7 @@ func optsFromConfig(ccfg *config.RegistryConfig_Consul) []Option {
 	return opts
 }
 
-func (c *consulBuilder) NewDiscovery(cfg *config.RegistryConfig) (registry.Discovery, error) {
+func (c *consulBuilder) NewDiscovery(cfg *config.Registry) (registry.Discovery, error) {
 	if cfg == nil || cfg.Consul == nil {
 		return nil, errors.New("configuration: consul config is required")
 	}
@@ -59,7 +59,7 @@ func (c *consulBuilder) NewDiscovery(cfg *config.RegistryConfig) (registry.Disco
 	return r, nil
 }
 
-func (c *consulBuilder) NewRegistrar(cfg *config.RegistryConfig) (registry.Registrar, error) {
+func (c *consulBuilder) NewRegistrar(cfg *config.Registry) (registry.Registrar, error) {
 	if cfg == nil || cfg.Consul == nil {
 		return nil, errors.New("configuration: consul config is required")
 	}
@@ -72,7 +72,7 @@ func (c *consulBuilder) NewRegistrar(cfg *config.RegistryConfig) (registry.Regis
 	return r, nil
 }
 
-func FromConfig(cfg *config.RegistryConfig_Consul) *api.Config {
+func FromConfig(cfg *config.Registry_Consul) *api.Config {
 	apiconfig := api.DefaultConfig()
 	if cfg.Address != "" {
 		apiconfig.Address = cfg.Address

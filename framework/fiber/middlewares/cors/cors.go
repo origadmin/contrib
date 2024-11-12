@@ -6,7 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 
-	"github.com/origadmin/toolkits/middlewares"
+	"github.com/origadmin/toolkits/runtime/config"
 )
 
 const (
@@ -26,7 +26,7 @@ const (
 	corsMatchAll                  string = "*"
 )
 
-func WithCors(cfg *middlewares.CorsConfig) fiber.Handler {
+func WithCors(cfg *config.Cors) fiber.Handler {
 	if !cfg.Enabled {
 		return func(ctx *fiber.Ctx) error {
 			return ctx.Next()

@@ -5,6 +5,7 @@ go 1.23.1
 toolchain go1.23.2
 
 replace (
+	github.com/armon/go-metrics v0.5.4 => github.com/origadmin/go-metrics v0.5.4
 	github.com/origadmin/toolkits => ../../
 	github.com/origadmin/toolkits/runtime => ../../runtime
 )
