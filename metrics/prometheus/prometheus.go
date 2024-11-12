@@ -5,6 +5,7 @@ package prometheus
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
@@ -49,10 +50,10 @@ func (obj *Prometheus) register() {
 		prometheus.CounterOpts{
 			Namespace: obj.config.Namespace,
 			Subsystem: obj.config.SubSystem,
-			Name:      metrics.MetricEvent.String(),
+			Name:      metrics.MetricCounterEvent.String(),
 			Help:      "number of module event",
 		},
-		obj.config.MetricLabels[metrics.MetricEvent],
+		obj.config.MetricLabels[metrics.MetricCounterEvent],
 	)
 	obj.registry.MustRegister(obj.event)
 
@@ -60,10 +61,10 @@ func (obj *Prometheus) register() {
 		prometheus.CounterOpts{
 			Namespace: obj.config.Namespace,
 			Subsystem: obj.config.SubSystem,
-			Name:      metrics.MetricSiteEvent.String(),
+			Name:      metrics.MetricCounterSiteEvent.String(),
 			Help:      "number of module site event",
 		},
-		obj.config.MetricLabels[metrics.MetricSiteEvent],
+		obj.config.MetricLabels[metrics.MetricCounterSiteEvent],
 	)
 	obj.registry.MustRegister(obj.siteEvent)
 
@@ -71,10 +72,10 @@ func (obj *Prometheus) register() {
 		prometheus.CounterOpts{
 			Namespace: obj.config.Namespace,
 			Subsystem: obj.config.SubSystem,
-			Name:      metrics.MetricErrorsTotal.String(),
+			Name:      metrics.MetricCounterException.String(),
 			Help:      "The HTTP request errors counter",
 		},
-		obj.config.MetricLabels[metrics.MetricErrorsTotal],
+		obj.config.MetricLabels[metrics.MetricCounterException],
 	)
 	obj.registry.MustRegister(obj.errorsTotal)
 
@@ -94,11 +95,11 @@ func (obj *Prometheus) register() {
 		prometheus.HistogramOpts{
 			Namespace: obj.config.Namespace,
 			Subsystem: obj.config.SubSystem,
-			Name:      metrics.MetricRequestSizeBytes.String(),
+			Name:      metrics.MetricCounterRecvBytes.String(),
 			Help:      "The HTTP request sizes in bytes.",
 			Buckets:   obj.config.SizeBuckets,
 		},
-		obj.config.MetricLabels[metrics.MetricRequestSizeBytes],
+		obj.config.MetricLabels[metrics.MetricCounterRecvBytes],
 	)
 	obj.registry.MustRegister(obj.requestSize)
 
@@ -107,11 +108,11 @@ func (obj *Prometheus) register() {
 		prometheus.HistogramOpts{
 			Namespace: obj.config.Namespace,
 			Subsystem: obj.config.SubSystem,
-			Name:      metrics.MetricResponseSizeBytes.String(),
+			Name:      metrics.MetricCounterSendBytes.String(),
 			Help:      "The HTTP response sizes in bytes.",
 			Buckets:   obj.config.SizeBuckets,
 		},
-		obj.config.MetricLabels[metrics.MetricResponseSizeBytes],
+		obj.config.MetricLabels[metrics.MetricCounterSendBytes],
 	)
 	obj.registry.MustRegister(obj.responseSize)
 
@@ -120,11 +121,11 @@ func (obj *Prometheus) register() {
 		prometheus.HistogramOpts{
 			Namespace: obj.config.Namespace,
 			Subsystem: obj.config.SubSystem,
-			Name:      metrics.MetricRequestDurationSeconds.String(),
+			Name:      metrics.MetricRequestsDurationSeconds.String(),
 			Help:      "The HTTP request latencies in seconds.",
 			Buckets:   obj.config.DurationBuckets,
 		},
-		obj.config.MetricLabels[metrics.MetricRequestDurationSeconds],
+		obj.config.MetricLabels[metrics.MetricRequestsDurationSeconds],
 	)
 	obj.registry.MustRegister(obj.requestDurationSeconds)
 
@@ -181,8 +182,8 @@ func (obj *Prometheus) register() {
 // The method does not return any value; its primary purpose is to update and maintain
 // the internal metric collectors of Prometheus. By calling this method, one can ensure
 // that relevant metric data is correctly collected and stored for subsequent analysis and querying.
-func (obj *Prometheus) Observe(reporter metrics.Reporter) {
-	obj.Log(reporter.Handler(), reporter.Method(), reporter.Code(), float64(reporter.WriteSize()), float64(reporter.ReadSize()), float64(reporter.Latency()))
+func (obj *Prometheus) Observe(data metrics.MetricData) {
+	obj.Log(strconv.Itoa(data.Code), data.Method, data.Endpoint, float64(data.SendSize), float64(data.RecvSize), data.Latency)
 }
 
 // Log logs the Handler request and its details.

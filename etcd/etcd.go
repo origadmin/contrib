@@ -5,18 +5,18 @@ import (
 	registryv2 "github.com/go-kratos/kratos/v2/registry"
 	etcdclient "go.etcd.io/etcd/client/v3"
 
+	"github.com/origadmin/toolkits/runtime"
 	"github.com/origadmin/toolkits/runtime/config"
-	"github.com/origadmin/toolkits/runtime/kratos"
 )
 
 type etcdBuilder struct {
 }
 
 func init() {
-	kratos.RegistryRegistry("etcd", &etcdBuilder{})
+	runtime.RegisterRegistry("etcd", &etcdBuilder{})
 }
 
-func (c *etcdBuilder) NewDiscovery(cfg *config.RegistryConfig) (registryv2.Discovery, error) {
+func (c *etcdBuilder) NewDiscovery(cfg *config.Registry) (registryv2.Discovery, error) {
 	config := FromConfig(cfg)
 	etcdCli, err := etcdclient.New(config)
 	if err != nil {
@@ -26,7 +26,7 @@ func (c *etcdBuilder) NewDiscovery(cfg *config.RegistryConfig) (registryv2.Disco
 	return r, nil
 }
 
-func (c *etcdBuilder) NewRegistrar(cfg *config.RegistryConfig) (registryv2.Registrar, error) {
+func (c *etcdBuilder) NewRegistrar(cfg *config.Registry) (registryv2.Registrar, error) {
 	config := FromConfig(cfg)
 	etcdCli, err := etcdclient.New(config)
 	if err != nil {
@@ -36,13 +36,13 @@ func (c *etcdBuilder) NewRegistrar(cfg *config.RegistryConfig) (registryv2.Regis
 	return r, nil
 }
 
-func FromConfig(cfg *config.RegistryConfig) etcdclient.Config {
-	if cfg.Type != "etcd" {
+func FromConfig(cfg *config.Registry) etcdclient.Config {
+	if cfg.GetType() != "etcd" {
 		panic("etcd config type error")
 	}
-	etcdConfig := cfg.Etcd
+	etcdConfig := cfg.GetEtcd()
 	apiconfig := etcdclient.Config{
-		Endpoints: etcdConfig.Endpoints,
+		Endpoints: etcdConfig.GetEndpoints(),
 	}
 	//if etcdConfig.DialTimeout != 0 {
 	//	apiconfig.DialTimeout = etcdConfig.DialTimeout

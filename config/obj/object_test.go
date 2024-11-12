@@ -1,6 +1,7 @@
 package obj
 
 import (
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
@@ -116,97 +117,32 @@ func TestFile(t *testing.T) {
 	}
 	testSource(t, file, data)
 	testSource(t, path, data)
-	testWatchFile(t, file)
-	testWatchDir(t, path, file)
-}
-
-func testWatchFile(t *testing.T, path string) {
-	t.Log(path)
-
-	s := NewSource(new(TestJSON))
-	watch, err := s.Watch()
-	if err != nil {
-		t.Error(err)
-	}
-
-	f, err := os.OpenFile(path, os.O_RDWR, 0)
-	if err != nil {
-		t.Error(err)
-	}
-	defer f.Close()
-	_, err = f.WriteString(_testJSONUpdate)
-	if err != nil {
-		t.Error(err)
-	}
-	kvs, err := watch.Next()
-	if err != nil {
-		t.Errorf("watch.Next() error(%v)", err)
-	}
-	if !reflect.DeepEqual(string(kvs[0].Value), _testJSONUpdate) {
-		t.Errorf("string(kvs[0].Value(%v) is  not equal to _testJSONUpdate(%v)", kvs[0].Value, _testJSONUpdate)
-	}
-
-	newFilepath := filepath.Join(filepath.Dir(path), "test1.json")
-	if err = os.Rename(path, newFilepath); err != nil {
-		t.Error(err)
-	}
-	kvs, err = watch.Next()
-	if err == nil {
-		t.Errorf("watch.Next() error(%v)", err)
-	}
-	if kvs != nil {
-		t.Errorf("watch.Next() error(%v)", err)
-	}
-
-	err = watch.Stop()
-	if err != nil {
-		t.Errorf("watch.Stop() error(%v)", err)
-	}
-
-	if err := os.Rename(newFilepath, path); err != nil {
-		t.Error(err)
-	}
-}
-
-func testWatchDir(t *testing.T, path, file string) {
-	t.Log(path)
-	t.Log(file)
-
-	s := NewSource(new(TestJSON))
-	watch, err := s.Watch()
-	if err != nil {
-		t.Error(err)
-	}
-
-	f, err := os.OpenFile(file, os.O_RDWR, 0)
-	if err != nil {
-		t.Error(err)
-	}
-	defer f.Close()
-	_, err = f.WriteString(_testJSONUpdate)
-	if err != nil {
-		t.Error(err)
-	}
-
-	kvs, err := watch.Next()
-	if err != nil {
-		t.Errorf("watch.Next() error(%v)", err)
-	}
-	if !reflect.DeepEqual(string(kvs[0].Value), _testJSONUpdate) {
-		t.Errorf("string(kvs[0].Value(%s) is  not equal to _testJSONUpdate(%v)", kvs[0].Value, _testJSONUpdate)
-	}
 }
 
 func testSource(t *testing.T, path string, data []byte) {
 	t.Log(path)
 
-	s := NewSource(new(TestJSON))
+	var source TestJSON
+	err := json.Unmarshal(data, &source)
+	if err != nil {
+		t.Error(err)
+	}
+
+	s := NewSource(source)
 	kvs, err := s.Load()
 	if err != nil {
 		t.Error(err)
 	}
-	if string(kvs[0].Value) != string(data) {
-		t.Errorf("no expected: %s, but got: %s", kvs[0].Value, data)
+	var d1 TestJSON
+	if err := json.Unmarshal(kvs[0].Value, &d1); err != nil {
+		t.Error(err)
+	}
+	var d2 TestJSON
+	if err := json.Unmarshal(data, &d2); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(d1, d2) {
+		t.Errorf("no expected: %+v, but got: %+v", d1, d2)
 	}
 }
 
@@ -234,8 +170,14 @@ func TestConfig(t *testing.T) {
 			Age  int    `json:"age"`
 		} `json:"foo"`
 	}
+
+	var source TestJSON
+	err := json.Unmarshal([]byte(_testJSON), &source)
+	if err != nil {
+		t.Error(err)
+	}
 	c := config.New(config.WithSource(
-		NewSource(new(TestJSON)),
+		NewSource(&source),
 	))
 	testScan(t, c)
 
@@ -306,7 +248,7 @@ func testConfig(t *testing.T, c config.Config) {
 	}
 
 	// not found
-	if _, err := c.Value("not_found_key").Bool(); errors.Is(err, config.ErrNotFound) {
+	if _, err := c.Value("not_found_key").Bool(); !errors.Is(err, config.ErrNotFound) {
 		t.Logf("not_found_key not match: %v", err)
 	}
 }

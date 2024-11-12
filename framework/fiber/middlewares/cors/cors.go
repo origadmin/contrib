@@ -1,10 +1,12 @@
 package cors
 
 import (
-	"github.com/gin-gonic/contrib/cors"
-	"github.com/gin-gonic/gin"
+	"strings"
 
-	"github.com/origadmin/toolkits/middlewares"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+
+	"github.com/origadmin/toolkits/runtime/config"
 )
 
 const (
@@ -24,27 +26,33 @@ const (
 	corsMatchAll                  string = "*"
 )
 
-func WithCors(cfg *middlewares.CorsConfig) gin.HandlerFunc {
+func WithCors(cfg *config.Cors) fiber.Handler {
 	if !cfg.Enabled {
-		return func(ctx *gin.Context) {
-			ctx.Next()
+		return func(ctx *fiber.Ctx) error {
+			return ctx.Next()
 		}
 	}
 
-	allOrigins := true
+	allOrigins := allOrigins
 	if len(cfg.AllowOrigins) > 0 && cfg.AllowOrigins[0] != corsMatchAll {
-		allOrigins = false
+		allOrigins = nil
 	}
 
+	//if allOrigins && cfg.AllowCredentials {
+	//	panic("[CORS] Insecure setup, 'AllowCredentials' is set to true, and 'AllowOrigins' is set to a wildcard.")
+	//}
+
 	return cors.New(cors.Config{
-		AbortOnError:     false,
-		AllowOriginFunc:  nil,
-		AllowAllOrigins:  allOrigins,
-		AllowedOrigins:   cfg.AllowOrigins,
-		AllowedMethods:   cfg.AllowMethods,
-		AllowedHeaders:   cfg.AllowHeaders,
-		ExposedHeaders:   cfg.ExposeHeaders,
+		AllowOriginsFunc: allOrigins,
+		AllowOrigins:     strings.Join(cfg.AllowOrigins, ","),
+		AllowMethods:     strings.Join(cfg.AllowMethods, ","),
+		AllowHeaders:     strings.Join(cfg.AllowHeaders, ","),
+		ExposeHeaders:    strings.Join(cfg.ExposeHeaders, ","),
 		AllowCredentials: cfg.AllowCredentials,
-		MaxAge:           cfg.MaxAge.AsDuration(),
+		MaxAge:           int(cfg.MaxAge.GetSeconds()),
 	})
+}
+
+func allOrigins(origin string) bool {
+	return true
 }

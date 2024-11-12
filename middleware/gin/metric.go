@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/origadmin/toolkits/context"
 	"github.com/origadmin/toolkits/metrics"
 )
 
@@ -30,24 +31,21 @@ func (obj *MetricAdapter) Middleware(metrics metrics.Metrics) gin.HandlerFunc {
 		received := obj.RequestBytes(ctx)
 		ctx.Next()
 		reporter := obj.Reporter(ctx, start, received)
-		metrics.Observe(reporter)
+		metrics.Observe(ctx, reporter)
 	}
 }
 
 // Reporter is the Gin MetricAdapter function that logs Handler requests and their details.
 func (obj *MetricAdapter) Reporter(ctx *gin.Context, start time.Time, requestBytes int64) metrics.MetricData {
-	// reporter := obj.reporterPool.Get().(*reporter)
-	// defer func() {
-	// 	obj.reporterPool.Put(reporter)
-	// }()
 	return metrics.MetricData{
-		handler:   obj.Handler(ctx),
-		method:    obj.Method(ctx),
-		code:      obj.Code(ctx),
-		succeed:   ctx.Writer.Status() < 400,
-		latency:   time.Since(start).Seconds(),
-		writeSize: obj.ResponseBytes(ctx),
-		readSize:  requestBytes,
+		TraceID:  context.FromTrace(ctx),
+		Endpoint: obj.Handler(ctx),
+		Method:   obj.Method(ctx),
+		Code:     obj.Code(ctx),
+		SendSize: obj.ResponseBytes(ctx),
+		RecvSize: requestBytes,
+		Latency:  time.Since(start).Seconds(),
+		Succeed:  ctx.Writer.Status() < 400,
 	}
 }
 

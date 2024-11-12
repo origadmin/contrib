@@ -1,11 +1,10 @@
 package cors
 
 import (
-	"net/http"
+	"github.com/gin-gonic/contrib/cors"
+	"github.com/gin-gonic/gin"
 
-	"github.com/gorilla/handlers"
-
-	"github.com/origadmin/toolkits/middlewares"
+	"github.com/origadmin/toolkits/runtime/config"
 )
 
 const (
@@ -25,26 +24,27 @@ const (
 	corsMatchAll                  string = "*"
 )
 
-type FilterFunc = func(http.Handler) http.Handler
-
-func WithCors(cfg *middlewares.CorsConfig) FilterFunc {
-	opts := []handlers.CORSOption{
-		handlers.AllowedOrigins(cfg.AllowOrigins),
-		handlers.AllowedHeaders(cfg.AllowHeaders),
-		handlers.AllowedMethods(cfg.AllowMethods),
-		handlers.ExposedHeaders(cfg.ExposeHeaders),
-		handlers.MaxAge(int(cfg.MaxAge.GetSeconds())),
-	}
-	if cfg.AllowCredentials {
-		opts = append(opts, handlers.AllowCredentials())
-	}
-	if len(cfg.AllowOrigins) == 0 || cfg.AllowOrigins[0] == corsMatchAll {
-		opts = append(opts, handlers.AllowedOriginValidator(allOrigins))
+func WithCors(cfg *config.Cors) gin.HandlerFunc {
+	if cfg == nil {
+		return func(ctx *gin.Context) {
+			ctx.Next()
+		}
 	}
 
-	return handlers.CORS(opts...)
-}
+	allOrigins := true
+	if len(cfg.AllowOrigins) > 0 && cfg.AllowOrigins[0] != corsMatchAll {
+		allOrigins = false
+	}
 
-func allOrigins(origin string) bool {
-	return true
+	return cors.New(cors.Config{
+		AbortOnError:     false,
+		AllowOriginFunc:  nil,
+		AllowAllOrigins:  allOrigins,
+		AllowedOrigins:   cfg.AllowOrigins,
+		AllowedMethods:   cfg.AllowMethods,
+		AllowedHeaders:   cfg.AllowHeaders,
+		ExposedHeaders:   cfg.ExposeHeaders,
+		AllowCredentials: cfg.AllowCredentials,
+		MaxAge:           cfg.MaxAge.AsDuration(),
+	})
 }

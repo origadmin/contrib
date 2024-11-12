@@ -1,19 +1,20 @@
-module github.com/origadmin/toolkits/contrib/etcd
+module github.com/origadmin/toolkits/contrib/middleware/logger
 
 go 1.23.1
 
 toolchain go1.23.2
 
 replace (
-	github.com/origadmin/toolkits => ../../
-	github.com/origadmin/toolkits/runtime => ../../runtime
+	github.com/origadmin/toolkits => ../../../
+	github.com/origadmin/toolkits/codec => ../../../codec
+	github.com/origadmin/toolkits/runtime => ../../../runtime
 )
 
 require (
-	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-20241105072421-f8b97f675b32
 	github.com/go-kratos/kratos/v2 v2.8.2
+	github.com/origadmin/slog-kratos v1.0.3
+	github.com/origadmin/toolkits v0.0.0-00010101000000-000000000000
 	github.com/origadmin/toolkits/runtime v0.0.0-00010101000000-000000000000
-	go.etcd.io/etcd/client/v3 v3.5.16
 )
 
 require (
@@ -22,27 +23,23 @@ require (
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/bufbuild/protovalidate-go v0.7.2 // indirect
-	github.com/coreos/go-semver v0.3.1 // indirect
-	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
-	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang/protobuf v1.5.4 // indirect
+	github.com/go-playground/assert/v2 v2.2.0 // indirect
+	github.com/go-playground/form/v4 v4.2.1 // indirect
+	github.com/goexts/generic v0.1.0 // indirect
+	github.com/golang-cz/devslog v0.0.11 // indirect
 	github.com/google/cel-go v0.22.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	github.com/origadmin/toolkits v0.0.0-00010101000000-000000000000 // indirect
+	github.com/lmittmann/tint v1.0.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/stoewer/go-strcase v1.3.0 // indirect
-	go.etcd.io/etcd/api/v3 v3.5.16 // indirect
-	go.etcd.io/etcd/client/pkg/v3 v3.5.16 // indirect
-	go.uber.org/multierr v1.11.0 // indirect
-	go.uber.org/zap v1.27.0 // indirect
 	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f // indirect
-	golang.org/x/net v0.31.0 // indirect
 	golang.org/x/sys v0.27.0 // indirect
 	golang.org/x/text v0.20.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20241104194629-dd2ea8efbc28 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241104194629-dd2ea8efbc28 // indirect
 	google.golang.org/grpc v1.68.0 // indirect
 	google.golang.org/protobuf v1.35.1 // indirect
+	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
