@@ -23,7 +23,7 @@ require (
 	cel.dev/expr v0.18.0 // indirect
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
-	github.com/armon/go-metrics v0.4.1 // indirect
+	github.com/armon/go-metrics v0.5.4 // indirect
 	github.com/bufbuild/protovalidate-go v0.7.2 // indirect
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/go-kratos/kratos/v2 v2.8.2 // indirect
