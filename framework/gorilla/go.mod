@@ -1,4 +1,4 @@
-module github.com/origadmin/toolkits/runtime/web/gorilla
+module github.com/origadmin/toolkits/contrib/framework/gorilla
 
 go 1.23.1
 
