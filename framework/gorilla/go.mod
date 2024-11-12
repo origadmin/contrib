@@ -18,7 +18,7 @@ require (
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/bufbuild/protovalidate-go v0.7.2 // indirect
-	github.com/felixge/httpsnoop v1.0.3 // indirect
+	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-kratos/kratos/v2 v2.8.2 // indirect
 	github.com/google/cel-go v0.22.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
