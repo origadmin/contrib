@@ -16,33 +16,32 @@ func init() {
 	runtime.RegisterRegistry("consul", &consulBuilder{})
 }
 
-func optsFromConfig(ccfg *config.Registry_Consul) []Option {
+func optsFromConfig(registry *config.Registry) []Option {
 	var opts []Option
 
-	if ccfg.HealthCheck {
-		opts = append(opts, WithHealthCheck(ccfg.HealthCheck))
+	cfg := registry.GetConsul()
+	if cfg == nil {
+		return opts
 	}
-	if ccfg.HeartBeat {
-		opts = append(opts, WithHeartbeat(ccfg.HeartBeat))
+
+	if cfg.HealthCheck {
+		opts = append(opts, WithHealthCheck(cfg.HealthCheck))
 	}
-	if ccfg.Timeout != nil {
-		opts = append(opts, WithTimeout(ccfg.Timeout.AsDuration()))
+	if cfg.HeartBeat {
+		opts = append(opts, WithHeartbeat(cfg.HeartBeat))
 	}
-	if ccfg.Datacenter != "" {
-		opts = append(opts, WithDatacenter(Datacenter(ccfg.Datacenter)))
+	if cfg.Timeout != nil {
+		opts = append(opts, WithTimeout(cfg.Timeout.AsDuration()))
 	}
-	if ccfg.HealthCheckInterval > 0 {
-		opts = append(opts, WithHealthCheckInterval(int(ccfg.HealthCheckInterval)))
+	if cfg.Datacenter != "" {
+		opts = append(opts, WithDatacenter(Datacenter(cfg.Datacenter)))
 	}
-	if ccfg.DeregisterCriticalServiceAfter > 0 {
-		opts = append(opts, WithDeregisterCriticalServiceAfter(int(ccfg.DeregisterCriticalServiceAfter)))
+	if cfg.HealthCheckInterval > 0 {
+		opts = append(opts, WithHealthCheckInterval(int(cfg.HealthCheckInterval)))
 	}
-	//if true {
-	//	consul.WithServiceResolver(func(ctx context.Context, entries []*api.ServiceEntry) []*registry.ServiceInstance {
-	//		return []*registry.ServiceInstance{}
-	//	})
-	//	consul.WithServiceCheck()
-	//}
+	if cfg.DeregisterCriticalServiceAfter > 0 {
+		opts = append(opts, WithDeregisterCriticalServiceAfter(int(cfg.DeregisterCriticalServiceAfter)))
+	}
 	return opts
 }
 
@@ -50,12 +49,12 @@ func (c *consulBuilder) NewDiscovery(cfg *config.Registry) (registry.Discovery, 
 	if cfg == nil || cfg.Consul == nil {
 		return nil, errors.New("configuration: consul config is required")
 	}
-	config := FromConfig(cfg.Consul)
+	config := fromConfig(cfg)
 	apiClient, err := api.NewClient(config)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create consul client")
 	}
-	r := New(apiClient, optsFromConfig(cfg.Consul)...)
+	r := New(apiClient, optsFromConfig(cfg)...)
 	return r, nil
 }
 
@@ -63,17 +62,21 @@ func (c *consulBuilder) NewRegistrar(cfg *config.Registry) (registry.Registrar, 
 	if cfg == nil || cfg.Consul == nil {
 		return nil, errors.New("configuration: consul config is required")
 	}
-	config := FromConfig(cfg.Consul)
+	config := fromConfig(cfg)
 	apiClient, err := api.NewClient(config)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create consul client")
 	}
-	r := New(apiClient, optsFromConfig(cfg.Consul)...)
+	r := New(apiClient, optsFromConfig(cfg)...)
 	return r, nil
 }
 
-func FromConfig(cfg *config.Registry_Consul) *api.Config {
+func fromConfig(registry *config.Registry) *api.Config {
 	apiconfig := api.DefaultConfig()
+	cfg := registry.GetConsul()
+	if cfg == nil {
+		return apiconfig
+	}
 	if cfg.Address != "" {
 		apiconfig.Address = cfg.Address
 	}
@@ -83,34 +86,8 @@ func FromConfig(cfg *config.Registry_Consul) *api.Config {
 	if cfg.Datacenter != "" {
 		apiconfig.Datacenter = cfg.Datacenter
 	}
-	//if cfg.PathPrefix != "" {
-	//	apiconfig.PathPrefix = cfg.PathPrefix
-	//}
-	//if cfg.WaitTime != 0 {
-	//	apiconfig.WaitTime = cfg.WaitTime
-	//}
 	if cfg.Token != "" {
 		apiconfig.Token = cfg.Token
 	}
-	//if cfg.TokenFile != "" {
-	//	apiconfig.Token = cfg.TokenFile
-	//}
-	//if cfg.Namespace != "" {
-	//	apiconfig.Namespace = cfg.Namespace
-	//}
-	//if cfg.Partition != "" {
-	//	apiconfig.Partition = cfg.Partition
-	//}
-	//apiconfig.TLSConfig = api.TLSConfig{
-	//	Address:            cfg.TLSConfig.Address,
-	//	CAFile:             cfg.TLSConfig.CAFile,
-	//	CAPath:             cfg.TLSConfig.CAPath,
-	//	CAPem:              cfg.TLSConfig.CAPem,
-	//	CertFile:           cfg.TLSConfig.CertFile,
-	//	CertPEM:            cfg.TLSConfig.CertPEM,
-	//	KeyFile:            cfg.TLSConfig.KeyFile,
-	//	KeyPEM:             cfg.TLSConfig.KeyPEM,
-	//	InsecureSkipVerify: cfg.TLSConfig.InsecureSkipVerify,
-	//}
 	return apiconfig
 }
