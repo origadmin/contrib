@@ -5,12 +5,12 @@ import (
 
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 
-	"github.com/origadmin/toolkits/runtime/config"
+	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 	"github.com/origadmin/toolkits/runtime/log"
 	"github.com/origadmin/toolkits/runtime/middleware"
 )
 
-func Middleware(config *config.Logger, logger log.Logger) (middleware.Middleware, error) {
+func Middleware(config *configv1.Logger, logger log.Logger) (middleware.Middleware, error) {
 	if logger == nil {
 		// todo: init logger from config
 		logger = log.NewStdLogger(os.Stdout)
@@ -20,6 +20,6 @@ func Middleware(config *config.Logger, logger log.Logger) (middleware.Middleware
 	return logging.Server(logger), nil
 }
 
-func NewLogger(config *config.Logger) log.Logger {
+func NewLogger(config *configv1.Logger) log.Logger {
 	return log.NewStdLogger(os.Stdout)
 }

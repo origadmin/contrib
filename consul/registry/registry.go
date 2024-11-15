@@ -5,7 +5,7 @@ import (
 
 	"github.com/origadmin/toolkits/errors"
 	"github.com/origadmin/toolkits/runtime"
-	"github.com/origadmin/toolkits/runtime/config"
+	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 	"github.com/origadmin/toolkits/runtime/registry"
 )
 
@@ -16,7 +16,7 @@ func init() {
 	runtime.RegisterRegistry("consul", &consulBuilder{})
 }
 
-func optsFromConfig(registry *config.Registry) []Option {
+func optsFromConfig(registry *configv1.Registry) []Option {
 	var opts []Option
 
 	cfg := registry.GetConsul()
@@ -45,7 +45,7 @@ func optsFromConfig(registry *config.Registry) []Option {
 	return opts
 }
 
-func (c *consulBuilder) NewDiscovery(cfg *config.Registry) (registry.Discovery, error) {
+func (c *consulBuilder) NewDiscovery(cfg *configv1.Registry) (registry.Discovery, error) {
 	if cfg == nil || cfg.Consul == nil {
 		return nil, errors.New("configuration: consul config is required")
 	}
@@ -58,7 +58,7 @@ func (c *consulBuilder) NewDiscovery(cfg *config.Registry) (registry.Discovery, 
 	return r, nil
 }
 
-func (c *consulBuilder) NewRegistrar(cfg *config.Registry) (registry.Registrar, error) {
+func (c *consulBuilder) NewRegistrar(cfg *configv1.Registry) (registry.Registrar, error) {
 	if cfg == nil || cfg.Consul == nil {
 		return nil, errors.New("configuration: consul config is required")
 	}
@@ -71,7 +71,7 @@ func (c *consulBuilder) NewRegistrar(cfg *config.Registry) (registry.Registrar, 
 	return r, nil
 }
 
-func fromConfig(registry *config.Registry) *api.Config {
+func fromConfig(registry *configv1.Registry) *api.Config {
 	apiconfig := api.DefaultConfig()
 	cfg := registry.GetConsul()
 	if cfg == nil {

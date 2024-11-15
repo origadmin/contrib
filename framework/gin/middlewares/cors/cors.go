@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
 
-	"github.com/origadmin/toolkits/runtime/config"
+	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 )
 
 const (
@@ -24,7 +24,7 @@ const (
 	corsMatchAll                  string = "*"
 )
 
-func WithCors(cfg *config.Cors) gin.HandlerFunc {
+func WithCors(cfg *configv1.Cors) gin.HandlerFunc {
 	if cfg == nil {
 		return func(ctx *gin.Context) {
 			ctx.Next()

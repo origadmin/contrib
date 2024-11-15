@@ -6,6 +6,7 @@ import (
 	"github.com/origadmin/toolkits/errors"
 	"github.com/origadmin/toolkits/runtime"
 	"github.com/origadmin/toolkits/runtime/config"
+	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 )
 
 func init() {
@@ -13,7 +14,7 @@ func init() {
 }
 
 // NewConsulConfig create a new consul config.
-func NewConsulConfig(ccfg *config.SourceConfig, opts ...config.Option) (config.Config, error) {
+func NewConsulConfig(ccfg *configv1.SourceConfig, opts ...config.Option) (config.Config, error) {
 	cfg := api.DefaultConfig()
 	cfg.Address = ccfg.Consul.Address
 	cfg.Scheme = ccfg.Consul.Scheme
