@@ -6,7 +6,7 @@ import (
 	etcdclient "go.etcd.io/etcd/client/v3"
 
 	"github.com/origadmin/toolkits/runtime"
-	"github.com/origadmin/toolkits/runtime/config"
+	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 )
 
 type etcdBuilder struct {
@@ -16,7 +16,7 @@ func init() {
 	runtime.RegisterRegistry("etcd", &etcdBuilder{})
 }
 
-func (c *etcdBuilder) NewDiscovery(cfg *config.Registry) (registryv2.Discovery, error) {
+func (c *etcdBuilder) NewDiscovery(cfg *configv1.Registry) (registryv2.Discovery, error) {
 	config := FromConfig(cfg)
 	etcdCli, err := etcdclient.New(config)
 	if err != nil {
@@ -26,7 +26,7 @@ func (c *etcdBuilder) NewDiscovery(cfg *config.Registry) (registryv2.Discovery, 
 	return r, nil
 }
 
-func (c *etcdBuilder) NewRegistrar(cfg *config.Registry) (registryv2.Registrar, error) {
+func (c *etcdBuilder) NewRegistrar(cfg *configv1.Registry) (registryv2.Registrar, error) {
 	config := FromConfig(cfg)
 	etcdCli, err := etcdclient.New(config)
 	if err != nil {
@@ -36,7 +36,7 @@ func (c *etcdBuilder) NewRegistrar(cfg *config.Registry) (registryv2.Registrar, 
 	return r, nil
 }
 
-func FromConfig(cfg *config.Registry) etcdclient.Config {
+func FromConfig(cfg *configv1.Registry) etcdclient.Config {
 	if cfg.GetType() != "etcd" {
 		panic("etcd config type error")
 	}

@@ -10,13 +10,13 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/logging"
 	logger "github.com/origadmin/slog-kratos"
 
-	"github.com/origadmin/toolkits/runtime/config"
+	configv1 "github.com/origadmin/toolkits/runtime/gen/go/config/v1"
 	"github.com/origadmin/toolkits/runtime/log"
 	"github.com/origadmin/toolkits/runtime/middleware"
 	"github.com/origadmin/toolkits/sloge"
 )
 
-func Middleware(cfg *config.Logger, l log.Logger) (middleware.Middleware, error) {
+func Middleware(cfg *configv1.Logger, l log.Logger) (middleware.Middleware, error) {
 	if cfg == nil && l == nil {
 		// todo: init l from config
 		l = log.NewStdLogger(os.Stdout)
@@ -28,7 +28,7 @@ func Middleware(cfg *config.Logger, l log.Logger) (middleware.Middleware, error)
 	return logging.Server(l), nil
 }
 
-func FromConfig(cfg *config.Logger) sloge.Setting {
+func FromConfig(cfg *configv1.Logger) sloge.Setting {
 	return func(option *sloge.Option) {
 		//option.OutputPath = cfg.Path
 		//option.Format = cfg.Format
