@@ -26,45 +26,42 @@
     {{- template "import/additional" $ }}
 		)
 
-    {{ range $n := $.Nodes }}
-        {{ range $n := $.MutableNodes }}
-            {{ $fields := $n.Fields }}
-            {{ $mutation := $n.MutationName }}
-						// SetFields sets the values of the fields with the given names. It returns an
-						// error if the field is not defined in the schema, or if the type mismatched the
-						// field type.
-						func (m *{{ $mutation }}) SetFields(input *{{ .Name }}, fields ...string) error {
-						for i := range fields {
-						switch fields[i] {
-            {{- range $f := $fields }}
-                {{- $const := print $n.Package "." $f.Constant }}
-								case {{ $const }}:
-                {{- if $f.Nillable}}
-                    {{"if"}} input.{{ $f.StructField }} {{"!= nil {"}}
+    {{ range $n := $.MutableNodes }}
+        {{ $fields := $n.Fields }}
+        {{ $mutation := $n.MutationName }}
+		    // SetFields sets the values of the fields with the given names. It returns an
+		    // error if the field is not defined in the schema, or if the type mismatched the
+		    // field type.
+		    func (m *{{ $mutation }}) SetFields(input *{{ .Name }}, fields ...string) error {
+		    for i := range fields {
+		    switch fields[i] {
+        {{- range $f := $fields }}
+            {{- $const := print $n.Package "." $f.Constant }}
+				    case {{ $const }}:
+            {{- if $f.Nillable}}
+                {{"if"}} input.{{ $f.StructField }} {{"!= nil {"}}
+                {{- $setter := print "Set" $f.StructField }}
+                {{ $mutation }}.{{ $setter }}(*input.{{ $f.StructField }})
+                {{"}"}}
+            {{- else}}
+                {{- if $f.IsTime }}
                     {{- $setter := print "Set" $f.StructField }}
-                    {{ $mutation }}.{{ $setter }}(*input.{{ $f.StructField }})
+                    {{"if !"}}input.{{ $f.StructField }}.IsZero() {{"{"}}
+								    m.{{ $setter }}(input.{{ $f.StructField }})
                     {{"}"}}
-                {{- else}}
-                    {{- if $f.IsTime }}
-                        {{- $setter := print "Set" $f.StructField }}
-                        {{"if !"}}input.{{ $f.StructField }}.IsZero() {{"{"}}
-												m.{{ $setter }}(input.{{ $f.StructField }})
-                        {{"}"}}
-                    {{- else }}
-                        {{- $setter := print "Set" $f.StructField }}
-												m.{{ $setter }}(input.{{ $f.StructField }})
-                    {{- end}}
+                {{- else }}
+                    {{- $setter := print "Set" $f.StructField }}
+								    m.{{ $setter }}(input.{{ $f.StructField }})
                 {{- end}}
-            {{- end }}
-						default:
-						return fmt.Errorf("unknown {{ .Name }} field %s", fields[i])
-						}
-						}
-						return nil
-						}
+            {{- end}}
         {{- end }}
-
-    {{ end }}
+		    default:
+		    return fmt.Errorf("unknown {{ .Name }} field %s", fields[i])
+		    }
+		    }
+		    return nil
+		    }
+    {{- end }}
 
 {{ end }}
 
