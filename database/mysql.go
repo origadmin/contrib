@@ -2,8 +2,8 @@
 
 //go:build mysql
 
-// Package support is the database client wrapper
-package support
+// Package database is the database client wrapper
+package database
 
 import (
 	_ "github.com/go-sql-driver/mysql"

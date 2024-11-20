@@ -2,8 +2,8 @@
 
 //go:build postgres
 
-// Package support is the database client wrapper
-package support
+// Package database is the database client wrapper
+package database
 
 import (
 	_ "github.com/lib/pq"
