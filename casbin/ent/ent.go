@@ -1,4 +1,4 @@
-// Copyright (c) 2024 KasaAdmin. All rights reserved.
+// Copyright (c) 2024 OrigAdmin. All rights reserved.
 
 // Package ent is the casbin ent adapter package
 package ent
