@@ -1,6 +1,6 @@
 module github.com/origadmin/toolkits/contrib/replacer
 
-go 1.23.1
+go 1.23.0
 
 replace (
 	github.com/origadmin/toolkits => ../../

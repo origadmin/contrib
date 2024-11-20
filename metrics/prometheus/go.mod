@@ -1,6 +1,6 @@
 module github.com/origadmin/toolkits/contrib/metrics/prometheus
 
-go 1.23.1
+go 1.23.0
 
 toolchain go1.23.2
 
