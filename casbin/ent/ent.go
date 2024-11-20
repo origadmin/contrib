@@ -4,7 +4,7 @@
 package ent
 
 import (
-	adapter "github.com/casbin/ent-adapter"
+	adapter "github.com/origadmin/ent-adapter"
 )
 
 var (
