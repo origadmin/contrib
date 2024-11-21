@@ -1,6 +1,6 @@
 // Copyright (c) 2024 OrigAdmin. All rights reserved.
 
-//go:build !sqlite3 && !mysql && !postgres
+//go:build !sqlite3 && !mysql && !postgres && !sqlserver && !mssql && !pgx
 
 // Package database is the database client wrapper
 package database

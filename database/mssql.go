@@ -1,6 +1,6 @@
 // Copyright (c) 2024 OrigAdmin. All rights reserved.
 
-//go:build mssql
+//go:build mssql || sqlserver
 
 // Package database implements the functions, types, and interfaces for the module.
 package database

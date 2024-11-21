@@ -35,7 +35,9 @@ func CreateDatabase(dsn string, name string) error {
 
 	charset := types.ZeroOr(cfg.Params["charset"], defaultCharSet)
 	collate := types.ZeroOr(cfg.Collation, defaultCollate)
-
+	if name == "" {
+		name = cfg.DBName
+	}
 	query := fmt.Sprintf(databaseCreateQuery, name, charset, collate)
 	_, err = db.Exec(query)
 	return err
