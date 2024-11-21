@@ -6,10 +6,11 @@
 package database
 
 import (
+	_ "github.com/denisenkom/go-mssqldb"
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
 	_ "github.com/sqlite3ent/sqlite3"
 )
 
-// Every ...
-type Every struct{}
+// EveryOne ...
+type EveryOne struct{}
