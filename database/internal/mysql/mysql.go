@@ -3,6 +3,7 @@ package mysql
 import (
 	"database/sql"
 	"fmt"
+	"os"
 
 	"github.com/go-sql-driver/mysql"
 	"github.com/goexts/generic/types"
@@ -28,13 +29,15 @@ func CreateDatabase(dsn string, name string) error {
 	defer func(db *sql.DB) {
 		err := db.Close()
 		if err != nil {
-			fmt.Printf("Failed to close database: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Failed to close database: %v\n", err)
 		}
 	}(db)
 
 	charset := types.ZeroOr(cfg.Params["charset"], defaultCharSet)
 	collate := types.ZeroOr(cfg.Collation, defaultCollate)
-
+	if name == "" {
+		name = cfg.DBName
+	}
 	query := fmt.Sprintf(databaseCreateQuery, name, charset, collate)
 	_, err = db.Exec(query)
 	return err

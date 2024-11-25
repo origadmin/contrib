@@ -2,8 +2,8 @@
 
 //go:build sqlite3 && !cgo
 
-// Package support is the database client register package.
-package support
+// Package database is the database client wrapper
+package database
 
 import (
 	_ "github.com/sqlite3ent/sqlite3"

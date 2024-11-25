@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/goexts/generic/settings"
 	"github.com/hashicorp/consul/api"
 
 	"github.com/origadmin/toolkits/errors"
@@ -14,7 +15,7 @@ func init() {
 }
 
 // NewConsulConfig create a new consul config.
-func NewConsulConfig(ccfg *configv1.SourceConfig, opts ...config.Option) (config.Config, error) {
+func NewConsulConfig(ccfg *configv1.SourceConfig, ss ...config.SourceFunc) (config.Config, error) {
 	cfg := api.DefaultConfig()
 	cfg.Address = ccfg.Consul.Address
 	cfg.Scheme = ccfg.Consul.Scheme
@@ -28,6 +29,8 @@ func NewConsulConfig(ccfg *configv1.SourceConfig, opts ...config.Option) (config
 	if err != nil {
 		return nil, errors.Wrap(err, "consul source error")
 	}
-	opts = append(opts, config.WithSource(source))
-	return config.New(opts...), nil
+	option := settings.Apply(&config.SourceOption{
+		Options: []config.Option{config.WithSource(source)},
+	}, ss)
+	return config.New(option.Options...), nil
 }

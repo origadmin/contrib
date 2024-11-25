@@ -2,6 +2,8 @@ module github.com/origadmin/toolkits/contrib/security/jwt
 
 go 1.23.1
 
+toolchain go1.23.2
+
 replace (
 	github.com/origadmin/toolkits => ../../../
 	github.com/origadmin/toolkits/idgen => ../../../idgen
