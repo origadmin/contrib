@@ -13,6 +13,7 @@ replace (
 require (
 	github.com/go-kratos/kratos/contrib/config/consul/v2 v2.0.0-20241105072421-f8b97f675b32
 	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20241105072421-f8b97f675b32
+	github.com/goexts/generic v0.1.0
 	github.com/hashicorp/consul/api v1.30.0
 	github.com/origadmin/toolkits v0.0.0-00010101000000-000000000000
 	github.com/origadmin/toolkits/errors v0.0.5
@@ -33,7 +34,6 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-playground/form/v4 v4.2.1 // indirect
-	github.com/goexts/generic v0.1.0 // indirect
 	github.com/google/cel-go v0.22.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
