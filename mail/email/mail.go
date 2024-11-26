@@ -1,4 +1,6 @@
-// Copyright (c) 2024 KasaAdmin. All rights reserved.
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
 
 // Package email provides a email client
 package email

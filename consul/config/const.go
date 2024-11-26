@@ -13,6 +13,10 @@ import (
 	"github.com/origadmin/toolkits/runtime/config"
 )
 
+const (
+	DefaultPathName = "bootstrap.json"
+)
+
 type (
 	Option = consul.Option
 )
