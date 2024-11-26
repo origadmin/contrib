@@ -1,4 +1,6 @@
-// Copyright (config) 2024 OrigAdmin. All rights reserved.
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
 
 // Package opentelemetry is the data access object
 package opentelemetry

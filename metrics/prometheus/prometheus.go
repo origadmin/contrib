@@ -1,4 +1,6 @@
-// Copyright (config) 2024 OrigAdmin. All rights reserved.
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
 
 // Package prometheus is a Prometheus metrics wrapper for metrics.
 package prometheus
