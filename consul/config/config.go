@@ -20,6 +20,7 @@ import (
 
 func init() {
 	runtime.RegisterConfigFunc("consul", NewConsulConfig)
+	runtime.RegisterConfigSync("consul", SyncConfig)
 }
 
 // NewConsulConfig create a new consul config.
@@ -46,15 +47,16 @@ func NewConsulConfig(ccfg *configv1.SourceConfig, ss ...config.SourceSetting) (c
 	if err != nil {
 		return nil, errors.Wrap(err, "consul source error")
 	}
-	option := settings.Apply(&config.SourceOption{
-		Options: []config.Option{
-			config.WithSource(source),
-		},
-	}, ss)
+
+	option := settings.Apply(&config.SourceOption{}, ss)
+	option.Options = append(option.Options, config.WithSource(source))
+	if option.Decoder != nil {
+		option.Options = append(option.Options, config.WithDecoder(option.Decoder))
+	}
 	return config.New(option.Options...), nil
 }
 
-func SyncConfig(ccfg *configv1.SourceConfig, v any) error {
+func SyncConfig(ccfg *configv1.SourceConfig, v any, ss ...config.SourceSetting) error {
 	consul := ccfg.GetConsul()
 	if consul == nil {
 		return errors.New("consul config error")
@@ -72,10 +74,16 @@ func SyncConfig(ccfg *configv1.SourceConfig, v any) error {
 		consul.Path = FileConfigPath(ccfg.Name, DefaultPathName)
 	}
 
-	marshal, err := marshalValue(v)
+	option := settings.Apply(&config.SourceOption{}, ss)
+	encode := marshalValue
+	if option.Encoder != nil {
+		encode = option.Encoder
+	}
+	marshal, err := encode(v)
 	if err != nil {
 		return errors.Wrap(err, "marshal config error")
 	}
+
 	if _, err := apiClient.KV().Put(&api.KVPair{
 		Key:   consul.Path,
 		Value: marshal,
