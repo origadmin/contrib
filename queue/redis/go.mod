@@ -4,10 +4,9 @@ go 1.23.1
 
 toolchain go1.23.2
 
-replace github.com/origadmin/toolkits => ../../
-
 require (
-	github.com/origadmin/toolkits v0.0.0-00010101000000-000000000000
+	github.com/origadmin/toolkits v0.1.2
+	github.com/origadmin/toolkits/errors v0.0.12
 	github.com/redis/go-redis/v9 v9.7.0
 )
 
