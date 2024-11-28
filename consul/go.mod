@@ -11,9 +11,9 @@ require (
 	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20241105072421-f8b97f675b32
 	github.com/goexts/generic v0.1.1
 	github.com/hashicorp/consul/api v1.30.0
-	github.com/origadmin/runtime v0.0.0-20241128081716-a55a701765ec
-	github.com/origadmin/toolkits v0.0.98
-	github.com/origadmin/toolkits/errors v0.0.10
+	github.com/origadmin/runtime v0.0.1
+	github.com/origadmin/toolkits v0.1.3
+	github.com/origadmin/toolkits/errors v0.0.11
 	google.golang.org/protobuf v1.35.2
 )
 
