@@ -7,7 +7,6 @@ toolchain go1.23.2
 require (
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-20241105072421-f8b97f675b32
 	github.com/go-kratos/kratos/v2 v2.8.2
-	github.com/origadmin/runtime v0.0.0-00010101000000-000000000000
 	go.etcd.io/etcd/client/v3 v3.5.16
 )
 
@@ -33,7 +32,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/lufia/plan9stats v0.0.0-20230326075908-cb1d2100619a // indirect
-	github.com/origadmin/toolkits v0.0.97 // indirect
+	github.com/origadmin/toolkits v0.1.3
 	github.com/origadmin/toolkits/errors v0.0.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20221212215047-62379fc7944b // indirect
