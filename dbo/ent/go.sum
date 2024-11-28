@@ -13,6 +13,7 @@ github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+l
 github.com/hashicorp/go-multierror v1.1.1/go.mod h1:iw975J/qwKPdAO1clOe2L8331t/9/fmwbPZ6JB6eMoM=
 github.com/origadmin/toolkits v0.0.36 h1:K3SgR3OX1S6HZWXReVgVfQIlcSg/7PVq/7DjUNIwmn0=
 github.com/origadmin/toolkits v0.0.36/go.mod h1:iSSYU3Lu5aE0Iu1gOZ1FZXR33zMMzq7VykR7w2up2Ts=
+github.com/origadmin/toolkits v0.1.2/go.mod h1:LTfOIM3dDZAbsqJRXen7j0N/cRRt4G+MrU8+BXzjFXY=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=

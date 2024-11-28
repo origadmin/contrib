@@ -1,12 +1,12 @@
 module github.com/origadmin/contrib/dbo/ent
 
-go 1.23.0
+go 1.23.1
 
-toolchain go1.23.1
+toolchain go1.23.2
 
 require (
 	entgo.io/ent v0.14.1
-	github.com/origadmin/toolkits v0.0.36
+	github.com/origadmin/toolkits v0.1.3
 )
 
 require (
