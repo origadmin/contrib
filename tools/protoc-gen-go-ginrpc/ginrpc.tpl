@@ -14,30 +14,30 @@ type {{.ServiceType}}GINRPCServer interface {
 {{- end}}
 }
 
-func Register{{.ServiceType}}GINRPCServer(router gin.IRouter, srv {{.ServiceType}}GINRPCServer) {
+func Register{{.ServiceType}}GINRPCServer(router gins.IRouter, srv {{.ServiceType}}GINRPCServer) {
 {{- range.Methods}}
 	router.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_GINRPC_Handler(srv))
 {{- end}}
 }
 
 {{range.Methods}}
-	func _{{$svrType}}_{{.Name}}{{.Num}}_GINRPC_Handler(srv {{$svrType}}GINRPCServer) func(ctx *gin.Context) {
-	return func(ctx *gin.Context) {
+	func _{{$svrType}}_{{.Name}}{{.Num}}_GINRPC_Handler(srv {{$svrType}}GINRPCServer) func(ctx *gins.Context) {
+	return func(ctx *gins.Context) {
 	var in {{.Request}}
   {{- if.HasBody}}
 		if err := gins.BindBody(ctx,&in{{.Body}}); err != nil {
-		gins.RetError(ctx,err)
+		gins.ResultError(ctx,err)
 		return
 		}
   {{- end}}
-	if err := gins.BindQuery(ctx,&in); err != nil {
-	gins.RetError(ctx,err)
-	return
+	if err := gins.BindQuery(ctx,&in{{.Query}}); err != nil {
+		gins.ResultError(ctx,err)
+		return
 	}
   {{- if.HasVars}}
-		if err := gins.BindURI(ctx,&in); err != nil {
-		gins.RetError(ctx,err)
-		return
+		if err := gins.BindURI(ctx,&in{{.Vars}}); err != nil {
+			gins.ResultError(ctx,err)
+			return
 		}
   {{- end}}
 	gins.SetOperation(ctx, {{$svrType}}_{{.OriginalName}}_OperationName)

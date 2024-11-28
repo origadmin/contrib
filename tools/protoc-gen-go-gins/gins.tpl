@@ -14,29 +14,29 @@ type {{.ServiceType}}GINSServer interface {
 {{- end}}
 }
 
-func Register{{.ServiceType}}GINSServer(router gin.IRouter, srv {{.ServiceType}}GINSServer) {
+func Register{{.ServiceType}}GINSServer(router gins.IRouter, srv {{.ServiceType}}GINSServer) {
 {{- range.Methods}}
 	router.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_GIN_Handler(srv))
 {{- end}}
 }
 
 {{range.Methods}}
-	func _{{$svrType}}_{{.Name}}{{.Num}}_GIN_Handler(srv {{$svrType}}GINSServer) func(ctx *gin.Context) {
-	return func(ctx *gin.Context) {
+	func _{{$svrType}}_{{.Name}}{{.Num}}_GIN_Handler(srv {{$svrType}}GINSServer) func(ctx *gins.Context) {
+	return func(ctx *gins.Context) {
 	var in {{.Request}}
   {{- if.HasBody}}
 		if err := gins.BindBody(ctx,&in{{.Body}}); err != nil {
-		gins.RetError(ctx,err)
+		gins.ResultError(ctx,err)
 		return
 		}
   {{- end}}
-	if err := gins.BindQuery(ctx,&in); err != nil {
-	gins.RetError(ctx,err)
+	if err := gins.BindQuery(ctx,&in{{.Query}}); err != nil {
+	gins.ResultError(ctx,err)
 	return
 	}
   {{- if.HasVars}}
-		if err := gins.BindURI(ctx,&in); err != nil {
-		gins.RetError(ctx,err)
+		if err := gins.BindURI(ctx,&in{{.Vars}}); err != nil {
+		gins.ResultError(ctx,err)
 		return
 		}
   {{- end}}
@@ -44,7 +44,7 @@ func Register{{.ServiceType}}GINSServer(router gin.IRouter, srv {{.ServiceType}}
 	newCtx := gins.NewContext(ctx)
 	reply, err := srv.{{.Name}}(newCtx, &in)
 	if err != nil {
-	gins.RetError(ctx,err)
+	gins.ResultError(ctx,err)
 	return
 	}
 	gins.RetJSON(ctx,200, reply{{.ResponseBody}})
