@@ -4,12 +4,10 @@ go 1.23.1
 
 toolchain go1.23.2
 
-
-
 require (
 	github.com/goexts/generic v0.1.1
-	github.com/origadmin/toolkits v0.0.0-00010101000000-000000000000
-	github.com/origadmin/toolkits/codec v0.0.21
+	github.com/origadmin/toolkits/codec v0.0.30
+	github.com/origadmin/toolkits/errors v0.0.12
 )
 
 require (
@@ -22,7 +20,6 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.9 // indirect
-	github.com/kr/text v0.2.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
