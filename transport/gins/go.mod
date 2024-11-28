@@ -9,9 +9,9 @@ require (
 	github.com/go-kratos/kratos/v2 v2.8.2
 	github.com/goexts/generic v0.1.1
 	github.com/gorilla/mux v1.8.1
-	github.com/origadmin/runtime v0.0.0-20241128081716-a55a701765ec
-	github.com/origadmin/toolkits v0.0.98
-	github.com/origadmin/toolkits/errors v0.0.10
+	github.com/origadmin/runtime v0.0.1
+	github.com/origadmin/toolkits v0.1.3
+	github.com/origadmin/toolkits/errors v0.0.11
 )
 
 require (
