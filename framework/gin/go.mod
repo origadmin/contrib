@@ -2,12 +2,11 @@ module github.com/origadmin/contrib/framework/gin
 
 go 1.23.1
 
-
 require (
 	github.com/gin-gonic/contrib v0.0.0-20240508051311-c1c6bf0061b0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-kratos/kratos/v2 v2.8.2
-	github.com/origadmin/runtime v0.0.0-00010101000000-000000000000
+	github.com/origadmin/runtime v0.0.1
 )
 
 require (
@@ -40,7 +39,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/origadmin/toolkits v0.0.97 // indirect
+	github.com/origadmin/toolkits v0.1.3
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/power-devops/perfstat v0.0.0-20221212215047-62379fc7944b // indirect
 	github.com/shirou/gopsutil/v3 v3.23.6 // indirect
