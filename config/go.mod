@@ -4,10 +4,9 @@ go 1.23.1
 
 toolchain go1.23.2
 
-
 require (
 	github.com/go-kratos/kratos/v2 v2.8.2
-	github.com/origadmin/toolkits/codec v0.0.21
+	github.com/origadmin/toolkits/codec v0.0.28
 	github.com/origadmin/toolkits/errors v0.0.5
 	google.golang.org/protobuf v1.35.1
 )
@@ -27,7 +26,7 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.9 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/origadmin/toolkits v0.0.0-00010101000000-000000000000 // indirect
+	github.com/origadmin/toolkits v0.1.3
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	golang.org/x/arch v0.12.0 // indirect
