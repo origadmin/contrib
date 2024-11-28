@@ -4,13 +4,11 @@ go 1.23.1
 
 toolchain go1.23.2
 
-
-
 require (
 	github.com/go-kratos/kratos/v2 v2.8.2
+	github.com/origadmin/runtime v0.0.1
 	github.com/origadmin/slog-kratos v1.0.3
-	github.com/origadmin/toolkits v0.0.97
-	github.com/origadmin/runtime v0.0.0-00010101000000-000000000000
+	github.com/origadmin/toolkits/sloge v0.0.1
 )
 
 require (
@@ -22,11 +20,12 @@ require (
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
-	github.com/go-playground/assert/v2 v2.2.0 // indirect
 	github.com/go-playground/form/v4 v4.2.1 // indirect
 	github.com/goexts/generic v0.1.1 // indirect
 	github.com/golang-cz/devslog v0.0.11 // indirect
 	github.com/google/cel-go v0.22.1 // indirect
+	github.com/google/gnostic v0.7.0 // indirect
+	github.com/google/gnostic-models v0.6.9-0.20230804172637-c7be7c783f49 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/lmittmann/tint v1.0.5 // indirect
