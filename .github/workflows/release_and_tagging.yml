@@ -60,16 +60,17 @@ jobs:
         id: generate_changelog
         run: |
           LATEST_RELEASE=${{ steps.get_latest_release.outputs.LATEST_RELEASE }}
+          echo "LATEST_RELEASE is $LATEST_RELEASE"
           echo "# Changelog" > changelog.txt
-          if [[ -z "$LATEST_RELEASE" ]]; then
-            # If there's no previous release, get only the current commit's log
+          if [[ -z "$LATEST_RELEASE" || "$LATEST_RELEASE" == "null" ]]; then
+            # If there's no previous release, get only the current commit log
             git config --global core.pager cat
             # git log --pretty=format:"* %s **by** @%an"
             git log --pretty=format:"* %s **by** @%an" >> changelog.txt
           else
             # Get all submission information since the last release
-            CHANGELOG=$(git log "$LATEST_RELEASE"..HEAD --pretty=format:"* %s **by** @%an")
-            git log "$LATEST_RELEASE"..HEAD --pretty=format:"* %s **by** @%an" >> changelog.txt
+            CHANGELOG=$(git log "$LATEST_RELEASE"..HEAD -- --pretty=format:"* %s **by** @%an")
+            git log "$LATEST_RELEASE"..HEAD -- --pretty=format:"* %s **by** @%an" >> changelog.txt
           fi
 
       - name: Create release
