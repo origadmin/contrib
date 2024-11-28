@@ -12,7 +12,6 @@ require (
 	github.com/goexts/generic v0.1.1
 	github.com/hashicorp/consul/api v1.30.0
 	github.com/origadmin/runtime v0.0.1
-	github.com/origadmin/toolkits v0.1.3
 	github.com/origadmin/toolkits/errors v0.0.11
 	google.golang.org/protobuf v1.35.2
 )
@@ -51,6 +50,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20221212215047-62379fc7944b // indirect
+	github.com/rogpeppe/go-internal v1.13.1 // indirect
 	github.com/shirou/gopsutil/v3 v3.23.6 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/stoewer/go-strcase v1.3.0 // indirect
