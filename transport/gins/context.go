@@ -7,8 +7,7 @@ package gins
 
 import (
 	"github.com/gin-gonic/gin"
-
-	"github.com/origadmin/toolkits/context"
+	"github.com/origadmin/runtime/context"
 )
 
 type ginCtx struct{}

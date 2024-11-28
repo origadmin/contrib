@@ -10,7 +10,7 @@ import (
 	"github.com/hashicorp/consul/api"
 
 	"github.com/origadmin/runtime/config"
-	"github.com/origadmin/toolkits/context"
+	"github.com/origadmin/runtime/context"
 )
 
 const (

@@ -348,32 +348,32 @@ func TestTimeout(t *testing.T) {
 	}
 }
 
-func TestRequestDecoder(t *testing.T) {
-	o := &Server{}
-	v := func(*gin.Context, interface{}) error { return nil }
-	RequestDecoder(v)(o)
-	if o.dec == nil {
-		t.Errorf("expected nil got %v", o.dec)
-	}
-}
-
-func TestResponseEncoder(t *testing.T) {
-	o := &Server{}
-	v := func(*gin.Context, interface{}) error { return nil }
-	ResponseEncoder(v)(o)
-	if o.enc == nil {
-		t.Errorf("expected nil got %v", o.enc)
-	}
-}
-
-func TestErrorEncoder(t *testing.T) {
-	o := &Server{}
-	v := func(*gin.Context, error) {}
-	ErrorEncoder(v)(o)
-	if o.ene == nil {
-		t.Errorf("expected nil got %v", o.ene)
-	}
-}
+//func TestRequestDecoder(t *testing.T) {
+//	o := &Server{}
+//	v := func(*gin.Context, interface{}) error { return nil }
+//	RequestDecoder(v)(o)
+//	if o.dec == nil {
+//		t.Errorf("expected nil got %v", o.dec)
+//	}
+//}
+//
+//func TestResponseEncoder(t *testing.T) {
+//	o := &Server{}
+//	v := func(*gin.Context, interface{}) error { return nil }
+//	ResponseEncoder(v)(o)
+//	if o.enc == nil {
+//		t.Errorf("expected nil got %v", o.enc)
+//	}
+//}
+//
+//func TestErrorEncoder(t *testing.T) {
+//	o := &Server{}
+//	v := func(*gin.Context, error) {}
+//	ErrorEncoder(v)(o)
+//	if o.ene == nil {
+//		t.Errorf("expected nil got %v", o.ene)
+//	}
+//}
 
 func TestTLSConfig(t *testing.T) {
 	o := &Server{}

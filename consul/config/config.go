@@ -9,13 +9,13 @@ import (
 
 	"github.com/goexts/generic/settings"
 	"github.com/hashicorp/consul/api"
+	"github.com/origadmin/toolkits/errors"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/origadmin/runtime"
 	"github.com/origadmin/runtime/config"
 	configv1 "github.com/origadmin/runtime/gen/go/config/v1"
-	
 )
 
 func init() {

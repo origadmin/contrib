@@ -5,9 +5,9 @@
 #
 
 # shellcheck disable=SC1091
-source "$(pwd)"/scripts/git/git_tag.sh
+source "$(pwd)"/.github/scripts/git/git_tag.sh
 # shellcheck disable=SC1091
-source "$(pwd)"/scripts/git/git_cmd.sh
+source "$(pwd)"/.github/scripts/git/git_cmd.sh
 
 # Record the original working directory
 ORIGINAL_DIR=$(pwd)

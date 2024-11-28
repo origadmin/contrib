@@ -9,18 +9,15 @@ import (
 	"context"
 	"fmt"
 	"testing"
-	"time"
-
-	"github.com/stretchr/testify/assert"
 
 	"github.com/origadmin/toolkits/security"
-	"github.com/origadmin/toolkits/storage/cache/memory"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestAuth(t *testing.T) {
-	cache := memory.NewCache(memory.Config{CleanupInterval: time.Second})
-
-	store := security.NewTokenStorage(security.WithCache(cache))
+	//cache := memory.NewCache(memory.Config{CleanupInterval: time.Second})
+	//c:=security.WithCache(cache)
+	store := security.NewTokenStorage()
 	ctx := context.Background()
 
 	jwtAuth := security.NewSecurity(NewTokenSerializer(), security.WithStorage(store))

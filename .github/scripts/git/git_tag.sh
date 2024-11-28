@@ -5,7 +5,7 @@
 #
 
 # shellcheck disable=SC1091
-source "$(pwd)"/scripts/git/git_cmd.sh
+source "$(pwd)"/.github/scripts/git/git_cmd.sh
 
 function_checks() {
     # Check if get_current_commit_hash is defined

@@ -7,7 +7,7 @@ toolchain go1.23.2
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-kratos/kratos/v2 v2.8.2
-	github.com/origadmin/runtime v0.0.0-20241128081716-a55a701765ec
+	github.com/origadmin/runtime v0.0.1
 	github.com/origadmin/toolkits v0.1.3
 	github.com/stretchr/testify v1.9.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20241118233622-e639e219e697
