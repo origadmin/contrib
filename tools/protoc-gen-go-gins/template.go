@@ -35,6 +35,9 @@ type methodDesc struct {
 	ClientPath   string
 	Method       string
 	HasVars      bool
+	Vars         []string
+	HasQuery     bool
+	Query        string
 	HasBody      bool
 	Body         string
 	ResponseBody string
