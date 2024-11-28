@@ -16,6 +16,8 @@ import (
 	"github.com/origadmin/toolkits/errors"
 	"github.com/origadmin/toolkits/errors/httperr"
 	"github.com/origadmin/toolkits/net/pagination"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/proto"
 )
 
 type Result struct {
@@ -36,8 +38,14 @@ func (r Result) GetSuccess() bool {
 }
 
 // ResultJSON result json data with status code
-func ResultJSON(c *gin.Context, status int, resp pagination.Responder) {
-	buf, err := json.Marshal(resp.GetData())
+func ResultJSON(c *gin.Context, status int, data any) {
+	var buf []byte
+	var err error
+	if msg, ok := data.(proto.Message); ok {
+		buf, err = protojson.Marshal(msg)
+	} else {
+		buf, err = json.Marshal(data)
+	}
 	if err != nil {
 		panic(err)
 	}
