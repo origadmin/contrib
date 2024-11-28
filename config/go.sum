@@ -11,6 +11,7 @@ github.com/cloudwego/base64x v0.1.4 h1:jwCgWpFanWmN8xoIUHa2rtzmkd5J2plF/dnLS6Xd/
 github.com/cloudwego/base64x v0.1.4/go.mod h1:0zlkT4Wn5C6NdauXdJRhSKRlJvmclQ1hhJgA0rcu/8w=
 github.com/cloudwego/iasm v0.2.0 h1:1KNIy1I1H9hNNFEEH3DVnI4UujN+1zjpuk6gwHLTssg=
 github.com/cloudwego/iasm v0.2.0/go.mod h1:8rXZaNYT2n95jn+zTI1sDr+IgcD2GVs0nlbbQPiEFhY=
+github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
@@ -19,8 +20,7 @@ github.com/fsnotify/fsnotify v1.7.0 h1:8JEhPFa5W2WU7YfeZzPNqzMP6Lwt7L2715Ggo0nos
 github.com/fsnotify/fsnotify v1.7.0/go.mod h1:40Bi/Hjc2AVfZrqy+aj+yEI+/bRxZnMJyTJwOpGvigM=
 github.com/go-kratos/kratos/v2 v2.8.2 h1:EsEA7AmPQ2YQQ0FZrDWO2HgBNqeWM8z/mWKzS5UkQaQ=
 github.com/go-kratos/kratos/v2 v2.8.2/go.mod h1:+Vfe3FzF0d+BfMdajA11jT0rAyJWublRE/seZQNZVxE=
-github.com/goexts/generic v0.1.0 h1:C6xn8/Xu4KBGSFvMP0CMAhle5HDqqX3iShE3EKV3WYI=
-github.com/goexts/generic v0.1.0/go.mod h1:j/ZjWHYt+If6VjeHWvDhYKdoP+gAiAKpm0cu3yvKmfo=
+github.com/goexts/generic v0.1.1 h1:dg5aPYVoH9MzdfRLngOVwb6Ws7dR6q1/BJeoVm3fO9k=
 github.com/goexts/generic v0.1.1/go.mod h1:j/ZjWHYt+If6VjeHWvDhYKdoP+gAiAKpm0cu3yvKmfo=
 github.com/google/go-cmp v0.5.5 h1:Khx7svrCpmxxtHBq5j2mp/xVjsi8hQMfNLvJFAlrGgU=
 github.com/google/go-cmp v0.5.5/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/gNBxE=
@@ -45,9 +45,7 @@ github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd h1:TRLaZ9cD/w
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
 github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9Gz0M=
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
-github.com/origadmin/toolkits v0.1.2/go.mod h1:LTfOIM3dDZAbsqJRXen7j0N/cRRt4G+MrU8+BXzjFXY=
-github.com/origadmin/toolkits/codec v0.0.21 h1:RPcqtA6z0CEWY/fal3/neuZaiv9PlIfcuhQ3ejSSyq4=
-github.com/origadmin/toolkits/codec v0.0.21/go.mod h1:mv8ghKhEPSQaYBvW21NFgNLV/pU2aMRIFbs2DUaYoP0=
+github.com/origadmin/toolkits/codec v0.0.28 h1:pFBE0LBVdm1SsFZOYFm/MqDj43aTRNeWDiWN33MCmvo=
 github.com/origadmin/toolkits/codec v0.0.28/go.mod h1:KouXvcRysdeDe6syxc3XL3two0yIIsk47bjZy6bhOoo=
 github.com/origadmin/toolkits/errors v0.0.5 h1:11d6+ErfWZfO4b5G1RyKthaJ5S6mxWLSHRfXD7dhQD4=
 github.com/origadmin/toolkits/errors v0.0.5/go.mod h1:O6xuxosWP4LU9qJ4eZr68d7+xksjxMUQS8tjrKXzPnU=
