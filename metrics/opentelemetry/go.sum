@@ -12,6 +12,10 @@ github.com/hashicorp/errwrap v1.1.0 h1:OxrOeh75EUXMY8TBjag2fzXGZ40LB6IKw45YeGUDY
 github.com/hashicorp/errwrap v1.1.0/go.mod h1:YH+1FKiLXxHSkmPseP+kNlulaMuP3n2brvKWEqk/Jc4=
 github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+lD48awMYo=
 github.com/hashicorp/go-multierror v1.1.1/go.mod h1:iw975J/qwKPdAO1clOe2L8331t/9/fmwbPZ6JB6eMoM=
+github.com/origadmin/toolkits v0.1.2 h1:W/8qKr5Jtd0ieuzVLaFOoVUIhPpQ6XyhYPbkJqX2OEQ=
+github.com/origadmin/toolkits v0.1.2/go.mod h1:LTfOIM3dDZAbsqJRXen7j0N/cRRt4G+MrU8+BXzjFXY=
+github.com/origadmin/toolkits/errors v0.0.12 h1:Gig26e3p59bedAGbdXTdPmzlC1+mQu9gQK/LQ76LA2o=
+github.com/origadmin/toolkits/errors v0.0.12/go.mod h1:6DM+lY0GU/UWobF66Fh/zeLJl3zF6Ll9+8ujHjSCwFQ=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=

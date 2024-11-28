@@ -6,17 +6,16 @@
 package opentelemetry
 
 import (
+	"context"
 	"maps"
 	"net/http"
 	"sync/atomic"
 
+	"github.com/origadmin/toolkits/errors"
+	"github.com/origadmin/toolkits/metrics"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
-
-	"github.com/origadmin/toolkits/context"
-	"github.com/origadmin/toolkits/errors"
-	"github.com/origadmin/toolkits/metrics"
 )
 
 // OpenTelemetry is a OpenTelemetry wrapper

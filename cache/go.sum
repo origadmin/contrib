@@ -814,10 +814,10 @@ github.com/mattn/go-isatty v0.0.16/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/
 github.com/mattn/go-sqlite3 v1.14.14/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/minio/asm2plan9s v0.0.0-20200509001527-cdd76441f9d8/go.mod h1:mC1jAcsrzbxHt8iiaC+zU4b1ylILSosueou12R++wfY=
 github.com/minio/c2goasm v0.0.0-20190812172519-36a3d3bbc4f3/go.mod h1:RagcQ7I8IeTMnF8JTXieKnO4Z6JCsikNEzj0DwauVzE=
-github.com/origadmin/runtime v0.0.0-20241128081716-a55a701765ec h1:mvMravfwuchef+h7n9J+x43MGpOxYAEP9x5aPHOgYD4=
-github.com/origadmin/runtime v0.0.0-20241128081716-a55a701765ec/go.mod h1:EMQ1qdwOGdZVLOB/uqQ2MSdjuAaqDope7uyu410A0xY=
-github.com/origadmin/toolkits/errors v0.0.10 h1:5DpTA2F+0KkdpyrwkQT+lhDsLSEVZXr5LaSldVtXYJo=
-github.com/origadmin/toolkits/errors v0.0.10/go.mod h1:6DM+lY0GU/UWobF66Fh/zeLJl3zF6Ll9+8ujHjSCwFQ=
+github.com/origadmin/runtime v0.0.1 h1:SqgVbD4k/xgviItdYBxyWLSx0euWsuwxLp36fEr31Uk=
+github.com/origadmin/runtime v0.0.1/go.mod h1:qjKsw3rZoT+/uhjEvQzUjdUK2CjU9I5RmbXDI962V8E=
+github.com/origadmin/toolkits/errors v0.0.11 h1:0V0HcCrnhnHxNX8LgZpASYtnWZfpxBph0x9fCV01+Ko=
+github.com/origadmin/toolkits/errors v0.0.11/go.mod h1:6DM+lY0GU/UWobF66Fh/zeLJl3zF6Ll9+8ujHjSCwFQ=
 github.com/phpdave11/gofpdf v1.4.2/go.mod h1:zpO6xFn9yxo3YLyMvW8HcKWVdbNqgIfOOp2dXMnm1mY=
 github.com/phpdave11/gofpdi v1.0.12/go.mod h1:vBmVV0Do6hSBHC8uKUQ71JGW+ZGQq74llk/7bXwjDoI=
 github.com/phpdave11/gofpdi v1.0.13/go.mod h1:vBmVV0Do6hSBHC8uKUQ71JGW+ZGQq74llk/7bXwjDoI=
