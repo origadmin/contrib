@@ -7,7 +7,16 @@ toolchain go1.23.2
 require (
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-20241105072421-f8b97f675b32
 	github.com/go-kratos/kratos/v2 v2.8.2
+	github.com/origadmin/runtime v0.0.1
 	go.etcd.io/etcd/client/v3 v3.5.16
+)
+
+require (
+	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
+	github.com/google/gnostic v0.7.0 // indirect
+	github.com/google/gnostic-models v0.6.9-0.20230804172637-c7be7c783f49 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
+	github.com/rogpeppe/go-internal v1.13.1 // indirect
 )
 
 require (
@@ -32,8 +41,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/lufia/plan9stats v0.0.0-20230326075908-cb1d2100619a // indirect
-	github.com/origadmin/toolkits v0.1.3
-	github.com/origadmin/toolkits/errors v0.0.5 // indirect
+	github.com/origadmin/toolkits/errors v0.0.11 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20221212215047-62379fc7944b // indirect
 	github.com/shirou/gopsutil/v3 v3.23.6 // indirect
