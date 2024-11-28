@@ -13,7 +13,7 @@ require (
 	github.com/goexts/generic v0.1.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/origadmin/toolkits v0.0.0-00010101000000-000000000000
-	github.com/origadmin/toolkits/idgen v0.0.0-00010101000000-000000000000
+	github.com/origadmin/toolkits/idgen v0.0.21
 	github.com/stretchr/testify v1.9.0
 )
 

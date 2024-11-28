@@ -8,7 +8,7 @@ replace github.com/origadmin/toolkits => ../../
 
 require (
 	github.com/go-kratos/kratos/v2 v2.8.2
-	github.com/origadmin/toolkits/codec v0.0.21
+	github.com/origadmin/toolkits/codec v0.0.28
 	github.com/origadmin/toolkits/errors v0.0.5
 	google.golang.org/protobuf v1.35.1
 )
