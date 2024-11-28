@@ -5,7 +5,7 @@ go 1.23.1
 toolchain go1.23.2
 
 require (
-	github.com/origadmin/toolkits v0.0.92
+	github.com/origadmin/toolkits v0.1.3
 	github.com/prometheus/client_golang v1.20.5
 )
 
