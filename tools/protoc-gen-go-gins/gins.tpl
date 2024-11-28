@@ -25,32 +25,32 @@ func Register{{.ServiceType}}GINSServer(router gins.IRouter, srv {{.ServiceType}
 	return func(ctx *gins.Context) {
 	var in {{.Request}}
   {{- if.HasBody}}
-		if err := gins.BindBody(ctx,&in{{.Body}}); err != nil {
+	if err := gins.BindBody(ctx,&in{{.Body}}); err != nil {
 		gins.ResultError(ctx,err)
 		return
-		}
+	}
   {{- end}}
 	if err := gins.BindQuery(ctx,&in{{.Query}}); err != nil {
-	gins.ResultError(ctx,err)
-	return
+		gins.ResultError(ctx,err)
+		return
 	}
   {{- if.HasVars}}
 		if err := gins.BindURI(ctx,&in{{.Vars}}); err != nil {
-		gins.ResultError(ctx,err)
-		return
+			gins.ResultError(ctx,err)
+			return
 		}
   {{- end}}
-	gins.SetOperation(ctx, {{$svrType}}_{{.OriginalName}}_OperationName)
-	newCtx := gins.NewContext(ctx)
-	reply, err := srv.{{.Name}}(newCtx, &in)
-	if err != nil {
-	gins.ResultError(ctx,err)
-	return
+		gins.SetOperation(ctx, {{$svrType}}_{{.OriginalName}}_OperationName)
+		newCtx := gins.NewContext(ctx)
+		reply, err := srv.{{.Name}}(newCtx, &in)
+		if err != nil {
+			gins.ResultError(ctx,err)
+			return
+		}
+		gins.ResultJSON(ctx,200, reply{{.ResponseBody}})
+		return
 	}
-	gins.RetJSON(ctx,200, reply{{.ResponseBody}})
-	return
-	}
-	}
+}
 {{end}}
 
 type {{.ServiceType}}GINSClient interface {
@@ -68,7 +68,7 @@ return &{{.ServiceType}}GINSClientImpl{client}
 }
 
 {{range.MethodSets}}
-	func (c *{{$svrType}}GINSClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...gins.CallOption) (*{{.Reply}}, error) {
+func (c *{{$svrType}}GINSClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...gins.CallOption) (*{{.Reply}}, error) {
 	var out {{.Reply}}
 	pattern := "{{.ClientPath}}"
 	path := binding.EncodeURL(pattern, in, {{not .HasBody}})
@@ -80,8 +80,8 @@ return &{{.ServiceType}}GINSClientImpl{client}
 		err := c.cc.Invoke(ctx, "{{.Method}}", path, nil, &out{{.ResponseBody}}, opts...)
   {{end -}}
 	if err != nil {
-	return nil, err
+		return nil, err
 	}
 	return &out, nil
-	}
+}
 {{end}}
