@@ -61,7 +61,7 @@ jobs:
         run: |
           LATEST_RELEASE=${{ steps.get_latest_release.outputs.LATEST_RELEASE }}
           echo "# Changelog" > changelog.txt
-          if [[ -z "$LATEST_RELEASE" ]]; then
+          if [[ -z "$LATEST_RELEASE" || "$LATEST_RELEASE" == "null" ]]; then
             # If there's no previous release, get only the current commit's log
             git config --global core.pager cat
             # git log --pretty=format:"* %s **by** @%an"
