@@ -37,12 +37,16 @@ func (r Result) GetSuccess() bool {
 	return r.Success
 }
 
+var protoOption = protojson.MarshalOptions{
+	EmitDefaultValues: true,
+}
+
 // ResultJSON result json data with status code
 func ResultJSON(c *gin.Context, status int, data any) {
 	var buf []byte
 	var err error
 	if msg, ok := data.(proto.Message); ok {
-		buf, err = protojson.Marshal(msg)
+		buf, err = protoOption.Marshal(msg)
 	} else {
 		buf, err = json.Marshal(data)
 	}
