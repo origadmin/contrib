@@ -22,7 +22,10 @@ type ID struct {
 // Fields of the mixin.
 func (ID) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("id").MaxLen(36).Unique(),
+		field.String("id").
+			MaxLen(36).
+			Unique().
+			Immutable(),
 	}
 }
 
