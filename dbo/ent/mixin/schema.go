@@ -35,7 +35,8 @@ func PrimaryID(name string) ent.Field {
 	// Create a unique string field with the given name and maximum length.
 	return field.String(name).
 		MaxLen(36).
-		Unique()
+		Unique().
+		Immutable()
 }
 
 // Time returns a time field with a default value of ZeroTime and a custom schema type for MySQL.
