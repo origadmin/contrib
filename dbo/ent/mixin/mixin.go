@@ -84,7 +84,7 @@ type CreateSchema struct {
 // Fields of the mixin.
 func (CreateSchema) Fields() []ent.Field {
 	return []ent.Field{
-		field.Time("created_time").
+		field.Time("create_time").
 			Default(time.Now).
 			Immutable(),
 	}
@@ -93,7 +93,7 @@ func (CreateSchema) Fields() []ent.Field {
 // Indexes of the mixin.
 func (CreateSchema) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("created_time"),
+		index.Fields("create_time"),
 	}
 }
 
