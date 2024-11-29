@@ -14,41 +14,41 @@ import (
 	"entgo.io/ent/schema/mixin"
 )
 
-// Model schema to include control and time fields.
-type Model struct {
+// ID schema to include control and time fields.
+type ID struct {
 	mixin.Schema
 }
 
 // Fields of the mixin.
-func (Model) Fields() []ent.Field {
+func (ID) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").MaxLen(36).Unique(),
 	}
 }
 
 // Indexes of the mixin.
-func (Model) Indexes() []ent.Index {
+func (ID) Indexes() []ent.Index {
 	return []ent.Index{}
 }
 
-// Origin schema to include control and time fields.
-type Origin struct {
+// Audit schema to include control and time fields.
+type Audit struct {
 	mixin.Schema
 }
 
 // Fields of the mixin.
-func (Origin) Fields() []ent.Field {
+func (Audit) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("created_by").Default(""),
-		field.String("updated_by").Default(""),
+		field.String("create_author").Default(""),
+		field.String("update_author").Default(""),
 	}
 }
 
 // Indexes of the mixin.
-func (Origin) Indexes() []ent.Index {
+func (Audit) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("created_by"),
-		index.Fields("updated_by"),
+		index.Fields("create_author"),
+		index.Fields("update_author"),
 	}
 }
 
@@ -60,7 +60,7 @@ type CreatedSchema struct {
 // Fields of the mixin.
 func (CreatedSchema) Fields() []ent.Field {
 	return []ent.Field{
-		field.Time("created_at").
+		field.Time("created_time").
 			Default(time.Now).
 			Immutable(),
 	}
@@ -69,7 +69,7 @@ func (CreatedSchema) Fields() []ent.Field {
 // Indexes of the mixin.
 func (CreatedSchema) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("created_at"),
+		index.Fields("created_time"),
 	}
 }
 
@@ -81,7 +81,7 @@ type UpdatedSchema struct {
 // Fields of the mixin.
 func (UpdatedSchema) Fields() []ent.Field {
 	return []ent.Field{
-		field.Time("updated_at").
+		field.Time("update_time").
 			Default(time.Now).
 			UpdateDefault(time.Now),
 	}
@@ -90,7 +90,7 @@ func (UpdatedSchema) Fields() []ent.Field {
 // Indexes of the mixin.
 func (UpdatedSchema) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("updated_at"),
+		index.Fields("update_time"),
 	}
 }
 
@@ -102,7 +102,7 @@ type DeletedSchema struct {
 // Fields of the Model.
 func (DeletedSchema) Fields() []ent.Field {
 	return []ent.Field{
-		field.Time("deleted_at").
+		field.Time("delete_time").
 			Optional().
 			Nillable(),
 	}
@@ -111,27 +111,9 @@ func (DeletedSchema) Fields() []ent.Field {
 // Indexes of the mixin.
 func (DeletedSchema) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("deleted_at"),
+		index.Fields("delete_time"),
 	}
 }
 
 // SoftDeleteSchema schema to include control and time fields.
-type SoftDeleteSchema struct {
-	mixin.Schema
-}
-
-// Fields of the mixin.
-func (SoftDeleteSchema) Fields() []ent.Field {
-	return []ent.Field{
-		field.Time("deleted_at").
-			Optional().
-			Nillable(),
-	}
-}
-
-// Indexes of the mixin.
-func (SoftDeleteSchema) Indexes() []ent.Index {
-	return []ent.Index{
-		index.Fields("deleted_at"),
-	}
-}
+type SoftDeleteSchema = DeletedSchema
