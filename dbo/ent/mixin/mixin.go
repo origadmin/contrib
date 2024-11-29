@@ -52,13 +52,34 @@ func (Audit) Indexes() []ent.Index {
 	}
 }
 
-// CreatedSchema schema to include control and time fields.
-type CreatedSchema struct {
+// CreateUpdateSchema schema to include control and time fields.
+type CreateUpdateSchema struct {
 	mixin.Schema
 }
 
 // Fields of the mixin.
-func (CreatedSchema) Fields() []ent.Field {
+func (CreateUpdateSchema) Fields() []ent.Field {
+	return append(
+		CreateSchema{}.Fields(),
+		UpdateSchema{}.Fields()...,
+	)
+}
+
+// Indexes of the mixin.
+func (CreateUpdateSchema) Indexes() []ent.Index {
+	return append(
+		CreateSchema{}.Indexes(),
+		UpdateSchema{}.Indexes()...,
+	)
+}
+
+// CreateSchema schema to include control and time fields.
+type CreateSchema struct {
+	mixin.Schema
+}
+
+// Fields of the mixin.
+func (CreateSchema) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("created_time").
 			Default(time.Now).
@@ -67,19 +88,19 @@ func (CreatedSchema) Fields() []ent.Field {
 }
 
 // Indexes of the mixin.
-func (CreatedSchema) Indexes() []ent.Index {
+func (CreateSchema) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("created_time"),
 	}
 }
 
-// UpdatedSchema schema to include control and time fields.
-type UpdatedSchema struct {
+// UpdateSchema schema to include control and time fields.
+type UpdateSchema struct {
 	mixin.Schema
 }
 
 // Fields of the mixin.
-func (UpdatedSchema) Fields() []ent.Field {
+func (UpdateSchema) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("update_time").
 			Default(time.Now).
@@ -88,19 +109,19 @@ func (UpdatedSchema) Fields() []ent.Field {
 }
 
 // Indexes of the mixin.
-func (UpdatedSchema) Indexes() []ent.Index {
+func (UpdateSchema) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("update_time"),
 	}
 }
 
-// DeletedSchema schema to include control and time fields.
-type DeletedSchema struct {
+// DeleteSchema schema to include control and time fields.
+type DeleteSchema struct {
 	mixin.Schema
 }
 
 // Fields of the Model.
-func (DeletedSchema) Fields() []ent.Field {
+func (DeleteSchema) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("delete_time").
 			Optional().
@@ -109,11 +130,11 @@ func (DeletedSchema) Fields() []ent.Field {
 }
 
 // Indexes of the mixin.
-func (DeletedSchema) Indexes() []ent.Index {
+func (DeleteSchema) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("delete_time"),
 	}
 }
 
 // SoftDeleteSchema schema to include control and time fields.
-type SoftDeleteSchema = DeletedSchema
+type SoftDeleteSchema = DeleteSchema
