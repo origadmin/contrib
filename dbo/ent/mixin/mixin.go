@@ -14,20 +14,20 @@ import (
 	"entgo.io/ent/schema/mixin"
 )
 
-// Model schema to include control and time fields.
-type Model struct {
+// ID schema to include control and time fields.
+type ID struct {
 	mixin.Schema
 }
 
 // Fields of the mixin.
-func (Model) Fields() []ent.Field {
+func (ID) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("id").MaxLen(36).Unique(),
 	}
 }
 
 // Indexes of the mixin.
-func (Model) Indexes() []ent.Index {
+func (ID) Indexes() []ent.Index {
 	return []ent.Index{}
 }
 
@@ -81,7 +81,7 @@ type UpdatedSchema struct {
 // Fields of the mixin.
 func (UpdatedSchema) Fields() []ent.Field {
 	return []ent.Field{
-		field.Time("updated_at").
+		field.Time("update_time").
 			Default(time.Now).
 			UpdateDefault(time.Now),
 	}
@@ -90,7 +90,7 @@ func (UpdatedSchema) Fields() []ent.Field {
 // Indexes of the mixin.
 func (UpdatedSchema) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("updated_at"),
+		index.Fields("update_time"),
 	}
 }
 
@@ -102,7 +102,7 @@ type DeletedSchema struct {
 // Fields of the Model.
 func (DeletedSchema) Fields() []ent.Field {
 	return []ent.Field{
-		field.Time("deleted_at").
+		field.Time("delete_time").
 			Optional().
 			Nillable(),
 	}
@@ -111,27 +111,9 @@ func (DeletedSchema) Fields() []ent.Field {
 // Indexes of the mixin.
 func (DeletedSchema) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("deleted_at"),
+		index.Fields("delete_time"),
 	}
 }
 
 // SoftDeleteSchema schema to include control and time fields.
-type SoftDeleteSchema struct {
-	mixin.Schema
-}
-
-// Fields of the mixin.
-func (SoftDeleteSchema) Fields() []ent.Field {
-	return []ent.Field{
-		field.Time("deleted_at").
-			Optional().
-			Nillable(),
-	}
-}
-
-// Indexes of the mixin.
-func (SoftDeleteSchema) Indexes() []ent.Index {
-	return []ent.Index{
-		index.Fields("deleted_at"),
-	}
-}
+type SoftDeleteSchema = DeletedSchema
