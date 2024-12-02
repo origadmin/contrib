@@ -22,7 +22,10 @@ type ID struct {
 // Fields of the mixin.
 func (ID) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("id").MaxLen(36).Unique(),
+		field.String("id").
+			MaxLen(36).
+			Unique().
+			Immutable(),
 	}
 }
 
@@ -81,7 +84,7 @@ type CreateSchema struct {
 // Fields of the mixin.
 func (CreateSchema) Fields() []ent.Field {
 	return []ent.Field{
-		field.Time("created_time").
+		field.Time("create_time").
 			Default(time.Now).
 			Immutable(),
 	}
@@ -90,7 +93,7 @@ func (CreateSchema) Fields() []ent.Field {
 // Indexes of the mixin.
 func (CreateSchema) Indexes() []ent.Index {
 	return []ent.Index{
-		index.Fields("created_time"),
+		index.Fields("create_time"),
 	}
 }
 

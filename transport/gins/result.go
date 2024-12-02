@@ -23,7 +23,7 @@ import (
 type Result struct {
 	pagination.UnimplementedResponder `json:"-"`
 	Success                           bool           `json:"success"`
-	Total                             int64          `json:"total,omitempty"`
+	Total                             int32          `json:"total,omitempty"`
 	Data                              any            `json:"data,omitempty"`
 	Extra                             any            `json:"extra,omitempty"`
 	Error                             *httperr.Error `json:"error,omitempty"`
@@ -37,12 +37,16 @@ func (r Result) GetSuccess() bool {
 	return r.Success
 }
 
+var protoOption = protojson.MarshalOptions{
+	EmitDefaultValues: true,
+}
+
 // ResultJSON result json data with status code
 func ResultJSON(c *gin.Context, status int, data any) {
 	var buf []byte
 	var err error
 	if msg, ok := data.(proto.Message); ok {
-		buf, err = protojson.Marshal(msg)
+		buf, err = protoOption.Marshal(msg)
 	} else {
 		buf, err = json.Marshal(data)
 	}
@@ -81,7 +85,7 @@ func ResultPage(c *gin.Context, resp pagination.Responder, args ...map[string]an
 		Success: true,
 		Data:    resp.GetData(),
 		Extra:   extra,
-		Total:   int64(resp.GetTotal()),
+		Total:   resp.GetTotal(),
 	})
 }
 
