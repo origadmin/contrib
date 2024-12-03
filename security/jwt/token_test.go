@@ -15,7 +15,7 @@ import (
 )
 
 func TestAuth(t *testing.T) {
-	//cache := memory.NewCache(memory.Config{CleanupInterval: time.Second})
+	//cache := memory.NewCache(memory.Selector{CleanupInterval: time.Second})
 	//c:=security.WithCache(cache)
 	store := security.NewTokenStorage()
 	ctx := context.Background()

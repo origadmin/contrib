@@ -11,11 +11,11 @@ import (
 	"io"
 	"time"
 
+	"github.com/origadmin/runtime/context"
 	"gopkg.in/gomail.v2"
 
 	configv1 "github.com/origadmin/runtime/gen/go/config/v1"
 	"github.com/origadmin/runtime/mail"
-	
 )
 
 // MailSender is a smtp email client
