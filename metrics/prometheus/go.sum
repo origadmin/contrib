@@ -12,8 +12,9 @@ github.com/kylelemons/godebug v1.1.0 h1:RPNrshWIDI6G2gRW9EHilWtl7Z6Sb1BR0xunSBf0
 github.com/kylelemons/godebug v1.1.0/go.mod h1:9/0rRGxNHcop5bhtWyNeEfOS8JIWk580+fNqagV/RAw=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 h1:C3w9PqII01/Oq1c1nUAm88MOHcQC9l5mIlSMApZMrHA=
 github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=
-github.com/origadmin/toolkits v0.0.92 h1:YNzR6l8hYf0jDq7el063WU1oZgQZAf7ZW37kHlOrwXE=
-github.com/origadmin/toolkits v0.0.92/go.mod h1:KUgmxNUHYsc4lKvJSN65ehYBKNvJ7L4DCOV6dGZNVT8=
+github.com/origadmin/contrib v0.0.9 h1:7qpPEIeSSmqX55scbeuod1rRx16oPlCdDtEf/3NNPcM=
+github.com/origadmin/contrib v0.0.9/go.mod h1:3QmJthOiOViCpyb01SYu5c+u4D3HQ/Qxy+6koT0cYr4=
+github.com/origadmin/toolkits v0.1.3 h1:5nqpc34FiobpsQBQj/HLYMJCA7+A7G5TzAzxhmb2P2c=
 github.com/origadmin/toolkits v0.1.3/go.mod h1:+BZ3uvvrsJIqRMbga6zalMinuTldHut/yaJbvVW4994=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 h1:Jamvg5psRIccs7FGNTlIRMkT8wgtp5eCXdBlqhYGL6U=
 github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
