@@ -21,19 +21,19 @@ func Register{{.ServiceType}}GINSServer(router gins.IRouter, srv {{.ServiceType}
 }
 
 {{range.Methods}}
-	func _{{$svrType}}_{{.Name}}{{.Num}}_GIN_Handler(srv {{$svrType}}GINSServer) func(ctx *gins.Context) {
-	return func(ctx *gins.Context) {
-	var in {{.Request}}
+	func _{{$svrType}}_{{.Name}}{{.Num}}_GIN_Handler(srv {{$svrType}}GINSServer) gins.HandlerFunc {
+		return func(ctx *gins.Context) {
+		var in {{.Request}}
   {{- if.HasBody}}
-	if err := gins.BindBody(ctx,&in{{.Body}}); err != nil {
-		gins.ResultError(ctx,err)
-		return
-	}
+		if err := gins.BindBody(ctx,&in{{.Body}}); err != nil {
+			gins.ResultError(ctx,err)
+			return
+		}
   {{- end}}
-	if err := gins.BindQuery(ctx,&in{{.Query}}); err != nil {
-		gins.ResultError(ctx,err)
-		return
-	}
+		if err := gins.BindQuery(ctx,&in{{.Query}}); err != nil {
+			gins.ResultError(ctx,err)
+			return
+		}
   {{- if.HasVars}}
 		if err := gins.BindURI(ctx,&in{{.Vars}}); err != nil {
 			gins.ResultError(ctx,err)

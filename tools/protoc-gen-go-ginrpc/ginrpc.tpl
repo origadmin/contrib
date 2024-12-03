@@ -2,10 +2,10 @@
 {{$svrName :=.ServiceName}}
 
 {{- range.MethodSets}}
-	const {{$svrType}}_{{.OriginalName}}_FullOperation = "/{{$svrName}}/{{.OriginalName}}"
+	const {{$svrType}}_{{.OriginalName}}_FullOperation = "/{{.ServiceName}}/{{.OriginalName}}"
 {{- end}}
 
-type {{.ServiceType}}GINRPCServer interface {
+type {{.ServiceType}}GINRPCAgent interface {
 {{- range.MethodSets}}
     {{- if ne .Comment ""}}
         {{.Comment}}
@@ -14,14 +14,14 @@ type {{.ServiceType}}GINRPCServer interface {
 {{- end}}
 }
 
-func Register{{.ServiceType}}GINRPCServer(router gins.IRouter, srv {{.ServiceType}}GINRPCServer) {
+func Register{{.ServiceType}}GINRPCServer(router gins.IRouter, srv {{.ServiceType}}GINRPCAgent) {
 {{- range.Methods}}
 	router.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_GINRPC_Handler(srv))
 {{- end}}
 }
 
 {{range.Methods}}
-	func _{{$svrType}}_{{.Name}}{{.Num}}_GINRPC_Handler(srv {{$svrType}}GINRPCServer) func(ctx *gins.Context) {
+	func _{{$svrType}}_{{.Name}}{{.Num}}_GINRPC_Handler(srv {{$svrType}}GINRPCAgent) gins.HandlerFunc {
 	return func(ctx *gins.Context) {
 	var in {{.Request}}
   {{- if.HasBody}}
