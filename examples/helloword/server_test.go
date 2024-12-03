@@ -18,22 +18,22 @@ import (
 	transgrpc "github.com/go-kratos/kratos/v2/transport/grpc"
 	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
-	"github.com/origadmin/runtime/transport/gins"
+	"github.com/origadmin/contrib/transport/gins"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/grpc"
 
-	"examples/helloword/services/helloworld/v1"
+	"examples/helloword/services/greeter/v1"
 )
 
-var _ helloworld.GreeterServiceHTTPServer = &helloServer{}
+var _ greeter.GreeterServiceHTTPServer = &helloServer{}
 
 type helloServer struct {
-	helloworld.UnimplementedGreeterServiceServer
-	cli helloworld.GreeterServiceClient
+	greeter.UnimplementedGreeterServiceServer
+	cli greeter.GreeterServiceClient
 }
 
-func (h helloServer) SayHello(ctx context.Context, request *helloworld.SayHelloRequest) (*helloworld.SayHelloResponse, error) {
-	var out helloworld.SayHelloResponse
+func (h helloServer) SayHello(ctx context.Context, request *greeter.SayHelloRequest) (*greeter.SayHelloResponse, error) {
+	var out greeter.SayHelloResponse
 	out.Message = strconv.FormatInt(int64(rand.Intn(100)), 10)
 	c, ok := gins.FromContext(ctx)
 	if ok {
@@ -72,11 +72,11 @@ func TestServer(t *testing.T) {
 		),
 	)
 	s := &helloServer{
-		cli: helloworld.NewGreeterServiceClient(con),
+		cli: greeter.NewGreeterServiceClient(con),
 	}
 
-	helloworld.RegisterGreeterServiceServer(gsrv, s)
-	helloworld.RegisterGreeterServiceGINSServer(hsrv, s)
+	greeter.RegisterGreeterServiceServer(gsrv, s)
+	greeter.RegisterGreeterServiceGINSServer(hsrv, s)
 	hsrv.Use(gins.Recovery(log.DefaultLogger, true))
 	hsrv.Use(gins.Logger(log.DefaultLogger))
 
@@ -88,8 +88,8 @@ func TestServer(t *testing.T) {
 		c.String(200, "Hello World!")
 	})
 
-	hsrv.GET("/helloworld", func(c *gin.Context) {
-		var out helloworld.SayHelloResponse
+	hsrv.GET("/greeter", func(c *gin.Context) {
+		var out greeter.SayHelloResponse
 		out.Message = strconv.FormatInt(int64(rand.Intn(100)), 10)
 		c.JSON(200, &out)
 	})
@@ -119,13 +119,13 @@ func testClient(t *testing.T) {
 	t.Log(resp)
 }
 
-func GetHelloReply(ctx context.Context, cli *transhttp.Client, in *helloworld.SayHelloRequest, opts ...transhttp.CallOption) (*helloworld.SayHelloResponse, error) {
-	var out helloworld.SayHelloResponse
+func GetHelloReply(ctx context.Context, cli *transhttp.Client, in *greeter.SayHelloRequest, opts ...transhttp.CallOption) (*greeter.SayHelloResponse, error) {
+	var out greeter.SayHelloResponse
 
-	pattern := "/helloworld"
+	pattern := "/greeter"
 	path := binding.EncodeURL(pattern, in, true)
 
-	opts = append(opts, transhttp.Operation(helloworld.GreeterService_SayHello_OperationName))
+	opts = append(opts, transhttp.Operation(greeter.GreeterService_SayHello_OperationName))
 	opts = append(opts, transhttp.PathTemplate(pattern))
 
 	err := cli.Invoke(ctx, "GET", path, nil, &out, opts...)
@@ -143,7 +143,7 @@ func testGinClient(t *testing.T) {
 		transhttp.WithEndpoint("127.0.0.1:8000"),
 	)
 	assert.Nil(t, err)
-	c := helloworld.NewGreeterServiceGINSClient(cli)
+	c := greeter.NewGreeterServiceGINSClient(cli)
 	resp, err := c.SayHello(context.Background(), nil, transhttp.EmptyCallOption{})
 	assert.Nil(t, err)
 	t.Log(resp)
@@ -156,8 +156,8 @@ func testGRPCClient(t *testing.T) {
 		transgrpc.WithEndpoint("127.0.0.1:8000"),
 	)
 	assert.Nil(t, err)
-	c := helloworld.NewGreeterServiceClient(cli)
-	resp, err := c.SayHello(context.Background(), &helloworld.SayHelloRequest{
+	c := greeter.NewGreeterServiceClient(cli)
+	resp, err := c.SayHello(context.Background(), &greeter.SayHelloRequest{
 		Name: "Mynameisworld",
 	}, grpc.EmptyCallOption{})
 	assert.Nil(t, err)

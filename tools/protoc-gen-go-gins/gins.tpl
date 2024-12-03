@@ -71,7 +71,7 @@ return &{{.ServiceType}}GINSClientImpl{client}
 func (c *{{$svrType}}GINSClientImpl) {{.Name}}(ctx context.Context, in *{{.Request}}, opts ...gins.CallOption) (*{{.Reply}}, error) {
 	var out {{.Reply}}
 	pattern := "{{.ClientPath}}"
-	path := binding.EncodeURL(pattern, in, {{not .HasBody}})
+	path := gins.EncodeURL(pattern, in, {{not .HasBody}})
 	opts = append(opts, gins.Operation({{$svrType}}_{{.OriginalName}}_OperationName))
 	opts = append(opts, gins.PathTemplate(pattern))
   {{if.HasBody -}}

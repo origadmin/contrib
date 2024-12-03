@@ -2,9 +2,9 @@
 // versions:
 // - protoc-gen-go-http v2.8.2
 // - protoc             (unknown)
-// source: helloworld/v1/helloworld.proto
+// source: greeter/v1/greeter.proto
 
-package helloworld
+package greeter
 
 import (
 	context "context"
@@ -19,7 +19,7 @@ var _ = binding.EncodeURL
 
 const _ = http.SupportPackageIsVersion1
 
-const OperationGreeterServiceSayHello = "/helloworld.v1.GreeterService/SayHello"
+const OperationGreeterServiceSayHello = "/greeter.v1.GreeterService/SayHello"
 
 type GreeterServiceHTTPServer interface {
 	// SayHello Sends a greeting

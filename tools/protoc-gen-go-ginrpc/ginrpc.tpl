@@ -2,7 +2,7 @@
 {{$svrName :=.ServiceName}}
 
 {{- range.MethodSets}}
-	const {{$svrType}}_{{.OriginalName}}_FullOperation = "/{{.ServiceName}}/{{.OriginalName}}"
+	const {{$svrType}}_{{.OriginalName}}_FullOperation = "/{{$svrName}}/{{.OriginalName}}"
 {{- end}}
 
 type {{.ServiceType}}GINRPCAgent interface {
@@ -10,7 +10,7 @@ type {{.ServiceType}}GINRPCAgent interface {
     {{- if ne .Comment ""}}
         {{.Comment}}
     {{- end}}
-    {{.Name}}(*gin.Context, *{{.Request}})
+    {{.Name}}(*gins.Context, *{{.Request}})
 {{- end}}
 }
 
