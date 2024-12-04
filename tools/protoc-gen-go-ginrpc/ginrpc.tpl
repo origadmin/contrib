@@ -14,7 +14,7 @@ type {{.ServiceType}}GINRPCAgent interface {
 {{- end}}
 }
 
-func Register{{.ServiceType}}GINRPCServer(router gins.IRouter, srv {{.ServiceType}}GINRPCAgent) {
+func Register{{.ServiceType}}GINRPCAgent (router gins.IRouter, srv {{.ServiceType}}GINRPCAgent) {
 {{- range.Methods}}
 	router.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_GINRPC_Handler(srv))
 {{- end}}
