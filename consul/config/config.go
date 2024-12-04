@@ -7,6 +7,7 @@ package config
 import (
 	"encoding/json"
 
+	"github.com/go-kratos/kratos/v2/config/env"
 	"github.com/hashicorp/consul/api"
 	"github.com/origadmin/toolkits/errors"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -48,7 +49,12 @@ func NewConsulConfig(ccfg *configv1.SourceConfig, rc *config.RuntimeConfig) (con
 	}
 
 	option := rc.Source()
-	option.Options = append(option.Options, config.WithSource(source))
+
+	var configSources = []config.Source{source}
+	if ccfg.EnvPrefixes != nil {
+		configSources = append(configSources, env.NewSource(ccfg.EnvPrefixes...))
+	}
+	option.Options = append(option.Options, config.WithSource(configSources...))
 	if option.Decoder != nil {
 		option.Options = append(option.Options, config.WithDecoder(option.Decoder))
 	}
@@ -74,7 +80,7 @@ func SyncConfig(ccfg *configv1.SourceConfig, v any, rc *config.RuntimeConfig) er
 	}
 
 	option := rc.Source()
-	encode := marshalValue
+	encode := marshalJSON
 	if option.Encoder != nil {
 		encode = option.Encoder
 	}
@@ -92,7 +98,10 @@ func SyncConfig(ccfg *configv1.SourceConfig, v any, rc *config.RuntimeConfig) er
 	return nil
 }
 
-func marshalValue(v any) ([]byte, error) {
+func FileConfigPath(serviceName, filename string) string {
+	return "/config/" + serviceName + "/" + filename
+}
+func marshalJSON(v any) ([]byte, error) {
 	if data, ok := v.(proto.Message); ok {
 		opt := protojson.MarshalOptions{
 			EmitUnpopulated: true,
@@ -101,8 +110,4 @@ func marshalValue(v any) ([]byte, error) {
 		return opt.Marshal(data)
 	}
 	return json.Marshal(v)
-}
-
-func FileConfigPath(serviceName, filename string) string {
-	return "/config/" + serviceName + "/" + filename
 }
