@@ -54,11 +54,12 @@ func (c *consulBuilder) NewDiscovery(cfg *configv1.Registry, _ *config.RuntimeCo
 	if cfg == nil || cfg.Consul == nil {
 		return nil, errors.New("configuration: consul config is required")
 	}
-	config := fromConfig(cfg)
-	apiClient, err := api.NewClient(config)
+	apiConfig := fromConfig(cfg)
+	apiClient, err := api.NewClient(apiConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create consul client")
 	}
+	//apiClient.Agent().ServiceRegister
 	r := New(apiClient, optsFromConfig(cfg)...)
 	return r, nil
 }
@@ -67,8 +68,8 @@ func (c *consulBuilder) NewRegistrar(cfg *configv1.Registry, _ *config.RuntimeCo
 	if cfg == nil || cfg.Consul == nil {
 		return nil, errors.New("configuration: consul config is required")
 	}
-	config := fromConfig(cfg)
-	apiClient, err := api.NewClient(config)
+	apiConfig := fromConfig(cfg)
+	apiClient, err := api.NewClient(apiConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to create consul client")
 	}
