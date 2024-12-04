@@ -7,7 +7,7 @@ package config
 import (
 	"encoding/json"
 
-	"github.com/goexts/generic/settings"
+	"github.com/go-kratos/kratos/v2/config/env"
 	"github.com/hashicorp/consul/api"
 	"github.com/origadmin/toolkits/errors"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -24,7 +24,7 @@ func init() {
 }
 
 // NewConsulConfig create a new consul config.
-func NewConsulConfig(ccfg *configv1.SourceConfig, ss ...config.SourceSetting) (config.Config, error) {
+func NewConsulConfig(ccfg *configv1.SourceConfig, rc *config.RuntimeConfig) (config.Config, error) {
 	consul := ccfg.GetConsul()
 	if consul == nil {
 		return nil, errors.New("consul config error")
@@ -48,15 +48,20 @@ func NewConsulConfig(ccfg *configv1.SourceConfig, ss ...config.SourceSetting) (c
 		return nil, errors.Wrap(err, "consul source error")
 	}
 
-	option := settings.Apply(&config.SourceOption{}, ss)
-	option.Options = append(option.Options, config.WithSource(source))
+	option := rc.Source()
+
+	var configSources = []config.Source{source}
+	if ccfg.EnvPrefixes != nil {
+		configSources = append(configSources, env.NewSource(ccfg.EnvPrefixes...))
+	}
+	option.Options = append(option.Options, config.WithSource(configSources...))
 	if option.Decoder != nil {
 		option.Options = append(option.Options, config.WithDecoder(option.Decoder))
 	}
 	return config.New(option.Options...), nil
 }
 
-func SyncConfig(ccfg *configv1.SourceConfig, v any, ss ...config.SourceSetting) error {
+func SyncConfig(ccfg *configv1.SourceConfig, v any, rc *config.RuntimeConfig) error {
 	consul := ccfg.GetConsul()
 	if consul == nil {
 		return errors.New("consul config error")
@@ -74,8 +79,8 @@ func SyncConfig(ccfg *configv1.SourceConfig, v any, ss ...config.SourceSetting) 
 		consul.Path = FileConfigPath(ccfg.Name, DefaultPathName)
 	}
 
-	option := settings.Apply(&config.SourceOption{}, ss)
-	encode := marshalValue
+	option := rc.Source()
+	encode := marshalJSON
 	if option.Encoder != nil {
 		encode = option.Encoder
 	}
@@ -93,7 +98,10 @@ func SyncConfig(ccfg *configv1.SourceConfig, v any, ss ...config.SourceSetting) 
 	return nil
 }
 
-func marshalValue(v any) ([]byte, error) {
+func FileConfigPath(serviceName, filename string) string {
+	return "/config/" + serviceName + "/" + filename
+}
+func marshalJSON(v any) ([]byte, error) {
 	if data, ok := v.(proto.Message); ok {
 		opt := protojson.MarshalOptions{
 			EmitUnpopulated: true,
@@ -102,8 +110,4 @@ func marshalValue(v any) ([]byte, error) {
 		return opt.Marshal(data)
 	}
 	return json.Marshal(v)
-}
-
-func FileConfigPath(serviceName, filename string) string {
-	return "/config/" + serviceName + "/" + filename
 }

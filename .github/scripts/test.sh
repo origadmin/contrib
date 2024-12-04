@@ -65,6 +65,7 @@ check_all_go_mod() {
                 cd "$dir" || continue
                 go fmt ./...
                 go mod tidy || return 1
+                go vet ./... || return 1
                 go test -race ./... || return 1
             fi
         fi

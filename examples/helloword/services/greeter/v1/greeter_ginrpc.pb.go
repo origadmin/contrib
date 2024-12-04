@@ -2,46 +2,42 @@
 // versions:
 // - protoc-gen-go-ginrpc unknown
 // - protoc             (unknown)
-// source: helloworld/v1/helloworld.proto
+// source: greeter/v1/greeter.proto
 
-package helloworld
+package greeter
 
 import (
 	context "context"
-	gin "github.com/gin-gonic/gin"
-	binding "github.com/go-kratos/kratos/v2/transport/http/binding"
-	gins "github.com/origadmin/toolkits/runtime/transport/gins"
+	gins "github.com/origadmin/contrib/transport/gins"
 )
 
 // This is a compile-time assertion to ensure that this generated file
 // is compatible with the kratos package it is being compiled against.
 var _ = new(context.Context)
-var _ = new(gin.H)
-var _ = binding.EncodeURL
 
 const _ = gins.SupportPackageIsVersion1
 
-const GreeterService_SayHello_FullOperation = "/helloworld.v1.GreeterService/SayHello"
+const GreeterService_SayHello_FullOperation = "/greeter.v1.GreeterService/SayHello"
 
-type GreeterServiceGINRPCServer interface {
+type GreeterServiceGINRPCAgent interface {
 	// SayHello Sends a greeting
-	SayHello(*gin.Context, *SayHelloRequest)
+	SayHello(*gins.Context, *SayHelloRequest)
 }
 
-func RegisterGreeterServiceGINRPCServer(router gin.IRouter, srv GreeterServiceGINRPCServer) {
+func RegisterGreeterServiceGINRPCServer(router gins.IRouter, srv GreeterServiceGINRPCAgent) {
 	router.POST("/say_hello", _GreeterService_SayHello0_GINRPC_Handler(srv))
 	router.GET("/helloworld/:name", _GreeterService_SayHello1_GINRPC_Handler(srv))
 }
 
-func _GreeterService_SayHello0_GINRPC_Handler(srv GreeterServiceGINRPCServer) func(ctx *gin.Context) {
-	return func(ctx *gin.Context) {
+func _GreeterService_SayHello0_GINRPC_Handler(srv GreeterServiceGINRPCAgent) gins.HandlerFunc {
+	return func(ctx *gins.Context) {
 		var in SayHelloRequest
 		if err := gins.BindBody(ctx, &in); err != nil {
-			gins.RetError(ctx, err)
+			gins.ResultError(ctx, err)
 			return
 		}
 		if err := gins.BindQuery(ctx, &in); err != nil {
-			gins.RetError(ctx, err)
+			gins.ResultError(ctx, err)
 			return
 		}
 		gins.SetOperation(ctx, GreeterService_SayHello_OperationName)
@@ -49,15 +45,15 @@ func _GreeterService_SayHello0_GINRPC_Handler(srv GreeterServiceGINRPCServer) fu
 	}
 }
 
-func _GreeterService_SayHello1_GINRPC_Handler(srv GreeterServiceGINRPCServer) func(ctx *gin.Context) {
-	return func(ctx *gin.Context) {
+func _GreeterService_SayHello1_GINRPC_Handler(srv GreeterServiceGINRPCAgent) gins.HandlerFunc {
+	return func(ctx *gins.Context) {
 		var in SayHelloRequest
 		if err := gins.BindQuery(ctx, &in); err != nil {
-			gins.RetError(ctx, err)
+			gins.ResultError(ctx, err)
 			return
 		}
 		if err := gins.BindURI(ctx, &in); err != nil {
-			gins.RetError(ctx, err)
+			gins.ResultError(ctx, err)
 			return
 		}
 		gins.SetOperation(ctx, GreeterService_SayHello_OperationName)
