@@ -5,7 +5,19 @@
 	const {{$svrType}}_{{.OriginalName}}_FullOperation = "/{{$svrName}}/{{.OriginalName}}"
 {{- end}}
 
+type {{.ServiceType}}GINRPCAgentResponder interface {
+		// Error returns a error
+		Error(*gins.Context, int, error) error
+
+		// JSON returns a json data
+		JSON(*gins.Context, int, any) error
+
+		// Any returns errors or any data
+		Any(*gins.Context, int, any, error) error
+}
+
 type {{.ServiceType}}GINRPCAgent interface {
+		{{.ServiceType}}GINRPCAgentResponder
 {{- range.MethodSets}}
     {{- if ne .Comment ""}}
         {{.Comment}}
