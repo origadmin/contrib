@@ -5,7 +5,19 @@
 	const {{$svrType}}_{{.OriginalName}}_FullOperation = "/{{$svrName}}/{{.OriginalName}}"
 {{- end}}
 
+type {{.ServiceType}}GINRPCAgentResponder interface {
+		// Error returns a error
+		Error(*gins.Context, int, error) error
+
+		// JSON returns a json data
+		JSON(*gins.Context, int, any) error
+
+		// Any returns errors or any data
+		Any(*gins.Context, int, any, error) error
+}
+
 type {{.ServiceType}}GINRPCAgent interface {
+		{{.ServiceType}}GINRPCAgentResponder
 {{- range.MethodSets}}
     {{- if ne .Comment ""}}
         {{.Comment}}
@@ -26,17 +38,17 @@ func Register{{.ServiceType}}GINRPCAgent (router gins.IRouter, srv {{.ServiceTyp
 	var in {{.Request}}
   {{- if.HasBody}}
 		if err := gins.BindBody(ctx,&in{{.Body}}); err != nil {
-		gins.ResultError(ctx,err)
+		srv.Error(ctx, 400, err)
 		return
 		}
   {{- end}}
 	if err := gins.BindQuery(ctx,&in{{.Query}}); err != nil {
-		gins.ResultError(ctx,err)
+		srv.Error(ctx, 400, err)
 		return
 	}
   {{- if.HasVars}}
 		if err := gins.BindURI(ctx,&in{{.Vars}}); err != nil {
-			gins.ResultError(ctx,err)
+		srv.Error(ctx, 400, err)
 			return
 		}
   {{- end}}
