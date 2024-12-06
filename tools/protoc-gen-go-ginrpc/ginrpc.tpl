@@ -38,17 +38,17 @@ func Register{{.ServiceType}}GINRPCAgent (router gins.IRouter, srv {{.ServiceTyp
 	var in {{.Request}}
   {{- if.HasBody}}
 		if err := gins.BindBody(ctx,&in{{.Body}}); err != nil {
-		gins.ResultError(ctx,err)
+		srv.Error(ctx, 400, err)
 		return
 		}
   {{- end}}
 	if err := gins.BindQuery(ctx,&in{{.Query}}); err != nil {
-		gins.ResultError(ctx,err)
+		srv.Error(ctx, 400, err)
 		return
 	}
   {{- if.HasVars}}
 		if err := gins.BindURI(ctx,&in{{.Vars}}); err != nil {
-			gins.ResultError(ctx,err)
+		srv.Error(ctx, 400, err)
 			return
 		}
   {{- end}}
