@@ -6,6 +6,7 @@
 package gins
 
 import (
+	"github.com/go-kratos/kratos/v2/transport"
 	transhttp "github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/go-kratos/kratos/v2/transport/http/binding"
 )
@@ -14,6 +15,8 @@ import (
 const SupportPackageIsVersion1 = transhttp.SupportPackageIsVersion1
 
 type (
+	// Kind is transport kind
+	Kind = transport.Kind
 	// Client is an HTTP client.
 	Client = transhttp.Client
 	// CallOption configures a Call before it starts or extracts information from

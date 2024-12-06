@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	KindGin transport.Kind = "gin"
+	KindGin Kind = "gin"
 )
 
 // Transporter is http Transporter
@@ -31,7 +31,7 @@ type Transport struct {
 }
 
 // Kind returns the transport kind.
-func (tr *Transport) Kind() transport.Kind {
+func (tr *Transport) Kind() Kind {
 	return KindGin
 }
 

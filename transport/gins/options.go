@@ -38,9 +38,6 @@ func Address(addr string) ServerOption {
 
 func StrictSlash(strictSlash bool) ServerOption {
 	return func(s *Server) {
-		if s.engine == nil {
-			s.engine = New()
-		}
 		s.engine.RedirectTrailingSlash = strictSlash
 	}
 }
