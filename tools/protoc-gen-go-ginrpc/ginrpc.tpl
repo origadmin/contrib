@@ -7,13 +7,11 @@
 
 type {{.ServiceType}}GINRPCAgentResponder interface {
 		// Error returns a error
-		Error(*gins.Context, int, error) error
-
+		Error(*gins.Context, int, error)
 		// JSON returns a json data
-		JSON(*gins.Context, int, any) error
-
+		JSON(*gins.Context, int, any)
 		// Any returns errors or any data
-		Any(*gins.Context, int, any, error) error
+		Any(*gins.Context, int, any, error)
 }
 
 type {{.ServiceType}}GINRPCAgent interface {
