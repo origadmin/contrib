@@ -5,6 +5,7 @@ go 1.23.1
 toolchain go1.23.2
 
 require (
+	github.com/casbin/casbin/v2 v2.102.0
 	github.com/goexts/generic v0.1.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/origadmin/toolkits v0.1.3
@@ -14,6 +15,8 @@ require (
 )
 
 require (
+	github.com/bmatcuk/doublestar/v4 v4.6.1 // indirect
+	github.com/casbin/govaluate v1.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
