@@ -19,12 +19,22 @@ const _ = gins.SupportPackageIsVersion1
 
 const GreeterService_SayHello_FullOperation = "/greeter.v1.GreeterService/SayHello"
 
+type GreeterServiceGINRPCAgentResponder interface {
+	// Error returns a error
+	Error(*gins.Context, int, error)
+	// JSON returns a json data
+	JSON(*gins.Context, int, any)
+	// Any returns errors or any data
+	Any(*gins.Context, int, any, error)
+}
+
 type GreeterServiceGINRPCAgent interface {
+	GreeterServiceGINRPCAgentResponder
 	// SayHello Sends a greeting
 	SayHello(*gins.Context, *SayHelloRequest)
 }
 
-func RegisterGreeterServiceGINRPCServer(router gins.IRouter, srv GreeterServiceGINRPCAgent) {
+func RegisterGreeterServiceGINRPCAgent(router gins.IRouter, srv GreeterServiceGINRPCAgent) {
 	router.POST("/say_hello", _GreeterService_SayHello0_GINRPC_Handler(srv))
 	router.GET("/helloworld/:name", _GreeterService_SayHello1_GINRPC_Handler(srv))
 }
@@ -33,11 +43,11 @@ func _GreeterService_SayHello0_GINRPC_Handler(srv GreeterServiceGINRPCAgent) gin
 	return func(ctx *gins.Context) {
 		var in SayHelloRequest
 		if err := gins.BindBody(ctx, &in); err != nil {
-			gins.ResultError(ctx, err)
+			srv.Error(ctx, 400, err)
 			return
 		}
 		if err := gins.BindQuery(ctx, &in); err != nil {
-			gins.ResultError(ctx, err)
+			srv.Error(ctx, 400, err)
 			return
 		}
 		gins.SetOperation(ctx, GreeterService_SayHello_OperationName)
@@ -49,11 +59,11 @@ func _GreeterService_SayHello1_GINRPC_Handler(srv GreeterServiceGINRPCAgent) gin
 	return func(ctx *gins.Context) {
 		var in SayHelloRequest
 		if err := gins.BindQuery(ctx, &in); err != nil {
-			gins.ResultError(ctx, err)
+			srv.Error(ctx, 400, err)
 			return
 		}
 		if err := gins.BindURI(ctx, &in); err != nil {
-			gins.ResultError(ctx, err)
+			srv.Error(ctx, 400, err)
 			return
 		}
 		gins.SetOperation(ctx, GreeterService_SayHello_OperationName)

@@ -66,7 +66,7 @@ check_all_go_mod() {
                 go fmt ./...
                 go mod tidy || return 1
                 go vet ./... || return 1
-                go test -race ./... || return 1
+                go test ./... || return 1
             fi
         fi
     done

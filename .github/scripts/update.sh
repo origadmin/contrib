@@ -21,7 +21,7 @@ check_go_mod_and_act() {
     if [ -f "$go_mod_name" ]; then
         # If it exists, perform specific operations
         echo "Updating packages in: $dir"
-#        go get -u ./...
+        go get -u all ./...
         go mod tidy
         
         go test -race ./... || cd "$ORIGINAL_DIR" || return 1
