@@ -6,9 +6,9 @@ toolchain go1.23.2
 
 require (
 	github.com/go-kratos/kratos/v2 v2.8.2
-	github.com/origadmin/toolkits/codec v0.0.28
-	github.com/origadmin/toolkits/errors v0.0.5
-	google.golang.org/protobuf v1.35.1
+	github.com/origadmin/toolkits/codec v0.0.49
+	github.com/origadmin/toolkits/errors v0.0.31
+	google.golang.org/protobuf v1.35.2
 )
 
 require (
@@ -19,7 +19,7 @@ require (
 require (
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/BurntSushi/toml v1.4.0 // indirect
-	github.com/goexts/generic v0.1.1 // indirect
+	github.com/goexts/generic v0.1.4 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
