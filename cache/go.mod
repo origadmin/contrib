@@ -7,8 +7,8 @@ toolchain go1.23.2
 require (
 	github.com/coocood/freecache v1.2.4
 	github.com/goexts/generic v0.1.4
-	github.com/origadmin/runtime v0.1.1
-	github.com/origadmin/toolkits/errors v0.0.26
+	github.com/origadmin/runtime v0.1.4
+	github.com/origadmin/toolkits/errors v0.0.31
 )
 
 require (
@@ -19,7 +19,7 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	golang.org/x/exp v0.0.0-20241210194714-1829a127f884 // indirect
+	golang.org/x/exp v0.0.0-20241215155358-4a5509556b9e // indirect
 	google.golang.org/protobuf v1.35.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
