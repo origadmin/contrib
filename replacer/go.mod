@@ -5,14 +5,14 @@ go 1.23.1
 toolchain go1.23.2
 
 require (
-	github.com/goexts/generic v0.1.1
-	github.com/origadmin/toolkits/codec v0.0.30
-	github.com/origadmin/toolkits/errors v0.0.12
+	github.com/goexts/generic v0.1.4
+	github.com/origadmin/toolkits/codec v0.0.49
+	github.com/origadmin/toolkits/errors v0.0.31
 )
 
 require (
 	github.com/BurntSushi/toml v1.4.0 // indirect
-	github.com/bytedance/sonic v1.12.4 // indirect
+	github.com/bytedance/sonic v1.12.6 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
@@ -25,7 +25,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	golang.org/x/arch v0.12.0 // indirect
-	golang.org/x/sys v0.27.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
