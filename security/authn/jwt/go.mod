@@ -1,4 +1,4 @@
-module github.com/origadmin/contrib/security/jwt
+module github.com/origadmin/contrib/security/authn/jwt
 
 go 1.23.1
 
@@ -9,8 +9,8 @@ require (
 	github.com/goexts/generic v0.1.4
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/origadmin/runtime v0.1.4
-	github.com/origadmin/toolkits v0.1.17
-	github.com/origadmin/toolkits/errors v0.0.26
+	github.com/origadmin/toolkits v0.1.19
+	github.com/origadmin/toolkits/errors v0.0.31
 	github.com/stretchr/testify v1.10.0
 	google.golang.org/protobuf v1.35.2
 )

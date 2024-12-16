@@ -8,8 +8,8 @@ import (
 	casbinmodel "github.com/casbin/casbin/v2/model"
 	"github.com/casbin/casbin/v2/persist"
 
-	"github.com/origadmin/runtime/middleware/security/internal/model"
-	"github.com/origadmin/runtime/middleware/security/internal/policy"
+	"github.com/origadmin/contrib/security/authz/casbin/internal/model"
+	"github.com/origadmin/contrib/security/authz/casbin/internal/policy"
 )
 
 // Setting is a function type for setting the Authenticator.

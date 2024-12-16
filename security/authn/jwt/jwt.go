@@ -39,7 +39,7 @@ type Authenticator struct {
 	//// user parser is the user parser for the token. It is optional.    If it is not set, the user will not be parsed.
 	//userParser security.UserClaimsParser
 	baseClaims security.Claims
-	exp        time.Duration
+	expiration time.Duration
 	issuer     string
 	audience   []string
 }
@@ -52,7 +52,7 @@ func (obj *Authenticator) CreateIdentityClaims(ctx context.Context, id string) (
 			Sub:    id,
 			Iss:    obj.baseClaims.GetIssuer(),
 			Aud:    obj.baseClaims.GetAudience(),
-			Exp:    timestamppb.New(now.Add(obj.exp)),
+			Exp:    timestamppb.New(now.Add(obj.expiration)),
 			Nbf:    timestamppb.New(now),
 			Iat:    timestamppb.New(now),
 			Jti:    "",

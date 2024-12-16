@@ -826,10 +826,10 @@ github.com/minio/asm2plan9s v0.0.0-20200509001527-cdd76441f9d8/go.mod h1:mC1jAcs
 github.com/minio/c2goasm v0.0.0-20190812172519-36a3d3bbc4f3/go.mod h1:RagcQ7I8IeTMnF8JTXieKnO4Z6JCsikNEzj0DwauVzE=
 github.com/origadmin/runtime v0.1.4 h1:NBgj00SNRhk+JZTi0DGMFGYqUaSDiMY5ZNGEut9bGBU=
 github.com/origadmin/runtime v0.1.4/go.mod h1:JCm2dZTnx/1UJefRrMNAfZrTM3c94zGu02hJWsdABZQ=
-github.com/origadmin/toolkits v0.1.17 h1:Z9MGjztOM4O/YcJLD5IB0BL+DTGQKftR170paUPRZUU=
-github.com/origadmin/toolkits v0.1.17/go.mod h1:pOKzzp/n89rAx71ztgRIQGKH/EUJbZO1vUv7Uv0CRXQ=
-github.com/origadmin/toolkits/errors v0.0.26 h1:xHfZBu1D8y7SEPciRr/bPyplytsd6nt1OnRssPb/dxM=
-github.com/origadmin/toolkits/errors v0.0.26/go.mod h1:6DM+lY0GU/UWobF66Fh/zeLJl3zF6Ll9+8ujHjSCwFQ=
+github.com/origadmin/toolkits v0.1.19 h1:Usafct2XIq48f77pYfCzLtv9F3VGGW/O6j6QAd/uLgA=
+github.com/origadmin/toolkits v0.1.19/go.mod h1:+BZ3uvvrsJIqRMbga6zalMinuTldHut/yaJbvVW4994=
+github.com/origadmin/toolkits/errors v0.0.31 h1:OngnbxdONZiTz4IczmTSoQMBxz2cEOnZG+vz/5xgm1A=
+github.com/origadmin/toolkits/errors v0.0.31/go.mod h1:6DM+lY0GU/UWobF66Fh/zeLJl3zF6Ll9+8ujHjSCwFQ=
 github.com/phpdave11/gofpdf v1.4.2/go.mod h1:zpO6xFn9yxo3YLyMvW8HcKWVdbNqgIfOOp2dXMnm1mY=
 github.com/phpdave11/gofpdi v1.0.12/go.mod h1:vBmVV0Do6hSBHC8uKUQ71JGW+ZGQq74llk/7bXwjDoI=
 github.com/phpdave11/gofpdi v1.0.13/go.mod h1:vBmVV0Do6hSBHC8uKUQ71JGW+ZGQq74llk/7bXwjDoI=
