@@ -8,13 +8,13 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-kratos/kratos/v2 v2.8.2
 	github.com/gorilla/mux v1.8.1
-	github.com/origadmin/runtime v0.1.1
-	github.com/origadmin/toolkits/errors v0.0.26
+	github.com/origadmin/runtime v0.1.4
+	github.com/origadmin/toolkits/errors v0.0.31
 	google.golang.org/protobuf v1.35.2
 )
 
 require (
-	github.com/bytedance/sonic v1.12.5 // indirect
+	github.com/bytedance/sonic v1.12.6 // indirect
 	github.com/bytedance/sonic/loader v0.2.1 // indirect
 	github.com/cloudwego/base64x v0.1.4 // indirect
 	github.com/cloudwego/iasm v0.2.0 // indirect
