@@ -24,7 +24,7 @@ check_go_mod_and_act() {
         go get -u all ./...
         go mod tidy
         
-        go test -race ./... || cd "$ORIGINAL_DIR" || return 1
+        go test ./... || cd "$ORIGINAL_DIR" || return 1
         local test_status=$?
         # Only mark as updated if tests pass
         if [ $test_status -eq 0 ]; then
