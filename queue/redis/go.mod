@@ -5,8 +5,8 @@ go 1.23.1
 toolchain go1.23.2
 
 require (
-	github.com/origadmin/toolkits v0.1.2
-	github.com/origadmin/toolkits/errors v0.0.12
+	github.com/origadmin/toolkits v0.1.19
+	github.com/origadmin/toolkits/errors v0.0.31
 	github.com/redis/go-redis/v9 v9.7.0
 )
 
