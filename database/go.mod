@@ -11,7 +11,7 @@ require (
 	github.com/jackc/pgx/v5 v5.7.1
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.24
-	github.com/origadmin/runtime v0.1.4
+	github.com/origadmin/runtime v0.1.5
 	github.com/origadmin/toolkits/errors v0.0.31
 	github.com/sqlite3ent/sqlite3 v1.34.1
 )
