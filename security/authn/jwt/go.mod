@@ -8,7 +8,7 @@ require (
 	github.com/go-kratos/kratos/v2 v2.8.2
 	github.com/goexts/generic v0.1.4
 	github.com/golang-jwt/jwt/v5 v5.2.1
-	github.com/origadmin/runtime v0.1.4
+	github.com/origadmin/runtime v0.1.5
 	github.com/origadmin/toolkits v0.1.19
 	github.com/origadmin/toolkits/errors v0.0.31
 	github.com/stretchr/testify v1.10.0
