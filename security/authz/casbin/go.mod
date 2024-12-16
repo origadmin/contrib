@@ -9,11 +9,11 @@ require (
 	github.com/goexts/generic v0.1.4
 	github.com/origadmin/runtime v0.1.4
 	github.com/origadmin/toolkits v0.1.19
-	github.com/origadmin/toolkits/errors v0.0.26
+	github.com/origadmin/toolkits/errors v0.0.31
 )
 
 require (
-	github.com/bmatcuk/doublestar/v4 v4.6.1 // indirect
+	github.com/bmatcuk/doublestar/v4 v4.7.1 // indirect
 	github.com/casbin/govaluate v1.2.0 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.1.0 // indirect
 	github.com/google/gnostic v0.7.0 // indirect
