@@ -5,12 +5,13 @@ go 1.23.1
 toolchain go1.23.2
 
 require (
+	github.com/dchest/uniuri v1.2.0
 	github.com/go-kratos/kratos/v2 v2.8.2
 	github.com/goexts/generic v0.1.4
 	github.com/golang-jwt/jwt/v5 v5.2.1
-	github.com/origadmin/runtime v0.1.5
-	github.com/origadmin/toolkits v0.1.19
-	github.com/origadmin/toolkits/errors v0.0.31
+	github.com/origadmin/runtime v0.1.11
+	github.com/origadmin/toolkits v0.1.21
+	github.com/origadmin/toolkits/errors v0.0.32
 	github.com/stretchr/testify v1.10.0
 	google.golang.org/protobuf v1.35.2
 )

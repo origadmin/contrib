@@ -11,6 +11,7 @@ import (
 	"maps"
 	"time"
 
+	"github.com/dchest/uniuri"
 	"github.com/goexts/generic/settings"
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 	securityv1 "github.com/origadmin/runtime/gen/go/security/v1"
@@ -38,35 +39,39 @@ type Authenticator struct {
 	scoped bool
 	//// user parser is the user parser for the token. It is optional.    If it is not set, the user will not be parsed.
 	//userParser security.UserClaimsParser
-	baseClaims security.Claims
-	expiration time.Duration
-	issuer     string
-	audience   []string
+	expirationAccess  time.Duration
+	expirationRefresh time.Duration
+	issuer            string
+	audience          []string
+	extraClaims       map[string]string
+	scopes            map[string]bool
+	enabledJTI        bool
 }
 
-func (obj *Authenticator) CreateIdentityClaims(ctx context.Context, id string) (security.Claims, error) {
+func (obj *Authenticator) CreateIdentityClaims(_ context.Context, id string, refresh bool) (security.Claims, error) {
+	expiration := getExpiration(obj, refresh)
 	now := time.Now()
 	// Create a new claims object with the base claims and the user ID.
 	claims := &SecurityClaims{
 		Claims: &securityv1.Claims{
 			Sub:    id,
-			Iss:    obj.baseClaims.GetIssuer(),
-			Aud:    obj.baseClaims.GetAudience(),
-			Exp:    timestamppb.New(now.Add(obj.expiration)),
+			Iss:    obj.issuer,
+			Aud:    obj.audience,
+			Exp:    timestamppb.New(now.Add(expiration)),
 			Nbf:    timestamppb.New(now),
 			Iat:    timestamppb.New(now),
-			Jti:    "",
+			Jti:    obj.generateJTI(),
 			Scopes: make(map[string]bool),
 		},
 		Extra: make(map[string]string),
 	}
 
 	// Add the extra keys to the claims.
-	claims.Extra = maps.Clone(obj.baseClaims.GetExtra())
+	claims.Extra = maps.Clone(obj.extraClaims)
 
 	// If the token is scoped, add the scope to the claims.
 	if obj.scoped {
-		claims.Claims.Scopes = maps.Clone(obj.baseClaims.GetScopes())
+		claims.Claims.Scopes = maps.Clone(obj.scopes)
 	}
 
 	return claims, nil
@@ -74,7 +79,7 @@ func (obj *Authenticator) CreateIdentityClaims(ctx context.Context, id string) (
 
 func (obj *Authenticator) CreateIdentityClaimsContext(ctx context.Context, tokenType security.TokenType, id string) (context.Context, error) {
 	// Create the claims.
-	claims, err := obj.CreateIdentityClaims(ctx, id)
+	claims, err := obj.CreateIdentityClaims(ctx, id, false)
 	if err != nil {
 		return ctx, err
 	}
@@ -198,6 +203,13 @@ func (obj *Authenticator) CreateToken(ctx context.Context, claims security.Claim
 	return tokenStr, nil
 }
 
+func getExpiration(obj *Authenticator, refresh bool) time.Duration {
+	if refresh {
+		return obj.expirationRefresh
+	}
+	return obj.expirationAccess
+}
+
 // CreateTokenContext creates a token string from the claims and adds it to the context.
 func (obj *Authenticator) CreateTokenContext(ctx context.Context, tokenType security.TokenType, claims security.Claims) (context.Context, error) {
 	// Create the token string.
@@ -311,6 +323,14 @@ func (obj *Authenticator) WithConfig(config *configv1.AuthNConfig_JWTConfig) err
 	obj.signingMethod = signingMethod
 	obj.keyFunc = keyFunc
 	return nil
+}
+
+func (obj *Authenticator) generateJTI() string {
+	if !obj.enabledJTI {
+		return ""
+	}
+	// Encode the random byte slice in base64.
+	return uniuri.New()
 }
 
 // NewAuthenticator creates a new Authenticator.
