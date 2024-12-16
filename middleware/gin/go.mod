@@ -6,7 +6,7 @@ toolchain go1.23.2
 
 require (
 	github.com/gin-gonic/gin v1.10.0
-	github.com/origadmin/runtime v0.1.4
+	github.com/origadmin/runtime v0.1.5
 	github.com/origadmin/toolkits v0.1.19
 	github.com/origadmin/toolkits/errors v0.0.31
 )

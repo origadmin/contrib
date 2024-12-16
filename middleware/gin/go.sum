@@ -54,8 +54,8 @@ github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd h1:TRLaZ9cD/w
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
 github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9Gz0M=
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
-github.com/origadmin/runtime v0.1.4 h1:NBgj00SNRhk+JZTi0DGMFGYqUaSDiMY5ZNGEut9bGBU=
-github.com/origadmin/runtime v0.1.4/go.mod h1:JCm2dZTnx/1UJefRrMNAfZrTM3c94zGu02hJWsdABZQ=
+github.com/origadmin/runtime v0.1.5 h1:TjGf/BfO1EtK3GQA4oFd1FDllDP//UN6PQRmMZQgJb8=
+github.com/origadmin/runtime v0.1.5/go.mod h1:x9RS5F+szmFub1JD/PxKyLk3GZ/iJoNHbxZcFKReoes=
 github.com/origadmin/toolkits v0.1.19 h1:Usafct2XIq48f77pYfCzLtv9F3VGGW/O6j6QAd/uLgA=
 github.com/origadmin/toolkits v0.1.19/go.mod h1:+BZ3uvvrsJIqRMbga6zalMinuTldHut/yaJbvVW4994=
 github.com/origadmin/toolkits/errors v0.0.31 h1:OngnbxdONZiTz4IczmTSoQMBxz2cEOnZG+vz/5xgm1A=
