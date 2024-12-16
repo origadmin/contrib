@@ -88,7 +88,8 @@ func (obj *Cache) Close(_ context.Context) error {
 	return nil
 }
 
-func NewCache(cfg *configv1.Data_Memory) *Cache {
+func NewCache(data *configv1.Data) *Cache {
+	cfg := data.GetCache().GetMemory()
 	if cfg == nil {
 		cfg = new(configv1.Data_Memory)
 	}

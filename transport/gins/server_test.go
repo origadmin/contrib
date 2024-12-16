@@ -385,7 +385,9 @@ func TestTLSConfig(t *testing.T) {
 }
 
 func TestStrictSlash(t *testing.T) {
-	o := &Server{}
+	o := &Server{
+		engine: gin.New(),
+	}
 	v := true
 	StrictSlash(v)(o)
 	if !reflect.DeepEqual(v, o.engine.RedirectTrailingSlash) {

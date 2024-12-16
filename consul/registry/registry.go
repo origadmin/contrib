@@ -6,8 +6,6 @@ package registry
 
 import (
 	"github.com/hashicorp/consul/api"
-	"github.com/origadmin/runtime/config"
-
 	"github.com/origadmin/runtime"
 	configv1 "github.com/origadmin/runtime/gen/go/config/v1"
 	"github.com/origadmin/runtime/registry"
@@ -50,7 +48,7 @@ func optsFromConfig(registry *configv1.Registry) []Option {
 	return opts
 }
 
-func (c *consulBuilder) NewDiscovery(cfg *configv1.Registry, _ *config.RuntimeConfig) (registry.Discovery, error) {
+func (c *consulBuilder) NewDiscovery(cfg *configv1.Registry, _ ...registry.OptionSetting) (registry.Discovery, error) {
 	if cfg == nil || cfg.Consul == nil {
 		return nil, errors.New("configuration: consul config is required")
 	}
@@ -64,7 +62,7 @@ func (c *consulBuilder) NewDiscovery(cfg *configv1.Registry, _ *config.RuntimeCo
 	return r, nil
 }
 
-func (c *consulBuilder) NewRegistrar(cfg *configv1.Registry, _ *config.RuntimeConfig) (registry.Registrar, error) {
+func (c *consulBuilder) NewRegistrar(cfg *configv1.Registry, _ ...registry.OptionSetting) (registry.Registrar, error) {
 	if cfg == nil || cfg.Consul == nil {
 		return nil, errors.New("configuration: consul config is required")
 	}

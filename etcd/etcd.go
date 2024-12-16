@@ -7,6 +7,7 @@ package etcd
 import (
 	"github.com/go-kratos/kratos/contrib/registry/etcd/v2"
 	registryv2 "github.com/go-kratos/kratos/v2/registry"
+	"github.com/origadmin/runtime/registry"
 	etcdclient "go.etcd.io/etcd/client/v3"
 
 	"github.com/origadmin/runtime"
@@ -20,7 +21,7 @@ func init() {
 	runtime.RegisterRegistry("etcd", &etcdBuilder{})
 }
 
-func (c *etcdBuilder) NewDiscovery(cfg *configv1.Registry) (registryv2.Discovery, error) {
+func (c *etcdBuilder) NewDiscovery(cfg *configv1.Registry, _ ...registry.OptionSetting) (registryv2.Discovery, error) {
 	config := FromConfig(cfg)
 	etcdCli, err := etcdclient.New(config)
 	if err != nil {
@@ -30,7 +31,7 @@ func (c *etcdBuilder) NewDiscovery(cfg *configv1.Registry) (registryv2.Discovery
 	return r, nil
 }
 
-func (c *etcdBuilder) NewRegistrar(cfg *configv1.Registry) (registryv2.Registrar, error) {
+func (c *etcdBuilder) NewRegistrar(cfg *configv1.Registry, _ ...registry.OptionSetting) (registryv2.Registrar, error) {
 	config := FromConfig(cfg)
 	etcdCli, err := etcdclient.New(config)
 	if err != nil {

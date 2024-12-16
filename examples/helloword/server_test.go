@@ -35,10 +35,9 @@ type helloServer struct {
 func (h helloServer) SayHello(ctx context.Context, request *greeter.SayHelloRequest) (*greeter.SayHelloResponse, error) {
 	var out greeter.SayHelloResponse
 	out.Message = strconv.FormatInt(int64(rand.Intn(100)), 10)
-	c, ok := gins.FromContext(ctx)
-	if ok {
-		log.Info("Request:", c.FullPath())
-		return h.cli.SayHello(ctx, request)
+	c := gins.FromContext(ctx)
+	if len(c.Params) > 0 {
+		log.Info("Gin trigger", c.FullPath(), " args ", c.Params)
 	}
 	log.Info("Request RPC:", "hello ", request.Name, " give ", out.Message)
 	return &out, nil
@@ -61,8 +60,8 @@ func TestServer(t *testing.T) {
 			func(handler middleware.Handler) middleware.Handler {
 				log.Info("Middleware Call")
 				return func(ctx context.Context, req interface{}) (interface{}, error) {
-					c, ok := gins.FromContext(ctx)
-					if ok {
+					c := gins.FromContext(ctx)
+					if len(c.Params) > 0 {
 						log.Info("Gin trigger middleware", c.FullPath(), " args ", c.Params)
 					}
 
