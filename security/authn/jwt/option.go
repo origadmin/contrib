@@ -6,11 +6,8 @@
 package jwt
 
 import (
-	// Import the jwt/v5 package for JSON Web Token functionality.
 	jwtv5 "github.com/golang-jwt/jwt/v5"
-
 	"github.com/origadmin/toolkits/errors"
-	// Import the security package for token cache service.
 	"github.com/origadmin/toolkits/security"
 )
 

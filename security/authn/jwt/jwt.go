@@ -142,7 +142,7 @@ func (obj *Authenticator) Authenticate(ctx context.Context, tokenStr string) (se
 
 func (obj *Authenticator) AuthenticateContext(ctx context.Context, tokenType security.TokenType) (security.Claims, error) {
 	// Get the token string from the context.
-	tokenStr, err := middlewaresecurity.FromTokenTypeContext(ctx, tokenType, obj.schemeString())
+	tokenStr, err := middlewaresecurity.TokenFromTypeContext(ctx, tokenType, obj.schemeString())
 	if err != nil || tokenStr == "" {
 		return nil, ErrInvalidToken
 	}
@@ -163,7 +163,7 @@ func (obj *Authenticator) Verify(ctx context.Context, tokenStr string) (bool, er
 
 func (obj *Authenticator) VerifyContext(ctx context.Context, tokenType security.TokenType) (bool, error) {
 	// Get the token string from the context.
-	tokenStr, err := middlewaresecurity.FromTokenTypeContext(ctx, tokenType, obj.schemeString())
+	tokenStr, err := middlewaresecurity.TokenFromTypeContext(ctx, tokenType, obj.schemeString())
 	if err != nil || tokenStr == "" {
 		return false, ErrInvalidToken
 	}
@@ -206,7 +206,7 @@ func (obj *Authenticator) CreateTokenContext(ctx context.Context, tokenType secu
 		return ctx, err
 	}
 	// Add the token string to the context.
-	ctx = middlewaresecurity.WithTokenTypeContext(ctx, tokenType, obj.schemeString(), tokenStr)
+	ctx = middlewaresecurity.TokenToTypeContext(ctx, tokenType, obj.schemeString(), tokenStr)
 	return ctx, nil
 }
 
@@ -225,7 +225,7 @@ func (obj *Authenticator) DestroyToken(ctx context.Context, tokenStr string) err
 // DestroyTokenContext destroys the token string from the context.
 func (obj *Authenticator) DestroyTokenContext(ctx context.Context, token security.TokenType) error {
 	// Get the token string from the context.
-	tokenStr, err := middlewaresecurity.FromTokenTypeContext(ctx, token, obj.schemeString())
+	tokenStr, err := middlewaresecurity.TokenFromTypeContext(ctx, token, obj.schemeString())
 	if err != nil || tokenStr == "" {
 		return ErrInvalidToken
 	}
