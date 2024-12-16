@@ -8,7 +8,7 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-kratos/kratos/v2 v2.8.2
 	github.com/gorilla/mux v1.8.1
-	github.com/origadmin/runtime v0.1.4
+	github.com/origadmin/runtime v0.1.5
 	github.com/origadmin/toolkits/errors v0.0.31
 	google.golang.org/protobuf v1.35.2
 )
