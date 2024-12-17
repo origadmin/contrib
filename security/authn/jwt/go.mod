@@ -9,11 +9,11 @@ require (
 	github.com/go-kratos/kratos/v2 v2.8.2
 	github.com/goexts/generic v0.1.4
 	github.com/golang-jwt/jwt/v5 v5.2.1
-	github.com/origadmin/runtime v0.1.11
+	github.com/origadmin/runtime v0.1.12
 	github.com/origadmin/toolkits v0.1.21
-	github.com/origadmin/toolkits/errors v0.0.32
+	github.com/origadmin/toolkits/errors v0.0.33
 	github.com/stretchr/testify v1.10.0
-	google.golang.org/protobuf v1.35.2
+	google.golang.org/protobuf v1.36.0
 )
 
 require (
@@ -27,7 +27,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	golang.org/x/sys v0.28.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20241209162323-e6fa225c2576 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20241216192217-9240e9c98484 // indirect
 	google.golang.org/grpc v1.69.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

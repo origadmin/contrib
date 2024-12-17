@@ -117,7 +117,7 @@ func ClaimsToJwtClaims(raw security.Claims) jwtv5.Claims {
 	return mapClaims
 }
 
-func MapToClaims(rawClaims jwtv5.MapClaims, extraKeys ...string) (security.Claims, error) {
+func MapToClaims(rawClaims jwtv5.MapClaims, extras map[string]string) (security.Claims, error) {
 	//claims := security.claims{
 	//	Scopes: make(ScopeSet),
 	//}
@@ -157,15 +157,6 @@ func MapToClaims(rawClaims jwtv5.MapClaims, extraKeys ...string) (security.Claim
 			scopes := strings.Split(scope, " ")
 			for _, s := range scopes {
 				claims.Scopes[s] = true
-			}
-		}
-	}
-
-	extras := make(map[string]string)
-	for _, key := range extraKeys {
-		if keyVal, ok := rawClaims[key]; ok {
-			if extraVal, ok := keyVal.(string); ok {
-				extras[key] = extraVal
 			}
 		}
 	}
@@ -228,12 +219,12 @@ func ProtoClaimsToClaims(rawClaims *securityv1.Claims) security.Claims {
 	}
 }
 
-func ToClaims(rawClaims jwtv5.Claims, extraKeys ...string) (security.Claims, error) {
+func ToClaims(rawClaims jwtv5.Claims, extras map[string]string) (security.Claims, error) {
 	if Claims, ok := rawClaims.(*jwtv5.RegisteredClaims); ok {
 		return RegisteredToClaims(Claims)
 	}
 	if Claims, ok := rawClaims.(jwtv5.MapClaims); ok {
-		return MapToClaims(Claims, extraKeys...)
+		return MapToClaims(Claims, extras)
 	}
 	return nil, ErrInvalidClaims
 }

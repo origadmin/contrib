@@ -23,29 +23,17 @@ import (
 	"github.com/origadmin/toolkits/storage/cache"
 )
 
+const (
+	defaultIssuerDomain      = "localhost"
+	defaultExpirationAccess  = 2 * 60 * time.Minute
+	defaultExpirationRefresh = 14 * 24 * time.Hour
+)
+
 // Authenticator is a struct that implements the Authenticator interface.
 type Authenticator struct {
-	// signingMethod is the signing method for the token.
-	signingMethod jwtv5.SigningMethod
-	// keyFunc is a function that returns the key for signing the token.
-	keyFunc func(*jwtv5.Token) (any, error)
-	// schemeType is the scheme type for the token.
-	schemeType security.Scheme
+	*Option
 	// cache is the token cache service.
 	cache security.TokenCacheService
-	// extraKeys are the extra keys for the token.
-	extraKeys []string
-	// scoped enabled for the token.
-	scoped bool
-	//// user parser is the user parser for the token. It is optional.    If it is not set, the user will not be parsed.
-	//userParser security.UserClaimsParser
-	expirationAccess  time.Duration
-	expirationRefresh time.Duration
-	issuer            string
-	audience          []string
-	extraClaims       map[string]string
-	scopes            map[string]bool
-	enabledJTI        bool
 }
 
 func (obj *Authenticator) CreateIdentityClaims(_ context.Context, id string, refresh bool) (security.Claims, error) {
@@ -138,7 +126,7 @@ func (obj *Authenticator) Authenticate(ctx context.Context, tokenStr string) (se
 	}
 
 	// Convert the claims to security.Claims.
-	securityClaims, err := ToClaims(jwtToken.Claims, obj.extraKeys...)
+	securityClaims, err := ToClaims(jwtToken.Claims, obj.extraClaims)
 	if err != nil {
 		return nil, err
 	}
@@ -261,7 +249,7 @@ func (obj *Authenticator) parseToken(token string) (*jwtv5.Token, error) {
 		return nil, ErrMissingKeyFunc
 	}
 	// If the extra keys are nil, parse the token with the key function.
-	if obj.extraKeys == nil && !obj.scoped {
+	if len(obj.extraClaims) == 0 && !obj.scoped {
 		return jwtv5.ParseWithClaims(token, &jwtv5.RegisteredClaims{}, obj.keyFunc)
 	}
 
@@ -291,43 +279,12 @@ func (obj *Authenticator) generateToken(jwtToken *jwtv5.Token) (string, error) {
 	return strToken, nil
 }
 
-func (obj *Authenticator) ApplyDefaults() error {
-	//// If the signing key is empty, return an error.
-	//signingKey := config.SigningKey
-	//if signingKey == "" {
-	//	return nil, errors.New("signing key is empty")
-	//}
-	//
-	//// Get the signing method and key function from the signing key.
-	//signingMethod, keyFunc, err := getSigningMethodAndKeyFunc(config.Algorithm, config.SigningKey)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	return nil
-}
-
-func (obj *Authenticator) WithConfig(config *configv1.AuthNConfig_JWTConfig) error {
-	// If the signing key is empty, return an error.
-	signingKey := config.SigningKey
-	if signingKey == "" {
-		return errors.New("signing key is empty")
-	}
-
-	// Get the signing method and key function from the signing key.
-	signingMethod, keyFunc, err := getSigningMethodAndKeyFunc(config.Algorithm, config.SigningKey)
-	if err != nil {
-		return err
-	}
-	// Set the signing method and key function.
-	obj.signingMethod = signingMethod
-	obj.keyFunc = keyFunc
-	return nil
-}
-
 func (obj *Authenticator) generateJTI() string {
 	if !obj.enabledJTI {
 		return ""
+	}
+	if obj.genJTI != nil {
+		return obj.genJTI()
 	}
 	// Encode the random byte slice in base64.
 	return uniuri.New()
@@ -340,14 +297,20 @@ func NewAuthenticator(cfg *configv1.Security, ss ...Setting) (security.Authentic
 	if config == nil {
 		return nil, errors.New("authenticator jwt config is empty")
 	}
-	auth := &Authenticator{}
-	err := auth.WithConfig(config)
+	option := settings.Apply(&Option{
+		schemeType:        security.SchemeBearer,
+		expirationAccess:  defaultExpirationAccess,
+		expirationRefresh: defaultExpirationRefresh,
+		issuer:            defaultIssuerDomain,
+	}, ss)
+	err := option.WithConfig(config)
 	if err != nil {
 		return nil, err
 	}
-	// Apply the settings to the Authenticator.
-	//auth := settings.ApplyDefaults(ss...)
-	return settings.ApplyErrorDefaults(auth, ss)
+	return &Authenticator{
+		Option: option,
+		cache:  option.cache,
+	}, nil
 }
 
 var _ security.Authenticator = (*Authenticator)(nil)
