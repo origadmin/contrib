@@ -15,6 +15,7 @@ import (
 	"github.com/goexts/generic/settings"
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 	securityv1 "github.com/origadmin/runtime/gen/go/security/v1"
+	"github.com/origadmin/runtime/log"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	configv1 "github.com/origadmin/runtime/gen/go/config/v1"
@@ -78,69 +79,100 @@ func (obj *Authenticator) CreateIdentityClaimsContext(ctx context.Context, token
 }
 
 func (obj *Authenticator) Authenticate(ctx context.Context, tokenStr string) (security.Claims, error) {
+	log.Debugf("Authenticating token string: %s", tokenStr)
 	// If the token cache service is not nil, validate the token.
 	if obj.cache != nil {
+		log.Debugf("Validating token using cache service")
 		ok, err := obj.cache.Validate(ctx, tokenStr)
 		switch {
 		case err != nil:
+			log.Errorf("Error validating token: %v", err)
 			return nil, ErrInvalidToken
 		case !ok:
+			log.Debugf("Token not found in cache")
 			return nil, ErrTokenNotFound
 		}
 	}
 	// Parse the token string.
+	log.Debugf("Parsing token string")
 	jwtToken, err := obj.parseToken(tokenStr)
 
 	// If the token is nil, return an error.
 	if jwtToken == nil {
+		log.Errorf("Failed to parse token: token is nil")
 		return nil, ErrInvalidToken
 	}
 
 	// If there is an error, return the appropriate error.
 	if err != nil {
+		log.Errorf("Error parsing token: %v", err)
 		switch {
 		case errors.Is(err, jwtv5.ErrTokenMalformed):
+			log.Debugf("Token is malformed")
 			return nil, ErrTokenMalformed
 		case errors.Is(err, jwtv5.ErrTokenSignatureInvalid):
+			log.Debugf("Token signature is invalid")
 			return nil, ErrTokenSignatureInvalid
 		case errors.Is(err, jwtv5.ErrTokenExpired) || errors.Is(err, jwtv5.ErrTokenNotValidYet):
+			log.Debugf("Token is expired or not valid yet")
 			return nil, ErrTokenExpired
 		default:
+			log.Debugf("Unknown error parsing token")
 			return nil, ErrInvalidToken
 		}
 	}
 
 	// If the token is not valid, return an error.
 	if !jwtToken.Valid {
+		log.Errorf("Token is not valid")
 		return nil, ErrInvalidToken
 	}
 
 	// If the signing method is not supported, return an error.
 	if jwtToken.Method != obj.signingMethod {
+		log.Errorf("Unsupported signing method: %s", jwtToken.Method)
 		return nil, ErrUnsupportedSigningMethod
 	}
 
 	// If the claims are nil, return an error.
 	if jwtToken.Claims == nil {
+		log.Errorf("Claims are nil")
 		return nil, ErrInvalidClaims
 	}
 
 	// Convert the claims to security.Claims.
+	log.Debugf("Converting claims to security.Claims")
 	securityClaims, err := ToClaims(jwtToken.Claims, obj.extraClaims)
 	if err != nil {
+		log.Errorf("Error converting claims: %v", err)
 		return nil, err
 	}
+	log.Debugf("Authentication successful")
 	return securityClaims, nil
 }
 
 func (obj *Authenticator) AuthenticateContext(ctx context.Context, tokenType security.TokenType) (security.Claims, error) {
+	log.Debugf("Entering AuthenticateContext with tokenType: %s", tokenType)
 	// Get the token string from the context.
 	tokenStr, err := middlewaresecurity.TokenFromTypeContext(ctx, tokenType, obj.schemeString())
+	if err != nil {
+		log.Errorf("Error getting token from context: %v", err)
+	} else if tokenStr == "" {
+		log.Debugf("Token string is empty")
+	}
 	if err != nil || tokenStr == "" {
+		log.Errorf("Invalid token or token string is empty")
 		return nil, ErrInvalidToken
 	}
+	log.Debugf("Token string retrieved from context: %s", tokenStr)
 	// Authenticate the token string.
-	return obj.Authenticate(ctx, tokenStr)
+	log.Debugf("Authenticating token string")
+	claims, err := obj.Authenticate(ctx, tokenStr)
+	if err != nil {
+		log.Errorf("Error authenticating token: %v", err)
+	}
+	log.Debugf("Authentication result: %+v", claims)
+	return claims, err
 }
 
 func (obj *Authenticator) Verify(ctx context.Context, tokenStr string) (bool, error) {

@@ -225,7 +225,9 @@ func TestClient(t *testing.T) {
 			}
 			principal.Scopes["local:admin:user_name"] = true
 			principal.Scopes["tenant:admin:user_name"] = true
-			auth, _ := middlewaresecurity.NewAuthN(cfg, middlewaresecurity.WithAuthenticator(authenticator))
+			auth, _ := middlewaresecurity.NewAuthN(cfg,
+				middlewaresecurity.WithAuthenticator(authenticator),
+			)
 			header := newTokenHeader(HeaderAuthorize, generateJwtKey(testKey, "fly"))
 			ctx := transport.NewClientContext(context.Background(), &Transport{reqHeader: header})
 			handle := auth(next)
