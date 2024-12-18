@@ -38,12 +38,11 @@ func Register{{.ServiceType}}Agent (s *http.Server, srv {{.ServiceType}}Agent) {
 			h := ctx.Middleware(func(_ context.Context, req interface{}) (interface{}, error) {
 			return srv.{{.Name}}(ctx, req.(*{{.Request}}))
 			})
-			out, err := h(ctx, &in)
+			_, err := h(ctx, &in)
 			if err != nil {
 			return err
 			}
-			reply := out.(*{{.Reply}})
-			return ctx.Result(200, reply{{.ResponseBody}})
+			return nil
 	}
 	}
 {{end}}
