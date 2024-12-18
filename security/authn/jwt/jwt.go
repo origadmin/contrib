@@ -15,6 +15,7 @@ import (
 	"github.com/goexts/generic/settings"
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 	securityv1 "github.com/origadmin/runtime/gen/go/security/v1"
+	"github.com/origadmin/runtime/log"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	configv1 "github.com/origadmin/runtime/gen/go/config/v1"
@@ -23,29 +24,17 @@ import (
 	"github.com/origadmin/toolkits/storage/cache"
 )
 
+const (
+	defaultIssuerDomain      = "localhost"
+	defaultExpirationAccess  = 2 * 60 * time.Minute
+	defaultExpirationRefresh = 14 * 24 * time.Hour
+)
+
 // Authenticator is a struct that implements the Authenticator interface.
 type Authenticator struct {
-	// signingMethod is the signing method for the token.
-	signingMethod jwtv5.SigningMethod
-	// keyFunc is a function that returns the key for signing the token.
-	keyFunc func(*jwtv5.Token) (any, error)
-	// schemeType is the scheme type for the token.
-	schemeType security.Scheme
+	*Option
 	// cache is the token cache service.
 	cache security.TokenCacheService
-	// extraKeys are the extra keys for the token.
-	extraKeys []string
-	// scoped enabled for the token.
-	scoped bool
-	//// user parser is the user parser for the token. It is optional.    If it is not set, the user will not be parsed.
-	//userParser security.UserClaimsParser
-	expirationAccess  time.Duration
-	expirationRefresh time.Duration
-	issuer            string
-	audience          []string
-	extraClaims       map[string]string
-	scopes            map[string]bool
-	enabledJTI        bool
 }
 
 func (obj *Authenticator) CreateIdentityClaims(_ context.Context, id string, refresh bool) (security.Claims, error) {
@@ -90,69 +79,100 @@ func (obj *Authenticator) CreateIdentityClaimsContext(ctx context.Context, token
 }
 
 func (obj *Authenticator) Authenticate(ctx context.Context, tokenStr string) (security.Claims, error) {
+	log.Debugf("Authenticating token string: %s", tokenStr)
 	// If the token cache service is not nil, validate the token.
 	if obj.cache != nil {
+		log.Debugf("Validating token using cache service")
 		ok, err := obj.cache.Validate(ctx, tokenStr)
 		switch {
 		case err != nil:
+			log.Errorf("Error validating token: %v", err)
 			return nil, ErrInvalidToken
 		case !ok:
+			log.Debugf("Token not found in cache")
 			return nil, ErrTokenNotFound
 		}
 	}
 	// Parse the token string.
+	log.Debugf("Parsing token string")
 	jwtToken, err := obj.parseToken(tokenStr)
 
 	// If the token is nil, return an error.
 	if jwtToken == nil {
+		log.Errorf("Failed to parse token: token is nil")
 		return nil, ErrInvalidToken
 	}
 
 	// If there is an error, return the appropriate error.
 	if err != nil {
+		log.Errorf("Error parsing token: %v", err)
 		switch {
 		case errors.Is(err, jwtv5.ErrTokenMalformed):
+			log.Debugf("Token is malformed")
 			return nil, ErrTokenMalformed
 		case errors.Is(err, jwtv5.ErrTokenSignatureInvalid):
+			log.Debugf("Token signature is invalid")
 			return nil, ErrTokenSignatureInvalid
 		case errors.Is(err, jwtv5.ErrTokenExpired) || errors.Is(err, jwtv5.ErrTokenNotValidYet):
+			log.Debugf("Token is expired or not valid yet")
 			return nil, ErrTokenExpired
 		default:
+			log.Debugf("Unknown error parsing token")
 			return nil, ErrInvalidToken
 		}
 	}
 
 	// If the token is not valid, return an error.
 	if !jwtToken.Valid {
+		log.Errorf("Token is not valid")
 		return nil, ErrInvalidToken
 	}
 
 	// If the signing method is not supported, return an error.
 	if jwtToken.Method != obj.signingMethod {
+		log.Errorf("Unsupported signing method: %s", jwtToken.Method)
 		return nil, ErrUnsupportedSigningMethod
 	}
 
 	// If the claims are nil, return an error.
 	if jwtToken.Claims == nil {
+		log.Errorf("Claims are nil")
 		return nil, ErrInvalidClaims
 	}
 
 	// Convert the claims to security.Claims.
-	securityClaims, err := ToClaims(jwtToken.Claims, obj.extraKeys...)
+	log.Debugf("Converting claims to security.Claims")
+	securityClaims, err := ToClaims(jwtToken.Claims, obj.extraClaims)
 	if err != nil {
+		log.Errorf("Error converting claims: %v", err)
 		return nil, err
 	}
+	log.Debugf("Authentication successful")
 	return securityClaims, nil
 }
 
 func (obj *Authenticator) AuthenticateContext(ctx context.Context, tokenType security.TokenType) (security.Claims, error) {
+	log.Debugf("Entering AuthenticateContext with tokenType: %s", tokenType)
 	// Get the token string from the context.
 	tokenStr, err := middlewaresecurity.TokenFromTypeContext(ctx, tokenType, obj.schemeString())
+	if err != nil {
+		log.Errorf("Error getting token from context: %v", err)
+	} else if tokenStr == "" {
+		log.Debugf("Token string is empty")
+	}
 	if err != nil || tokenStr == "" {
+		log.Errorf("Invalid token or token string is empty")
 		return nil, ErrInvalidToken
 	}
+	log.Debugf("Token string retrieved from context: %s", tokenStr)
 	// Authenticate the token string.
-	return obj.Authenticate(ctx, tokenStr)
+	log.Debugf("Authenticating token string")
+	claims, err := obj.Authenticate(ctx, tokenStr)
+	if err != nil {
+		log.Errorf("Error authenticating token: %v", err)
+	}
+	log.Debugf("Authentication result: %+v", claims)
+	return claims, err
 }
 
 func (obj *Authenticator) Verify(ctx context.Context, tokenStr string) (bool, error) {
@@ -261,7 +281,7 @@ func (obj *Authenticator) parseToken(token string) (*jwtv5.Token, error) {
 		return nil, ErrMissingKeyFunc
 	}
 	// If the extra keys are nil, parse the token with the key function.
-	if obj.extraKeys == nil && !obj.scoped {
+	if len(obj.extraClaims) == 0 && !obj.scoped {
 		return jwtv5.ParseWithClaims(token, &jwtv5.RegisteredClaims{}, obj.keyFunc)
 	}
 
@@ -291,43 +311,12 @@ func (obj *Authenticator) generateToken(jwtToken *jwtv5.Token) (string, error) {
 	return strToken, nil
 }
 
-func (obj *Authenticator) ApplyDefaults() error {
-	//// If the signing key is empty, return an error.
-	//signingKey := config.SigningKey
-	//if signingKey == "" {
-	//	return nil, errors.New("signing key is empty")
-	//}
-	//
-	//// Get the signing method and key function from the signing key.
-	//signingMethod, keyFunc, err := getSigningMethodAndKeyFunc(config.Algorithm, config.SigningKey)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//
-	return nil
-}
-
-func (obj *Authenticator) WithConfig(config *configv1.AuthNConfig_JWTConfig) error {
-	// If the signing key is empty, return an error.
-	signingKey := config.SigningKey
-	if signingKey == "" {
-		return errors.New("signing key is empty")
-	}
-
-	// Get the signing method and key function from the signing key.
-	signingMethod, keyFunc, err := getSigningMethodAndKeyFunc(config.Algorithm, config.SigningKey)
-	if err != nil {
-		return err
-	}
-	// Set the signing method and key function.
-	obj.signingMethod = signingMethod
-	obj.keyFunc = keyFunc
-	return nil
-}
-
 func (obj *Authenticator) generateJTI() string {
 	if !obj.enabledJTI {
 		return ""
+	}
+	if obj.genJTI != nil {
+		return obj.genJTI()
 	}
 	// Encode the random byte slice in base64.
 	return uniuri.New()
@@ -340,14 +329,20 @@ func NewAuthenticator(cfg *configv1.Security, ss ...Setting) (security.Authentic
 	if config == nil {
 		return nil, errors.New("authenticator jwt config is empty")
 	}
-	auth := &Authenticator{}
-	err := auth.WithConfig(config)
+	option := settings.Apply(&Option{
+		schemeType:        security.SchemeBearer,
+		expirationAccess:  defaultExpirationAccess,
+		expirationRefresh: defaultExpirationRefresh,
+		issuer:            defaultIssuerDomain,
+	}, ss)
+	err := option.WithConfig(config)
 	if err != nil {
 		return nil, err
 	}
-	// Apply the settings to the Authenticator.
-	//auth := settings.ApplyDefaults(ss...)
-	return settings.ApplyErrorDefaults(auth, ss)
+	return &Authenticator{
+		Option: option,
+		cache:  option.cache,
+	}, nil
 }
 
 var _ security.Authenticator = (*Authenticator)(nil)

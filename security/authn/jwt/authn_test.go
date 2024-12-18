@@ -163,7 +163,7 @@ func TestServer(t *testing.T) {
 			//WithSigningMethod(test.alg),
 
 			assert.Nil(t, err)
-			server, _ := middlewaresecurity.NewAuthNServer(cfg,
+			server, _ := middlewaresecurity.NewAuthN(cfg,
 				middlewaresecurity.WithAuthenticator(authenticator),
 				middlewaresecurity.WithSkipper())
 			handle := server(next)
@@ -198,7 +198,7 @@ func TestClient(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			next := func(ctx context.Context, req interface{}) (interface{}, error) {
 				if header, ok := transport.FromClientContext(ctx); ok {
-					t.Log(header.RequestHeader().Get(HeaderAuthorize))
+					t.Log("token: ", header.RequestHeader().Get(HeaderAuthorize))
 				}
 				return "reply", nil
 			}
@@ -225,10 +225,12 @@ func TestClient(t *testing.T) {
 			}
 			principal.Scopes["local:admin:user_name"] = true
 			principal.Scopes["tenant:admin:user_name"] = true
-			client, _ := middlewaresecurity.NewAuthNClient(cfg, middlewaresecurity.WithAuthenticator(authenticator))
+			auth, _ := middlewaresecurity.NewAuthN(cfg,
+				middlewaresecurity.WithAuthenticator(authenticator),
+			)
 			header := newTokenHeader(HeaderAuthorize, generateJwtKey(testKey, "fly"))
 			ctx := transport.NewClientContext(context.Background(), &Transport{reqHeader: header})
-			handle := client(next)
+			handle := auth(next)
 			_, err2 := handle(ctx, "ok")
 			if !errors.Is(test.expectError, err2) {
 				t.Errorf("except error %v, but got %v", test.expectError, err2)

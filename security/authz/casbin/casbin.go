@@ -9,6 +9,7 @@ import (
 	"github.com/casbin/casbin/v2/model"
 	"github.com/casbin/casbin/v2/persist"
 	"github.com/goexts/generic/settings"
+	"github.com/origadmin/runtime/log"
 
 	"github.com/origadmin/runtime/context"
 	configv1 "github.com/origadmin/runtime/gen/go/config/v1"
@@ -25,21 +26,25 @@ type Authorizer struct {
 }
 
 func (auth *Authorizer) Authorized(ctx context.Context, claims security.UserClaims) (bool, error) {
+	log.Debugf("Authorizing user with claims: %+v", claims)
 	domain := claims.GetDomain()
 	if len(domain) == 0 {
+		log.Debugf("Domain is empty, using wildcard item: %s", auth.wildcardItem)
 		domain = auth.wildcardItem
 	}
 
 	var err error
 	var allowed bool
 	if allowed, err = auth.enforcer.Enforce(claims.GetSubject(), claims.GetObject(), claims.GetAction(), domain); err != nil {
+		log.Errorf("Authorization failed with error: %v", err)
 		return false, err
 	} else if allowed {
+		log.Debugf("Authorization successful for user with claims: %+v", claims)
 		return true, nil
 	}
+	log.Debugf("Authorization failed for user with claims: %+v", claims)
 	return false, nil
 }
-
 func (auth *Authorizer) ApplyDefaults() error {
 	if auth.policy == nil {
 		auth.policy = NewAdapter()
