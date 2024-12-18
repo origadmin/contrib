@@ -150,7 +150,7 @@ jobs:
           # either 'goreleaser' (default) or 'goreleaser-pro'
           distribution: goreleaser
           version: '~> v2'
-          args: release --clean -f ./tools/protoc-gen-go-ginrpc/.goreleaser.yaml
+          args: release --clean -f ./tools/protoc-gen-go-agent/.goreleaser.yaml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
