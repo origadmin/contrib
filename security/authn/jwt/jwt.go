@@ -18,8 +18,8 @@ import (
 	"github.com/origadmin/runtime/log"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	middlewaresecurity "github.com/origadmin/runtime/agent/middleware/security"
 	configv1 "github.com/origadmin/runtime/gen/go/config/v1"
-	middlewaresecurity "github.com/origadmin/runtime/middleware/security"
 	"github.com/origadmin/toolkits/security"
 	"github.com/origadmin/toolkits/storage/cache"
 )
