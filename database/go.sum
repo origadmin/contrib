@@ -851,8 +851,8 @@ github.com/minio/c2goasm v0.0.0-20190812172519-36a3d3bbc4f3/go.mod h1:RagcQ7I8Ie
 github.com/modocache/gover v0.0.0-20171022184752-b58185e213c5/go.mod h1:caMODM3PzxT8aQXRPkAt8xlV/e7d7w8GM5g0fa5F0D8=
 github.com/ncruces/go-strftime v0.1.9 h1:bY0MQC28UADQmHmaF5dgpLmImcShSi2kHU9XLdhx/f4=
 github.com/ncruces/go-strftime v0.1.9/go.mod h1:Fwc5htZGVVkseilnfgOVb9mKy6w1naJmn9CehxcKcls=
-github.com/origadmin/runtime v0.1.18 h1:4mXWCpPc+Qtu1TtxwYfsiDTRFQ3frXF2EwSDsFLL2Uc=
-github.com/origadmin/runtime v0.1.18/go.mod h1:SHu83JEfUmsqVMdxot7/5Nhe0AKME0IN/8dTXtUPufU=
+github.com/origadmin/runtime v0.1.19 h1:RXwuzb7xmEVeQzx3fLrrjwgqP2GuZ4ADmMZu1xScsV4=
+github.com/origadmin/runtime v0.1.19/go.mod h1:SHu83JEfUmsqVMdxot7/5Nhe0AKME0IN/8dTXtUPufU=
 github.com/origadmin/toolkits/errors v0.0.34 h1:PiCmSUrfPstbhKhIlxleE+x+kn9DykmMKftFGGhLUKE=
 github.com/origadmin/toolkits/errors v0.0.34/go.mod h1:6DM+lY0GU/UWobF66Fh/zeLJl3zF6Ll9+8ujHjSCwFQ=
 github.com/phpdave11/gofpdf v1.4.2/go.mod h1:zpO6xFn9yxo3YLyMvW8HcKWVdbNqgIfOOp2dXMnm1mY=
