@@ -5,6 +5,8 @@
 package registry
 
 import (
+	"time"
+
 	"github.com/hashicorp/consul/api"
 	"github.com/origadmin/runtime"
 	configv1 "github.com/origadmin/runtime/gen/go/config/v1"
@@ -33,8 +35,8 @@ func optsFromConfig(registry *configv1.Registry) []Option {
 	if cfg.HeartBeat {
 		opts = append(opts, WithHeartbeat(cfg.HeartBeat))
 	}
-	if cfg.Timeout != nil {
-		opts = append(opts, WithTimeout(cfg.Timeout.AsDuration()))
+	if cfg.Timeout != 0 {
+		opts = append(opts, WithTimeout(time.Duration(cfg.Timeout)))
 	}
 	if cfg.Datacenter != "" {
 		opts = append(opts, WithDatacenter(Datacenter(cfg.Datacenter)))
