@@ -20,12 +20,12 @@ import (
 )
 
 func init() {
-	runtime.RegisterConfigFunc("consul", NewConsulConfig)
-	runtime.RegisterConfigSync("consul", SyncConfig)
+	runtime.RegisterConfigFunc(Type, NewConsulConfig)
+	runtime.RegisterConfigSync(Type, SyncConfig)
 }
 
 // NewConsulConfig create a new consul config.
-func NewConsulConfig(ccfg *configv1.SourceConfig, ss ...config.SourceOptionSetting) (config.Config, error) {
+func NewConsulConfig(ccfg *configv1.SourceConfig, ss ...config.OptionSetting) (config.KConfig, error) {
 	consul := ccfg.GetConsul()
 	if consul == nil {
 		return nil, errors.New("consul config error")
@@ -50,18 +50,18 @@ func NewConsulConfig(ccfg *configv1.SourceConfig, ss ...config.SourceOptionSetti
 	}
 
 	option := settings.ApplyOrZero(ss...)
-	var configSources = []config.Source{source}
+	var configSources = []config.KSource{source}
 	if ccfg.EnvPrefixes != nil {
 		configSources = append(configSources, env.NewSource(ccfg.EnvPrefixes...))
 	}
-	option.Options = append(option.Options, config.WithSource(configSources...))
+	option.SourceOptions = append(option.SourceOptions, config.WithSource(configSources...))
 	if option.Decoder != nil {
-		option.Options = append(option.Options, config.WithDecoder(option.Decoder))
+		option.SourceOptions = append(option.SourceOptions, config.WithDecoder(option.Decoder))
 	}
-	return config.New(option.Options...), nil
+	return config.NewSourceConfig(option.SourceOptions...), nil
 }
 
-func SyncConfig(ccfg *configv1.SourceConfig, v any, ss ...config.SourceOptionSetting) error {
+func SyncConfig(ccfg *configv1.SourceConfig, v any, ss ...config.OptionSetting) error {
 	consul := ccfg.GetConsul()
 	if consul == nil {
 		return errors.New("consul config error")

@@ -15,6 +15,7 @@ import (
 
 const (
 	DefaultPathName = "bootstrap.json"
+	Type            = "consul"
 )
 
 type (
@@ -22,7 +23,7 @@ type (
 )
 
 // New returns a new consul config source
-func New(client *api.Client, opts ...Option) (config.Source, error) {
+func New(client *api.Client, opts ...Option) (config.KSource, error) {
 	return consul.New(client, opts...)
 }
 

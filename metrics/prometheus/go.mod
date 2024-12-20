@@ -5,8 +5,8 @@ go 1.23.1
 toolchain go1.23.2
 
 require (
-	github.com/origadmin/contrib v0.0.11
-	github.com/origadmin/toolkits v0.1.19
+	github.com/origadmin/contrib v0.0.15
+	github.com/origadmin/toolkits v0.1.22
 	github.com/prometheus/client_golang v1.20.5
 )
 
@@ -19,5 +19,5 @@ require (
 	github.com/prometheus/common v0.61.0 // indirect
 	github.com/prometheus/procfs v0.15.1 // indirect
 	golang.org/x/sys v0.28.0 // indirect
-	google.golang.org/protobuf v1.35.2 // indirect
+	google.golang.org/protobuf v1.36.0 // indirect
 )

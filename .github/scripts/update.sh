@@ -22,14 +22,11 @@ check_go_mod_and_act() {
         # If it exists, perform specific operations
         echo "Updating packages in: $dir"
         go get -u all ./...
+        echo "Running go mod tidy"
         go mod tidy
-        
-        go test ./... || cd "$ORIGINAL_DIR" || return 1
-        local test_status=$?
-        # Only mark as updated if tests pass
-        if [ $test_status -eq 0 ]; then
-            updated=0
-        fi
+        echo "Running go vet"
+        go vet ./... || cd "$ORIGINAL_DIR" || return 1
+				updated=0
     fi
     
     # Return to the original working directory

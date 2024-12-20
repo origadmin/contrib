@@ -15,6 +15,7 @@ import (
 const (
 	SingleDatacenter = consul.SingleDatacenter
 	MultiDatacenter  = consul.MultiDatacenter
+	Type             = "consul"
 )
 
 type (
