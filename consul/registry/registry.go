@@ -16,7 +16,7 @@ type consulBuilder struct {
 }
 
 func init() {
-	runtime.RegisterRegistry("consul", &consulBuilder{})
+	runtime.RegisterRegistry(Type, &consulBuilder{})
 }
 
 func optsFromConfig(registry *configv1.Registry) []Option {

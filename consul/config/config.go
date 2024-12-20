@@ -20,8 +20,8 @@ import (
 )
 
 func init() {
-	runtime.RegisterConfigFunc("consul", NewConsulConfig)
-	runtime.RegisterConfigSync("consul", SyncConfig)
+	runtime.RegisterConfigFunc(Type, NewConsulConfig)
+	runtime.RegisterConfigSync(Type, SyncConfig)
 }
 
 // NewConsulConfig create a new consul config.

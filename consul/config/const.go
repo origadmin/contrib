@@ -15,6 +15,7 @@ import (
 
 const (
 	DefaultPathName = "bootstrap.json"
+	Type            = "consul"
 )
 
 type (

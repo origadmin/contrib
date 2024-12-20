@@ -18,11 +18,11 @@ type etcdBuilder struct {
 }
 
 func init() {
-	runtime.RegisterRegistry("etcd", &etcdBuilder{})
+	runtime.RegisterRegistry(Type, &etcdBuilder{})
 }
 
 func (c *etcdBuilder) NewDiscovery(cfg *configv1.Registry, _ ...registry.OptionSetting) (registryv2.Discovery, error) {
-	config := FromConfig(cfg)
+	config := fromConfig(cfg)
 	etcdCli, err := etcdclient.New(config)
 	if err != nil {
 		return nil, err
@@ -32,7 +32,7 @@ func (c *etcdBuilder) NewDiscovery(cfg *configv1.Registry, _ ...registry.OptionS
 }
 
 func (c *etcdBuilder) NewRegistrar(cfg *configv1.Registry, _ ...registry.OptionSetting) (registryv2.Registrar, error) {
-	config := FromConfig(cfg)
+	config := fromConfig(cfg)
 	etcdCli, err := etcdclient.New(config)
 	if err != nil {
 		return nil, err
@@ -41,13 +41,13 @@ func (c *etcdBuilder) NewRegistrar(cfg *configv1.Registry, _ ...registry.OptionS
 	return r, nil
 }
 
-func FromConfig(cfg *configv1.Registry) etcdclient.Config {
-	if cfg.GetType() != "etcd" {
-		panic("etcd config type error")
-	}
+func fromConfig(cfg *configv1.Registry) etcdclient.Config {
 	etcdConfig := cfg.GetEtcd()
+	if etcdConfig == nil {
+		return etcdclient.Config{}
+	}
 	apiconfig := etcdclient.Config{
-		Endpoints: etcdConfig.GetEndpoints(),
+		Endpoints: etcdConfig.Endpoints,
 	}
 	//if etcdConfig.DialTimeout != 0 {
 	//	apiconfig.DialTimeout = etcdConfig.DialTimeout
