@@ -6,11 +6,11 @@ toolchain go1.23.2
 
 require (
 	github.com/gin-gonic/gin v1.10.0
-	github.com/go-kratos/kratos/v2 v2.8.2
+	github.com/go-kratos/kratos/v2 v2.8.3
 	github.com/gorilla/mux v1.8.1
-	github.com/origadmin/runtime v0.1.5
-	github.com/origadmin/toolkits/errors v0.0.31
-	google.golang.org/protobuf v1.35.2
+	github.com/origadmin/runtime v0.1.18
+	github.com/origadmin/toolkits/errors v0.0.34
+	google.golang.org/protobuf v1.36.0
 )
 
 require (
@@ -45,10 +45,10 @@ require (
 	github.com/ugorji/go/codec v1.2.12 // indirect
 	golang.org/x/arch v0.12.0 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/net v0.32.0 // indirect
+	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20241209162323-e6fa225c2576 // indirect
-	google.golang.org/grpc v1.69.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20241219192143-6b3ec007d9bb // indirect
+	google.golang.org/grpc v1.69.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
