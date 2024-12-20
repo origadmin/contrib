@@ -14,7 +14,7 @@ import (
 	"github.com/origadmin/runtime/middleware"
 )
 
-func Middleware(config *configv1.Logger, logger log.Logger) (middleware.Middleware, error) {
+func Middleware(config *configv1.Logger, logger log.KLogger) (middleware.KMiddleware, error) {
 	if logger == nil {
 		// todo: init logger from config
 		logger = log.NewStdLogger(os.Stdout)
@@ -24,6 +24,6 @@ func Middleware(config *configv1.Logger, logger log.Logger) (middleware.Middlewa
 	return logging.Server(logger), nil
 }
 
-func NewLogger(config *configv1.Logger) log.Logger {
+func NewLogger(config *configv1.Logger) log.KLogger {
 	return log.NewStdLogger(os.Stdout)
 }

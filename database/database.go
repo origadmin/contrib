@@ -7,6 +7,7 @@ package database
 
 import (
 	"database/sql"
+	"time"
 
 	configv1 "github.com/origadmin/runtime/gen/go/config/v1"
 	"github.com/origadmin/toolkits/errors"
@@ -41,11 +42,11 @@ func Open(database *configv1.Data_Database) (*sql.DB, error) {
 	if database.MaxOpenConnections > 0 {
 		db.SetMaxOpenConns(int(database.MaxOpenConnections))
 	}
-	if t := database.ConnectionMaxLifetime.AsDuration(); t > 0 {
-		db.SetConnMaxLifetime(t)
+	if t := database.ConnectionMaxLifetime; t > 0 {
+		db.SetConnMaxLifetime(time.Duration(t))
 	}
-	if t := database.ConnectionMaxIdleTime.AsDuration(); t > 0 {
-		db.SetConnMaxIdleTime(t)
+	if t := database.ConnectionMaxIdleTime; t > 0 {
+		db.SetConnMaxIdleTime(time.Duration(t))
 	}
 	return db, nil
 }

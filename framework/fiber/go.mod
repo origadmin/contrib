@@ -4,7 +4,7 @@ go 1.23.1
 
 require (
 	github.com/gofiber/fiber/v2 v2.52.5
-	github.com/origadmin/runtime v0.1.19
+	github.com/origadmin/runtime v0.1.20
 )
 
 require (
