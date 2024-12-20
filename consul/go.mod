@@ -12,7 +12,7 @@ require (
 	github.com/go-kratos/kratos/v2 v2.8.3
 	github.com/goexts/generic v0.1.5
 	github.com/hashicorp/consul/api v1.30.0
-	github.com/origadmin/runtime v0.1.19
+	github.com/origadmin/runtime v0.1.20
 	github.com/origadmin/toolkits/errors v0.0.34
 	google.golang.org/protobuf v1.36.0
 )
