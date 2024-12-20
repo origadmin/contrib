@@ -7,7 +7,7 @@ toolchain go1.23.2
 require (
 	github.com/coocood/freecache v1.2.4
 	github.com/goexts/generic v0.1.5
-	github.com/origadmin/runtime v0.1.5
+	github.com/origadmin/runtime v0.1.19
 	github.com/origadmin/toolkits/errors v0.0.34
 )
 
