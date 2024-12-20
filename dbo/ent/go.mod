@@ -6,7 +6,7 @@ toolchain go1.23.2
 
 require (
 	entgo.io/ent v0.14.1
-	github.com/origadmin/runtime v0.1.18
+	github.com/origadmin/runtime v0.1.19
 )
 
 require (
