@@ -4,7 +4,7 @@ go 1.23.1
 
 require (
 	github.com/gorilla/handlers v1.5.2
-	github.com/origadmin/runtime v0.1.18
+	github.com/origadmin/runtime v0.1.19
 )
 
 require (
