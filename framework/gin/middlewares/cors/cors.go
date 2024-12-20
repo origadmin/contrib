@@ -5,6 +5,8 @@
 package cors
 
 import (
+	"time"
+
 	"github.com/gin-gonic/contrib/cors"
 	"github.com/gin-gonic/gin"
 
@@ -49,6 +51,6 @@ func WithCors(cfg *configv1.Cors) gin.HandlerFunc {
 		AllowedHeaders:   cfg.AllowHeaders,
 		ExposedHeaders:   cfg.ExposeHeaders,
 		AllowCredentials: cfg.AllowCredentials,
-		MaxAge:           cfg.MaxAge.AsDuration(),
+		MaxAge:           time.Duration(cfg.MaxAge),
 	})
 }

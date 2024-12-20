@@ -93,8 +93,8 @@ func NewCache(data *configv1.Data) *Cache {
 	if cfg == nil {
 		cfg = new(configv1.Data_Memory)
 	}
-	expiration := types.ZeroOr(cfg.GetExpiration().AsDuration(), 24*time.Hour)
-	interval := types.ZeroOr(cfg.GetCleanupInterval().AsDuration(), 30*time.Minute)
+	expiration := types.ZeroOr(time.Duration(cfg.GetExpiration()), 24*time.Hour)
+	interval := types.ZeroOr(time.Duration(cfg.GetCleanupInterval()), 30*time.Minute)
 	return &Cache{
 		Expiration:      expiration,
 		CleanupInterval: interval,
