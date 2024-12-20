@@ -11,7 +11,7 @@ Please start your pull request title with `[Type]` followed by a brief descripti
 - `[Feature] Add support for custom log formats`
 
 If you are merging branches, please use the following default title format:
-- `[Merge] Merge dev (源) into main (目标)`
+- `[Merge] Merge dev (your source) into main (target branch)`
 
 ## Description
 Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context.
