@@ -7,7 +7,7 @@ toolchain go1.23.2
 require (
 	github.com/casbin/casbin/v2 v2.102.0
 	github.com/goexts/generic v0.1.5
-	github.com/origadmin/runtime v0.1.18
+	github.com/origadmin/runtime v0.1.19
 	github.com/origadmin/toolkits v0.1.22
 	github.com/origadmin/toolkits/errors v0.0.34
 )
