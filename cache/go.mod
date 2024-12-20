@@ -6,9 +6,9 @@ toolchain go1.23.2
 
 require (
 	github.com/coocood/freecache v1.2.4
-	github.com/goexts/generic v0.1.4
+	github.com/goexts/generic v0.1.5
 	github.com/origadmin/runtime v0.1.5
-	github.com/origadmin/toolkits/errors v0.0.31
+	github.com/origadmin/toolkits/errors v0.0.34
 )
 
 require (
@@ -21,7 +21,7 @@ require (
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
-	golang.org/x/exp v0.0.0-20241215155358-4a5509556b9e // indirect
-	google.golang.org/protobuf v1.35.2 // indirect
+	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67 // indirect
+	google.golang.org/protobuf v1.36.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
