@@ -48,7 +48,7 @@ func optsFromConfig(registry *configv1.Registry) []Option {
 	return opts
 }
 
-func (c *consulBuilder) NewDiscovery(cfg *configv1.Registry, _ ...registry.OptionSetting) (registry.Discovery, error) {
+func (c *consulBuilder) NewDiscovery(cfg *configv1.Registry, _ ...registry.OptionSetting) (registry.KDiscovery, error) {
 	if cfg == nil || cfg.Consul == nil {
 		return nil, errors.New("configuration: consul config is required")
 	}
@@ -62,7 +62,20 @@ func (c *consulBuilder) NewDiscovery(cfg *configv1.Registry, _ ...registry.Optio
 	return r, nil
 }
 
-func (c *consulBuilder) NewRegistrar(cfg *configv1.Registry, _ ...registry.OptionSetting) (registry.Registrar, error) {
+func (c *consulBuilder) NewRegistrar(cfg *configv1.Registry, _ ...registry.OptionSetting) (registry.KRegistrar, error) {
+	if cfg == nil || cfg.Consul == nil {
+		return nil, errors.New("configuration: consul config is required")
+	}
+	apiConfig := fromConfig(cfg)
+	apiClient, err := api.NewClient(apiConfig)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create consul client")
+	}
+	r := New(apiClient, optsFromConfig(cfg)...)
+	return r, nil
+}
+
+func (c *consulBuilder) Create(cfg *configv1.Registry, _ ...registry.OptionSetting) (registry.Registry, error) {
 	if cfg == nil || cfg.Consul == nil {
 		return nil, errors.New("configuration: consul config is required")
 	}
