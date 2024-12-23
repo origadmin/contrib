@@ -42,10 +42,10 @@ func Register{{.ServiceType}}Agent (ag agent.Agent, srv {{.ServiceType}}Agent) {
 			if err != nil {
 			return err
 			}
-			if out == nil {
-			return nil
+			reply := out.(*{{.Reply}})
+			if reply == nil {
+				 return nil
 			}
-			reply := out{{.ResponseBody}}
 			return ctx.Result(200, reply)
 	}
 	}
