@@ -10,8 +10,8 @@ type {{.ServiceType}}Agent interface {
 {{- end}}
 }
 
-func Register{{.ServiceType}}Agent (s *http.Server, srv {{.ServiceType}}Agent) {
-	r := s.Route("/")
+func Register{{.ServiceType}}Agent (ag agent.Agent, srv {{.ServiceType}}Agent) {
+	r := ag.Route()
 {{- range.Methods}}
 	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_Agent_Handler(srv))
 {{- end}}
