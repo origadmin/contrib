@@ -50,7 +50,7 @@ return
 }
 r := ag.Route()
 {{- range.Methods}}
-	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_Agent_Handler(srv))
+	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_HTTPAgent_Handler(srv))
 {{- end}}
 }
 
