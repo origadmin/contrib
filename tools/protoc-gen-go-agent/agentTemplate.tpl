@@ -45,6 +45,9 @@ type {{.ServiceType}}Agent interface {
 {{end}}
 
 func Register{{.ServiceType}}Agent (ag agent.Agent, srv {{.ServiceType}}Agent) {
+if ag.HTTPServer() == nil {
+return
+}
 r := ag.Route()
 {{- range.Methods}}
 	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_Agent_Handler(srv))
