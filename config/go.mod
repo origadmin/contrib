@@ -6,9 +6,9 @@ toolchain go1.23.2
 
 require (
 	github.com/go-kratos/kratos/v2 v2.8.3
-	github.com/origadmin/toolkits/codec v0.0.52
-	github.com/origadmin/toolkits/errors v0.0.34
-	google.golang.org/protobuf v1.36.0
+	github.com/origadmin/toolkits/codec v0.0.54
+	github.com/origadmin/toolkits/errors v0.0.36
+	google.golang.org/protobuf v1.36.1
 )
 
 require (
