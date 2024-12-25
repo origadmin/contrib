@@ -73,7 +73,9 @@ handle_go_mod_directory() {
     if [ "$module_name" != "." ]; then
         module="$module_name"
     fi
-    
+
+    MAIN_TAG="$(get_head_version_tag)"
+    echo " ->MAIN_TAG: $MAIN_TAG"
     if check_for_go_mod "$dir"; then
         local HEAD_TAG
         local LATEST_TAG
@@ -87,7 +89,7 @@ handle_go_mod_directory() {
         fi
         LATEST_TAG=$(get_latest_module_tag "$module_name")
         echo " ->LATEST_TAG: $LATEST_TAG"
-        NEXT_TAG=$(get_next_module_version "$module_name")
+        NEXT_TAG="$module_name/$MAIN_TAG"
         echo " ->NEXT_TAG: $NEXT_TAG"
         
         if [ -z "$HEAD_TAG" ]; then

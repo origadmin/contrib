@@ -30,7 +30,7 @@ check_go_mod_and_test() {
         need_test=0
         #		fi
     fi
-    
+
     # Return to the original working directory
     cd "$ORIGINAL_DIR" || return 1
     # Return the update status
@@ -64,7 +64,7 @@ check_all_go_mod() {
 					 local need_test=$?
 					 if [ $need_test -eq 0 ]; then
 							 echo "Testing packages in: $dir"
-							 cd "$dir" || continue
+							 cd "$dir" || return 1
 							 go fmt ./...
 							 go mod tidy || return 1
 							 go vet ./... || return 1
