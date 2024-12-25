@@ -55,8 +55,29 @@ check_all_go_mod() {
     fi
     
     # Skip the root directory ('.')
+    echo "Checking go.mod files in: $start_dir"
+    if [ "$start_dir" != "." ]; then
+			 dir="$start_dir"
+       echo "Processing directories in: $dir"
+			 cd "$ORIGINAL_DIR" || return 1
+			 if check_go_mod_and_test "$dir"; then
+					 local need_test=$?
+					 if [ $need_test -eq 0 ]; then
+							 echo "Testing packages in: $dir"
+							 cd "$dir" || continue
+							 go fmt ./...
+							 go mod tidy || return 1
+							 go vet ./... || return 1
+							 go test ./... || return 1
+							 return 0
+					 fi
+			 fi
+			 cd "$ORIGINAL_DIR" || return 1
+    fi
+
+
     find "$start_dir" -mindepth 1 -type d -not -path "./.*" -print0 | while IFS= read -r -d '' dir; do
-        
+        echo "Processing directories in: $dir"
         cd "$ORIGINAL_DIR" || return 1
         if check_go_mod_and_test "$dir"; then
             local need_test=$?
