@@ -3,11 +3,7 @@ name: Auto Tagging Submodule After Release
 on:
   release:
     types: [ created ]
-  push:
-    branches:
-      - main
-    tags:
-      - "v*.*.*"
+
 jobs:
   tag_push:
     runs-on: ubuntu-latest
@@ -21,14 +17,12 @@ jobs:
         with:
           ref: main
           fetch-depth: 0 # Fetch all history
-
       - name: Run tag script
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           chmod +x ./.github/scripts/tag.sh
           ./.github/scripts/tag.sh
-
       - name: Commit and push
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"

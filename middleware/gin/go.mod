@@ -6,9 +6,9 @@ toolchain go1.23.2
 
 require (
 	github.com/gin-gonic/gin v1.10.0
-	github.com/origadmin/runtime v0.1.20
-	github.com/origadmin/toolkits v0.1.22
-	github.com/origadmin/toolkits/errors v0.0.34
+	github.com/origadmin/runtime v0.1.39
+	github.com/origadmin/toolkits v0.1.24
+	github.com/origadmin/toolkits/errors v0.0.36
 )
 
 require (
@@ -37,6 +37,6 @@ require (
 	golang.org/x/net v0.33.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
-	google.golang.org/protobuf v1.36.0 // indirect
+	google.golang.org/protobuf v1.36.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

@@ -7,7 +7,7 @@ toolchain go1.23.2
 require (
 	github.com/goexts/generic v0.1.5
 	github.com/nats-io/nats.go v1.38.0
-	github.com/origadmin/toolkits v0.1.22
+	github.com/origadmin/toolkits v0.1.24
 )
 
 require (

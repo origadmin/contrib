@@ -6,8 +6,8 @@ toolchain go1.23.2
 
 require (
 	github.com/goexts/generic v0.1.5
-	github.com/origadmin/toolkits/codec v0.0.52
-	github.com/origadmin/toolkits/errors v0.0.34
+	github.com/origadmin/toolkits/codec v0.0.54
+	github.com/origadmin/toolkits/errors v0.0.36
 )
 
 require (

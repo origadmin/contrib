@@ -23,6 +23,7 @@ const (
 	contextPackage       = protogen.GoImportPath("context")
 	transportHTTPPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http")
 	bindingPackage       = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http/binding")
+	agentPackage         = protogen.GoImportPath("github.com/origadmin/runtime/agent")
 )
 
 var methodSets = make(map[string]int)
@@ -61,6 +62,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P("var _ = new(", contextPackage.Ident("Context"), ")")
 	g.P("var _ = ", bindingPackage.Ident("EncodeURL"))
 	g.P("const _ = ", transportHTTPPackage.Ident("SupportPackageIsVersion1"))
+	g.P("const _ = ", agentPackage.Ident("ApiVersionV1"))
 	g.P()
 
 	for _, service := range file.Services {

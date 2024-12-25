@@ -13,28 +13,30 @@ import (
 	"github.com/origadmin/toolkits/errors"
 
 	"github.com/origadmin/contrib/database/internal/mysql"
+	"github.com/origadmin/contrib/database/internal/sqlite"
 )
 
 func Open(database *configv1.Data_Database) (*sql.DB, error) {
 	if database == nil {
-		return nil, errors.New("database is nil")
+		return nil, errors.New("config: database is nil")
 	}
-	switch database.Driver {
+	switch database.Dialect {
 	case "mysql":
 		err := mysql.CreateDatabase(database.Source, "")
 		if err != nil {
-			return nil, errors.Wrap(err, "create database error")
+			return nil, errors.Wrap(err, "mysql: create database error")
 		}
-		break
 	case "pgx":
-		database.Driver = "postgres"
-		break
+		database.Dialect = "postgres"
+	case "sqlite3", "sqlite":
+		database.Dialect = "sqlite3"
+		database.Source = sqlite.FixSource(database.Source)
 	default:
 
 	}
-	db, err := sql.Open(database.Driver, database.Source)
+	db, err := sql.Open(database.Dialect, database.Source)
 	if err != nil {
-		return nil, errors.Wrap(err, "open database error")
+		return nil, errors.Wrap(err, "database: open database error")
 	}
 	if database.MaxIdleConnections > 0 {
 		db.SetMaxIdleConns(int(database.MaxIdleConnections))
