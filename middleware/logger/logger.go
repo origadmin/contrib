@@ -16,7 +16,7 @@ import (
 	"github.com/origadmin/toolkits/sloge"
 )
 
-func Middleware(cfg *configv1.Logger, l log.KLogger) (middleware.KMiddleware, error) {
+func Middleware(cfg *configv1.Logger, l log.Logger) (middleware.Middleware, error) {
 	if cfg == nil && l == nil {
 		// todo: init l from config
 		l = log.NewStdLogger(os.Stdout)

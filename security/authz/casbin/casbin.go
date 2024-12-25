@@ -25,12 +25,6 @@ type Authorizer struct {
 	wildcardItem string
 }
 
-func (auth *Authorizer) SetPolicies(ctx context.Context, policies map[string]any, roles map[string]any) error {
-	log.Debugf("Setting policies: %v", policies)
-	// TODO: implement setting policies
-	return errors.New("not implemented")
-}
-
 func (auth *Authorizer) Authorized(ctx context.Context, claims security.UserClaims) (bool, error) {
 	log.Debugf("Authorizing user with claims: %+v", claims)
 	domain := claims.GetDomain()
