@@ -9,15 +9,14 @@ import (
 	"strings"
 )
 
-const (
-	FKSuffix = "_fk=1"
-)
+const FKSuffix = "_fk=1"
 
 func FixSource(source string) string {
 	// Check if the source already contains the FK parameter
 	if strings.Contains(source, FKSuffix) {
 		return source
 	}
+
 	// Check if the source already contains parameters
 	if strings.Contains(source, "?") {
 		// If parameters exist, append with &
