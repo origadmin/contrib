@@ -123,6 +123,37 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  release-agent:
+    needs: [ tagging ]
+    if: success()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/setup-go@v5.0.2 # v5
+        with:
+          go-version: stable
+      - name: Ensure Go
+        run: go version
+      - name: Checkout code
+        uses: actions/checkout@v4.2.0 # v4
+        with:
+          ref: main
+          fetch-depth: 0 # Fetch all history
+
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        if: success()
+        with:
+          # either 'goreleaser' (default) or 'goreleaser-pro'
+          distribution: goreleaser
+          version: '~> v2'
+          args: release --clean -f ./tools/protoc-gen-go-agent/.goreleaser.yaml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   release-gingrpc:
     needs: [ tagging ]
     if: success()
