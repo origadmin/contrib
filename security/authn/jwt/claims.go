@@ -11,8 +11,6 @@ import (
 	"time"
 
 	jwtv5 "github.com/golang-jwt/jwt/v5"
-	"google.golang.org/protobuf/types/known/timestamppb"
-
 	securityv1 "github.com/origadmin/runtime/gen/go/security/v1"
 	"github.com/origadmin/toolkits/security"
 )
@@ -56,15 +54,15 @@ func (s *SecurityClaims) GetAudience() []string {
 }
 
 func (s *SecurityClaims) GetExpiration() time.Time {
-	return s.Claims.Exp.AsTime()
+	return time.Unix(s.Claims.Exp, 0)
 }
 
 func (s *SecurityClaims) GetNotBefore() time.Time {
-	return s.Claims.Nbf.AsTime()
+	return time.Unix(s.Claims.Nbf, 0)
 }
 
 func (s *SecurityClaims) GetIssuedAt() time.Time {
-	return s.Claims.Iat.AsTime()
+	return time.Unix(s.Claims.Iat, 0)
 }
 
 func (s *SecurityClaims) GetJWTID() string {
@@ -79,7 +77,7 @@ func (s *SecurityClaims) GetScopes() map[string]bool {
 	return s.Claims.Scopes
 }
 
-func ClaimsToJwtClaims(raw security.Claims) jwtv5.Claims {
+func SecurityToClaims(raw security.Claims) jwtv5.Claims {
 	mapClaims := jwtv5.MapClaims{
 		"sub": raw.GetSubject(),
 	}
@@ -91,7 +89,7 @@ func ClaimsToJwtClaims(raw security.Claims) jwtv5.Claims {
 		mapClaims["aud"] = aud
 	}
 	if exp := raw.GetExpiration(); !exp.IsZero() {
-		mapClaims["exp"] = exp.UnixMilli()
+		mapClaims["exp"] = exp.Unix()
 	}
 
 	extras := raw.GetExtra()
@@ -117,10 +115,7 @@ func ClaimsToJwtClaims(raw security.Claims) jwtv5.Claims {
 	return mapClaims
 }
 
-func MapToClaims(rawClaims jwtv5.MapClaims, extras map[string]string) (security.Claims, error) {
-	//claims := security.claims{
-	//	Scopes: make(ScopeSet),
-	//}
+func MapClaimsToSecurity(rawClaims jwtv5.MapClaims, extras map[string]string) (*SecurityClaims, error) {
 	claims := &securityv1.Claims{
 		Scopes: make(map[string]bool),
 	}
@@ -145,8 +140,8 @@ func MapToClaims(rawClaims jwtv5.MapClaims, extras map[string]string) (security.
 	}
 	// optional Expiration
 	if expClaim, err := rawClaims.GetExpirationTime(); err == nil {
-		if expClaim != nil {
-			claims.Exp = timestamppb.New(expClaim.Time)
+		if expClaim != nil && !expClaim.Time.IsZero() {
+			claims.Exp = expClaim.Time.Unix()
 		}
 	} else {
 		return nil, ErrInvalidExpiration
@@ -161,70 +156,60 @@ func MapToClaims(rawClaims jwtv5.MapClaims, extras map[string]string) (security.
 		}
 	}
 
-	return &SecurityClaims{
-		Claims: claims,
-		Extra:  extras,
-	}, nil
+	return PBClaimsToSecurity(claims, extras), nil
 }
 
-func RegisteredToClaims(rawClaims *jwtv5.RegisteredClaims) (security.Claims, error) {
-	Claims := &securityv1.Claims{
+func RegisteredClaimsToSecurity(rawClaims *jwtv5.RegisteredClaims) (*SecurityClaims, error) {
+	return ClaimsToSecurity(rawClaims)
+}
+
+func ClaimsToSecurity(rawClaims jwtv5.Claims) (*SecurityClaims, error) {
+	claims := &securityv1.Claims{
 		Scopes: make(map[string]bool),
 	}
 
 	// optional Subject
 	if subjectClaim, err := rawClaims.GetSubject(); err == nil {
-		Claims.Sub = subjectClaim
+		claims.Sub = subjectClaim
 	} else {
 		return nil, ErrInvalidSubject
 	}
 	// optional Issuer
 	if issuerClaim, err := rawClaims.GetIssuer(); err == nil {
-		Claims.Iss = issuerClaim
+		claims.Iss = issuerClaim
 	} else {
 		return nil, ErrInvalidIssuer
 	}
 	// optional Audience
 	if audienceClaim, err := rawClaims.GetAudience(); err == nil {
-		Claims.Aud = append(Claims.Aud, audienceClaim...)
+		claims.Aud = append(claims.Aud, audienceClaim...)
 	} else {
 		return nil, ErrInvalidAudience
 	}
 	// optional Expiration
 	if expClaim, err := rawClaims.GetExpirationTime(); err == nil {
-		if expClaim != nil {
-			Claims.Exp = timestamppb.New(expClaim.Time)
+		if expClaim != nil && !expClaim.Time.IsZero() {
+			claims.Exp = expClaim.Time.Unix()
 		}
 	} else {
 		return nil, ErrInvalidExpiration
 	}
-	// optional scopes
-	//if scopeKey, ok := rawClaims.Scope["scope"]; ok {
-	//	if scope, ok := scopeKey.(string); ok {
-	//		scopes := strings.Split(scope, " ")
-	//		for _, s := range scopes {
-	//			Claims.Scopes[s] = true
-	//		}
-	//	}
-	//}
-
-	return &SecurityClaims{
-		Claims: Claims,
-	}, nil
+	return PBClaimsToSecurity(claims, nil), nil
 }
 
-func ProtoClaimsToClaims(rawClaims *securityv1.Claims) security.Claims {
+func PBClaimsToSecurity(rawClaims *securityv1.Claims, extras map[string]string) *SecurityClaims {
 	return &SecurityClaims{
 		Claims: rawClaims,
+		Extra:  extras,
 	}
 }
 
 func ToClaims(rawClaims jwtv5.Claims, extras map[string]string) (security.Claims, error) {
-	if Claims, ok := rawClaims.(*jwtv5.RegisteredClaims); ok {
-		return RegisteredToClaims(Claims)
-	}
 	if Claims, ok := rawClaims.(jwtv5.MapClaims); ok {
-		return MapToClaims(Claims, extras)
+		return MapClaimsToSecurity(Claims, extras)
 	}
-	return nil, ErrInvalidClaims
+	//if Claims, ok := rawClaims.(*jwtv5.RegisteredClaims); ok {
+	//	return RegisteredClaimsToSecurity(Claims)
+	//}
+	return ClaimsToSecurity(rawClaims)
 }

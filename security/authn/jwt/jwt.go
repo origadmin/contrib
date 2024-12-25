@@ -204,7 +204,7 @@ func (obj *Authenticator) schemeString() string {
 // CreateToken creates a token string from the claims.
 func (obj *Authenticator) CreateToken(ctx context.Context, claims security.Claims) (string, error) {
 	// Create a new token with the claims.
-	jwtToken := jwtv5.NewWithClaims(obj.signingMethod, ClaimsToJwtClaims(claims))
+	jwtToken := jwtv5.NewWithClaims(obj.signingMethod, SecurityToClaims(claims))
 
 	// Generate the token string.
 	tokenStr, err := obj.generateToken(jwtToken)
