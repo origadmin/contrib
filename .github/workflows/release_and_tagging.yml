@@ -7,6 +7,7 @@ on:
 
 jobs:
   test:
+    if: github.actor!= 'dependabot[bot]'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -91,7 +92,6 @@ jobs:
       #          draft: false
       #          prerelease: false
 
-
   release-gins:
     needs: [ tagging ]
     if: success()
@@ -159,3 +159,36 @@ jobs:
       #        with:
       #          name: protoc-gen-go-gins
       #          path: ./cmd/protoc-gen-go-gins/dist/*
+
+  tag_push:
+    needs: [ release-gingrpc, release-gins ]
+    if: github.actor!= 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.2.0 # v4
+        with:
+          ref: main
+          fetch-depth: 0 # Fetch all history
+      - name: Run tag script
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          chmod +x ./.github/scripts/tag.sh
+          ./.github/scripts/tag.sh
+      - name: Commit and push
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git push origin --tags
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#      - name: Upload assets
+#        uses: actions/upload-artifact@v4.4.3
+#        with:
+#          name: protoc-gen-go-gins
+#          path: ./cmd/protoc-gen-go-gins/dist/*
