@@ -4,7 +4,7 @@ go 1.23.1
 
 require (
 	github.com/gorilla/handlers v1.5.2
-	github.com/origadmin/runtime v0.1.20
+	github.com/origadmin/runtime v0.1.39
 )
 
 require (
@@ -15,6 +15,6 @@ require (
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/rogpeppe/go-internal v1.13.1 // indirect
-	google.golang.org/protobuf v1.36.0 // indirect
+	google.golang.org/protobuf v1.36.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
