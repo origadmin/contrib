@@ -117,16 +117,16 @@ func PreferredLocale(supportedLocales ...string) string {
 func Compare(lt, rt language.Tag) int {
 	baseLT, _ := lt.Base()
 	baseRT, _ := rt.Base()
-	scriptLT, _ := lt.Script()
-	scriptRT, _ := rt.Script()
-	regionLT, _ := lt.Region()
-	regionRT, _ := rt.Region()
 	if baseLT.String() != baseRT.String() {
 		return 0
 	}
+	scriptLT, _ := lt.Script()
+	scriptRT, _ := rt.Script()
 	if scriptLT.String() != scriptRT.String() {
 		return 0
 	}
+	regionLT, _ := lt.Region()
+	regionRT, _ := rt.Region()
 	if regionLT.String() != regionRT.String() {
 		return 0
 	}
