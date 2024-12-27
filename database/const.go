@@ -19,5 +19,6 @@ type (
 	ExecFunc = func(context.Context) error
 	// TxFunc is a function that can be executed within a transaction
 	TxFunc = func(tx Tx) error
-	Trans  database.Trans
+	// Trans is a transaction interface
+	Trans database.Trans
 )
