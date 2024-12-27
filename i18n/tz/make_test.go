@@ -40,3 +40,38 @@ func TestCountriesFromFile(t *testing.T) {
 		})
 	}
 }
+
+func TestTimeZonesFromFile(t *testing.T) {
+	type args struct {
+		filePath string
+	}
+	tests := []struct {
+		name      string
+		args      args
+		want      []TimeZone
+		wantTotal int
+		wantErr   bool
+	}{
+		// TODO: Add test cases.
+		{
+			name: "test",
+			args: args{
+				filePath: "time_zone.csv",
+			},
+			want:      nil,
+			wantTotal: 146523,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := TimeZonesFromCSV(tt.args.filePath)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("TimeZonesFromCSV() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if len(got) != tt.wantTotal {
+				t.Errorf("TimeZonesFromCSV() got = %v, want %v", len(got), tt.wantTotal)
+			}
+		})
+	}
+}
