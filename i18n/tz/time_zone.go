@@ -6,13 +6,7 @@
 package tz
 
 import (
-	"bufio"
 	_ "embed"
-	"encoding/csv"
-	"fmt"
-	"os"
-	"strconv"
-	"time"
 )
 
 const (
@@ -37,30 +31,3 @@ type TimeZone struct {
 
 //go:embed time_zone.json
 var jsonTimeZones []byte
-
-func TimeZoneFrom(abbr string, gmt int64, dst int64) (TimeZone, error) {
-	name, offset := time.Now().Local().Zone()
-	fmt.Println(name, offset)
-	t := time.Unix(-2177481943, 0)
-	fmt.Println("SH", t, time.Now().Local().IsDST())
-	sta, end := time.Now().Local().ZoneBounds()
-	fmt.Println(sta.Unix(), end)
-	for idx, tz := range TimeZones {
-		if tz.Abbreviation != abbr {
-			continue
-		}
-		if tz.GmtOffset != gmt {
-			continue
-		}
-		fmt.Println(idx, tz.ZoneName)
-		//fmt.Println(tz.GmtOffset, gmt)
-		fmt.Println(tz.Dst, dst)
-		if tz.Dst != dst {
-			continue
-		}
-
-		return tz, nil
-
-	}
-	return TimeZone{}, nil
-}

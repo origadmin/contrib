@@ -6,10 +6,7 @@
 package tz
 
 import (
-	"bufio"
 	_ "embed"
-	"encoding/csv"
-	"os"
 )
 
 const (
