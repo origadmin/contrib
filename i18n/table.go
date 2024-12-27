@@ -217,7 +217,5 @@ type LocaleCode struct {
 var localeTable = make(map[string]*LocaleCode)
 
 func init() {
-	if err := json.Unmarshal([]byte(jsonTable), &localeTable); err != nil {
-		//panic(err)
-	}
+	_ = json.Unmarshal([]byte(jsonTable), &localeTable)
 }

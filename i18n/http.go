@@ -14,18 +14,18 @@ import (
 
 type languageCtx struct{}
 
-func WithContext(ctx context.Context, tag language.Tag) context.Context {
+func WithContext(ctx context.Context, tag Tag) context.Context {
 	return context.WithValue(ctx, languageCtx{}, tag)
 }
-func FromContext(ctx context.Context) language.Tag {
-	if tag, ok := ctx.Value(languageCtx{}).(language.Tag); ok {
+func FromContext(ctx context.Context) Tag {
+	if tag, ok := ctx.Value(languageCtx{}).(Tag); ok {
 		return tag
 	}
-	return language.AmericanEnglish
+	return DefaultLocale
 }
 func LanguageFromRequest(req *http.Request) *http.Request {
 	tags, _, err := language.ParseAcceptLanguage(req.Header.Get("Accept-Language"))
-	tag := language.AmericanEnglish
+	tag := DefaultLocale
 	if err == nil && len(tags) > 0 {
 		tag = tags[0]
 	}

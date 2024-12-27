@@ -6,20 +6,20 @@
 package i18n
 
 import (
-	"fmt"
-
 	"github.com/godcong/go-locale/v2"
 	"golang.org/x/text/language"
 )
 
 const (
-	defaultLocale = "en_US"
+	defaultLocaleString = "en_US"
 )
 
 var (
 	// Locales is the current system language settings
-	Locales   = locale.Languages()
-	Languages = []language.Tag{
+	Locales = locale.Languages()
+	// DefaultLocale is the default system language settings
+	DefaultLocale = Make(defaultLocaleString)
+	Languages     = []Tag{
 		language.Afrikaans,
 		language.Amharic,
 		language.Arabic,
@@ -103,76 +103,52 @@ var (
 )
 
 // PreferredLocale gets the current system language settings
-func PreferredLocale(supportedLocales ...string) string {
-	for _, localeTag := range Locales {
-		for _, supportedLocale := range supportedLocales {
-			if localeTag.String() == supportedLocale {
-				return supportedLocale
+// multi-language are supported, the first match is returned
+// if no match is found, the default system language settings is returned
+func PreferredLocale(tags []Tag, localeStrings ...string) string {
+	for _, localeString := range localeStrings {
+		for _, tag := range tags {
+			prefer := Make(localeString)
+			if Compare(tag, prefer) == 1 {
+				return localeString
 			}
 		}
 	}
-	return defaultLocale
+	return defaultLocaleString
 }
 
-func Compare(lt, rt language.Tag) int {
-	baseLT, _ := lt.Base()
-	baseRT, _ := rt.Base()
-	if baseLT.String() != baseRT.String() {
+// Compare compares two language tags and returns 1 if they match, 0 otherwise.
+func Compare(lt, rt Tag) int {
+	// Check if the language bases match
+	if languageBase(lt) != languageBase(rt) {
 		return 0
 	}
-	scriptLT, _ := lt.Script()
-	scriptRT, _ := rt.Script()
-	if scriptLT.String() != scriptRT.String() {
+	// Check if the language scripts match
+	if languageScript(lt) != languageScript(rt) {
 		return 0
 	}
-	regionLT, _ := lt.Region()
-	regionRT, _ := rt.Region()
-	if regionLT.String() != regionRT.String() {
+	// Check if the language regions match
+	if languageRegion(lt) != languageRegion(rt) {
 		return 0
 	}
+	// If all components match, return 1
 	return 1
 }
 
-func LanguageStrings() []string {
-	var langs []string
-	for _, lang := range Languages {
-		langs = append(langs, lang.String())
-	}
-	return langs
+// Language2Country converts a language tag to a country tag.
+func Language2Country(lang Tag) Tag {
+	// Create a new tag with the language base and region
+	return Make(languageBaseRegion(lang))
 }
 
-func CountryStrings() []string {
-	var langs []string
-	for _, lang := range Languages {
-		b, _ := lang.Base()
-		r, _ := lang.Region()
-		langs = append(langs, fmt.Sprintf("%s-%s", b, r))
-	}
-	return langs
+// Country2Language converts a country tag to a language tag.
+func Country2Language(lang Tag) Tag {
+	// Create a new tag with the language base and script
+	return Make(languageBaseScript(lang))
 }
 
-func String2Language(lang string) language.Tag {
-	tag := language.Make(lang)
-	b, _ := tag.Base()
-	s, _ := tag.Script()
-	return language.Make(fmt.Sprintf("%s-%s", b, s))
-}
-
-func Language2Language(lang language.Tag) language.Tag {
-	b, _ := lang.Base()
-	s, _ := lang.Script()
-	return language.Make(fmt.Sprintf("%s-%s", b, s))
-}
-
-func Language2Country(lang language.Tag) language.Tag {
-	b, _ := lang.Base()
-	r, _ := lang.Region()
-	return language.Make(fmt.Sprintf("%s-%s", b, r))
-}
-
-func CountryLanguage(lang language.Tag) language.Tag {
-	b, _ := lang.Base()
-	s, _ := lang.Script()
-	r, _ := lang.Region()
-	return language.Make(fmt.Sprintf("%s-%s-%s", b, s, r))
+// CountryLanguage converts a country tag to a language tag with region.
+func CountryLanguage(lang Tag) Tag {
+	// Create a new tag with the language base, script, and region
+	return Make(languageBaseScriptRegion(lang))
 }
