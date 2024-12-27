@@ -7,8 +7,8 @@ package tz
 
 import (
 	"bufio"
+	_ "embed"
 	"encoding/csv"
-	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -33,19 +33,10 @@ type TimeZone struct {
 	TimeStart    int64  `json:"time_start"`
 	GmtOffset    int64  `json:"gmt_offset"`
 	Dst          int64  `json:"dst"` // 1 or 0 means DST
-	//ZoneNameOffset int32  `json:"zone_name_offset"`
 }
 
-var (
-	TimeZones []TimeZone
-)
-
-func init() {
-	err := json.Unmarshal(jsonTimeZones, &TimeZones)
-	if err != nil {
-		return
-	}
-}
+//go:embed time_zone.json
+var jsonTimeZones []byte
 
 func TimeZoneFrom(abbr string, gmt int64, dst int64) (TimeZone, error) {
 	name, offset := time.Now().Local().Zone()
@@ -72,49 +63,4 @@ func TimeZoneFrom(abbr string, gmt int64, dst int64) (TimeZone, error) {
 
 	}
 	return TimeZone{}, nil
-}
-
-func TimeZonesFromCSV(filePath string) ([]TimeZone, error) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return nil, err
-	}
-	rd := bufio.NewReader(file)
-	reader := csv.NewReader(rd)
-	var timeZones []TimeZone
-	for {
-		line, err := reader.Read()
-		if err != nil {
-			break
-		}
-		ts, err := strconv.ParseInt(line[OffsetZoneTimeStart], 10, 64)
-		if err != nil {
-			return nil, err
-		}
-
-		gmto, err := strconv.ParseInt(line[OffsetZoneGmtOffset], 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		dst, err := strconv.ParseInt(line[OffsetZoneDst], 10, 64)
-		if err != nil {
-			return nil, err
-		}
-		//zno, err := strconv.ParseInt(line[OffsetZoneNameOffset], 10, 32)
-		//if err != nil {
-		//	return nil, err
-		//}
-
-		timeZone := TimeZone{
-			ZoneName:     line[OffsetZoneName],
-			CountryCode:  line[OffsetZoneCountryCode],
-			Abbreviation: line[OffsetZoneAbbreviation],
-			TimeStart:    ts,
-			GmtOffset:    gmto,
-			Dst:          dst,
-			//ZoneNameOffset: int32(zno),
-		}
-		timeZones = append(timeZones, timeZone)
-	}
-	return timeZones, nil
 }

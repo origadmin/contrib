@@ -8,41 +8,31 @@ package tz
 import (
 	_ "embed"
 	"encoding/json"
-	"os"
 )
 
 const (
 	defaultTimeZone = "Asia/Shanghai"
 )
 
-//go:embed time_zone.json
-var jsonTimeZones []byte
+var (
+	Countries []Country
+	TimeZones []TimeZone
+)
 
-//go:embed country.json
-var jsonCountries []byte
-
-func GenerateJSON() error {
-	file, err := CountriesFromCSV("country.csv")
-	if err != nil {
-		return err
-	}
-	countries, err := json.MarshalIndent(file, "", "  ")
-	if err != nil {
-		return err
-	}
-	_ = os.WriteFile("country.json", countries, 0644)
-	timeZones, err := TimeZonesFromCSV("time_zone.csv")
-	if err != nil {
-		return err
-	}
-	timeZonesJSON, err := json.MarshalIndent(timeZones, "", "  ")
-	if err != nil {
-		return err
-	}
-	_ = os.WriteFile("time_zone.json", timeZonesJSON, 0644)
-	return nil
+func init() {
+	_ = json.Unmarshal(jsonTimeZones, &TimeZones)
+	_ = json.Unmarshal(jsonCountries, &Countries)
 }
 
 func Location() string {
 	return location()
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }

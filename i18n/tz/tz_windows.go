@@ -285,30 +285,33 @@ func fixWindowsZoneType(mz []MapZone, tz TimeZone) TimeZone {
 	return tz
 }
 
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
+func location() string {
+	locations := Locations()
+	szLocations := len(locations)
+	if szLocations > 0 {
+		return locations[szLocations-1]
 	}
-	return false
+	return defaultTimeZone
 }
 
-func location() string {
+// Locations A time zone may have multiple time zones,
+// so a way to get all the time zones under the current time zone is needed
+func Locations() []string {
 	path, err := exec.LookPath("tzutil")
 	if err != nil {
-		return defaultTimeZone
+		return nil
 	}
 	cmd := exec.Command(path, "/g")
 	out, err := cmd.Output()
 	if err != nil {
-		return defaultTimeZone
+		return nil
 	}
 	zone := strings.Trim(string(out), "\r\n")
 	for i := range mapZones {
-		if mapZones[i].ZoneID == zone {
-			return mapZones[i].TimeZones[len(mapZones[i].TimeZones)-1]
+		szTimeZone := len(mapZones[i].TimeZones)
+		if mapZones[i].ZoneID == zone && szTimeZone > 0 {
+			return mapZones[i].TimeZones
 		}
 	}
-	return defaultTimeZone
+	return nil
 }

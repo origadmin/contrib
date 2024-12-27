@@ -25,11 +25,12 @@ func location() string {
 	}
 
 	tzParts := strings.Split(targetPath, "/")
-	if len(tzParts) < 3 {
+	szParts := len(tzParts)
+	if szParts < 3 {
 		return defaultTimeZone
 	}
 
-	continent, country := tzParts[len(tzParts)-2], tzParts[len(tzParts)-1]
+	continent, country := tzParts[szParts-2], tzParts[szParts-1]
 	timezone := fmt.Sprintf("%s/%s", continent, country)
 	return timezone
 }

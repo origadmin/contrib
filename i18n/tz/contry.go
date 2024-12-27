@@ -7,8 +7,8 @@ package tz
 
 import (
 	"bufio"
+	_ "embed"
 	"encoding/csv"
-	"encoding/json"
 	"os"
 )
 
@@ -23,35 +23,5 @@ type Country struct {
 	CountryCode string `json:"country_code"`
 }
 
-var (
-	Countries []Country
-)
-
-func init() {
-	err := json.Unmarshal(jsonCountries, &Countries)
-	if err != nil {
-		return
-	}
-}
-
-func CountriesFromCSV(filePath string) ([]Country, error) {
-	file, err := os.Open(filePath)
-	if err != nil {
-		return nil, err
-	}
-	rd := bufio.NewReader(file)
-	reader := csv.NewReader(rd)
-	var countries []Country
-	for {
-		line, err := reader.Read()
-		if err != nil {
-			break
-		}
-		country := Country{
-			CountryName: line[OffsetCountryName],
-			CountryCode: line[OffsetCountryCode],
-		}
-		countries = append(countries, country)
-	}
-	return countries, nil
-}
+//go:embed country.json
+var jsonCountries []byte
