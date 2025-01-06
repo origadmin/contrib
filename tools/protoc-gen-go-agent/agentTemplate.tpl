@@ -6,7 +6,7 @@ type {{.ServiceType}}Agent interface {
     {{- if ne .Comment ""}}
         {{.Comment}}
     {{- end}}
-    {{.Name}}(http.Context, *{{.Request}}) (*{{.Reply}}, error)
+    {{.Name}}(context.Context, *{{.Request}}) (*{{.Reply}}, error)
 {{- end}}
 }
 
@@ -28,9 +28,10 @@ type {{.ServiceType}}Agent interface {
 		}
   {{- end}}
 	http.SetOperation(ctx,Operation{{$svrType}}{{.OriginalName}})
-	h := ctx.Middleware(func(_ context.Context, req interface{}) (interface{}, error) {
+	h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 	return srv.{{.Name}}(ctx, req.(*{{.Request}}))
 	})
+	ctx=agent.NewHTTPContext(ctx)
 	out, err := h(ctx, &in)
 	if err != nil {
 	return err
