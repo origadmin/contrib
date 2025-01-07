@@ -12,26 +12,27 @@ type {{.ServiceType}}Agent interface {
 
 {{range.Methods}}
 	func _{{$svrType}}_{{.Name}}{{.Num}}_HTTPAgent_Handler(srv {{$svrType}}Agent) http.HandlerFunc {
-	return func(ctx http.Context) error {
+	return func(cctx http.Context) error {
 	var in {{.Request}}
   {{- if .HasBody}}
-		if err := ctx.Bind(&in{{.Body}}); err != nil {
+		if err := cctx.Bind(&in{{.Body}}); err != nil {
 		return err
 		}
   {{- end}}
-	if err := ctx.BindQuery(&in); err != nil {
+	if err := cctx.BindQuery(&in); err != nil {
 	return err
 	}
   {{- if .HasVars}}
-		if err := ctx.BindVars(&in); err != nil {
+		if err := cctx.BindVars(&in); err != nil {
 		return err
 		}
   {{- end}}
-	http.SetOperation(ctx,Operation{{$svrType}}{{.OriginalName}})
-	h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
-	return srv.{{.Name}}(ctx, req.(*{{.Request}}))
+	http.SetOperation(cctx,Operation{{$svrType}}{{.OriginalName}})
+	h := cctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			ctx = agent.NewHTTPContext(ctx,cctx)
+			return srv.{{.Name}}(ctx, req.(*{{.Request}}))
 	})
-	out, err := h(agent.HTTPContext(ctx), &in)
+	out, err := h(cctx, &in)
 	if err != nil {
 	return err
 	}
@@ -39,7 +40,7 @@ type {{.ServiceType}}Agent interface {
 	if reply == nil {
 	return nil
 	}
-	return ctx.Result(200, reply)
+	return cctx.Result(200, reply)
 	}
 	}
 {{end}}
