@@ -31,8 +31,7 @@ type {{.ServiceType}}Agent interface {
 	h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 	return srv.{{.Name}}(ctx, req.(*{{.Request}}))
 	})
-	cctx := agent.NewHTTPContext(ctx, ctx)
-	out, err := h(cctx, &in)
+	out, err := h(agent.HTTPContext(ctx), &in)
 	if err != nil {
 	return err
 	}
