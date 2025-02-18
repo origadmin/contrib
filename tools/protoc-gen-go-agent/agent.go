@@ -222,7 +222,7 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 		Request:      g.QualifiedGoIdent(m.Input.GoIdent),
 		Reply:        g.QualifiedGoIdent(m.Output.GoIdent),
 		Comment:      comment,
-		Path:         transformPath(path),
+		Path:         path,
 		ClientPath:   path,
 		Method:       method,
 		HasVars:      len(vars) > 0,
