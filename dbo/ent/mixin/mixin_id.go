@@ -14,15 +14,9 @@ import (
 
 type ID struct {
 	mixin.Schema
-	Key                  string
-	CommentKey           string
+	BaseID[int64]
 	I18nText             func(key string) string
-	Optional             bool
 	Positive             bool
-	Unique               bool
-	Immutable            bool
-	UseDefault           bool
-	DefaultFunc          any
 	UseCustomIDGenerator bool
 }
 
@@ -108,14 +102,12 @@ func (obj ID) Comment(key string, fns ...func(key string) string) IDGenerator {
 	if len(fns) > 0 {
 		fn = fns[0]
 	}
-	return ID{
-		I18nText:   fn,
-		CommentKey: key,
-	}
+	obj.I18nText = fn
+	obj.CommentKey = key
+	return obj
 }
 
 func (obj ID) UseDefaultFunc(f func() int64) IDGenerator {
-	return ID{
-		DefaultFunc: f,
-	}
+	obj.DefaultFunc = f
+	return obj
 }

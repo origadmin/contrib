@@ -14,16 +14,9 @@ import (
 // UUID schema to include control and time fields.
 type UUID struct {
 	mixin.Schema
-	Key         string
-	MaxLen      int
-	CommentKey  string
-	I18nText    func(key string) string
-	Optional    bool
-	Positive    bool
-	Unique      bool
-	Immutable   bool
-	UseDefault  bool
-	DefaultFunc any
+	BaseID[string]
+	MaxLen   int
+	I18nText func(key string) string
 }
 
 func (obj UUID) ToField() ent.Field {
@@ -63,10 +56,9 @@ func (obj UUID) Comment(key string, fns ...func(key string) string) IDGenerator 
 	if len(fns) > 0 {
 		fn = fns[0]
 	}
-	return ID{
-		I18nText:   fn,
-		CommentKey: key,
-	}
+	obj.I18nText = fn
+	obj.CommentKey = key
+	return obj
 }
 
 // Fields of the mixin.
@@ -103,8 +95,7 @@ func (obj UUID) OP(name string) ent.Field {
 	return obj.ToField()
 }
 
-func (obj UUID) UseDefaultFunc(f any) IDGenerator {
-	return UUID{
-		DefaultFunc: f,
-	}
+func (obj UUID) UseDefaultFunc(fn any) IDGenerator {
+	obj.DefaultFunc = fn
+	return obj
 }

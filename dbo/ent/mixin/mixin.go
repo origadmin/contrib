@@ -19,34 +19,35 @@ type IDGenerator interface {
 	OP(name string) ent.Field
 	FK(name string) ent.Field
 	PK(name string, fn ...any) ent.Field
+	ToField() ent.Field
 }
 
 // Audit schema to include control and time fields.
-type Audit struct {
+type Audit[T any] struct {
 	mixin.Schema
-	CommentKey string
+	IDGen BaseID[T]
 }
 
 // Fields of the mixin.
-func (Audit) Fields() []ent.Field {
-	auditCreate := _id
+func (obj Audit[T]) Fields() []ent.Field {
+	auditCreate := obj.IDGen
 	auditCreate.Key = "create_author"
 	auditCreate.CommentKey = "entity.create_author.field.comment"
 	auditCreate.UseDefault = true
 	auditCreate.Optional = true
-	auditUpdate := _id
+	auditUpdate := obj.IDGen
 	auditUpdate.Key = "update_author"
 	auditUpdate.CommentKey = "entity.update_author.field.comment"
 	auditUpdate.UseDefault = true
 	auditUpdate.Optional = true
 	return []ent.Field{
-		auditCreate.ToField(),
-		auditUpdate.ToField(),
+		auditCreate.GenFunc(),
+		auditUpdate.GenFunc(),
 	}
 }
 
 // Indexes of the mixin.
-func (Audit) Indexes() []ent.Index {
+func (Audit[T]) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("create_author"),
 		index.Fields("update_author"),
@@ -54,24 +55,25 @@ func (Audit) Indexes() []ent.Index {
 }
 
 // ManagerSchema schema to include control and time fields.
-type ManagerSchema struct {
+type ManagerSchema[T any] struct {
 	mixin.Schema
+	IDGen    BaseID[T]
 	I18nText func(key string) string
 }
 
 // Fields of the Model.
-func (s ManagerSchema) Fields() []ent.Field {
-	manager := _id
+func (obj ManagerSchema[T]) Fields() []ent.Field {
+	manager := obj.IDGen
 	manager.Key = "manager_id"
 	manager.CommentKey = "entity.manager_id.field.comment"
 	manager.Optional = true
 	manager.UseDefault = true
 	managerName := ""
-	if s.I18nText != nil {
-		managerName = s.I18nText("entity.manager_name.field.comment")
+	if obj.I18nText != nil {
+		managerName = obj.I18nText("entity.manager_name.field.comment")
 	}
 	return []ent.Field{
-		manager.ToField(),
+		manager.GenFunc(),
 		field.String("manager_name").
 			Comment(managerName).
 			Default(""),
@@ -79,7 +81,7 @@ func (s ManagerSchema) Fields() []ent.Field {
 }
 
 // Indexes of the mixin.
-func (ManagerSchema) Indexes() []ent.Index {
+func (ManagerSchema[T]) Indexes() []ent.Index {
 	return []ent.Index{
 		index.Fields("manager_id"),
 	}
@@ -186,20 +188,6 @@ func (DeleteSchema) Indexes() []ent.Index {
 		index.Fields("delete_time"),
 	}
 }
-
-var (
-	ModelMixin = []ent.Mixin{
-		_id,
-		CreateSchema{},
-		UpdateSchema{},
-	}
-	AuditModelMixin = []ent.Mixin{
-		_id,
-		Audit{},
-		CreateSchema{},
-		UpdateSchema{},
-	}
-)
 
 type softDeleteKey struct{}
 

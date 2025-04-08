@@ -15,32 +15,6 @@ import (
 
 // ZeroTime represents the zero value for time.Time.
 var ZeroTime = time.Time{}
-var _id = ID{}
-
-func Comment(key string) IDGenerator {
-	return _id.Comment(key)
-}
-
-func PK(name string, comment ...string) ent.Field {
-	if len(comment) == 0 {
-		return _id.PK(name)
-	}
-	return _id.Comment(comment[0]).PK(name)
-}
-
-func FK(name string, comment ...string) ent.Field {
-	if len(comment) == 0 {
-		return _id.FK(name)
-	}
-	return _id.Comment(comment[0]).FK(name)
-}
-
-func OP(name string, comment ...string) ent.Field {
-	if len(comment) == 0 {
-		return _id.OP(name)
-	}
-	return _id.Comment(comment[0]).OP(name)
-}
 
 // TimeOP returns a time field with a default value of ZeroTime and a custom schema type for MySQL.
 func TimeOP(name string, comment ...string) ent.Field {
