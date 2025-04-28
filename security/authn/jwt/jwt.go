@@ -20,8 +20,8 @@ import (
 
 	middlewaresecurity "github.com/origadmin/runtime/agent/middleware/security"
 	configv1 "github.com/origadmin/runtime/gen/go/config/v1"
-	"github.com/origadmin/toolkits/security"
-	"github.com/origadmin/toolkits/storage/cache"
+	"github.com/origadmin/runtime/interfaces/security"
+	"github.com/origadmin/runtime/interfaces/storage/cache"
 )
 
 const (

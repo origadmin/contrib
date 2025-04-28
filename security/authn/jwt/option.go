@@ -10,8 +10,8 @@ import (
 
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 	configv1 "github.com/origadmin/runtime/gen/go/config/v1"
+	"github.com/origadmin/runtime/interfaces/security"
 	"github.com/origadmin/toolkits/errors"
-	"github.com/origadmin/toolkits/security"
 )
 
 type Option struct {

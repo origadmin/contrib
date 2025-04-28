@@ -9,7 +9,7 @@ import (
 	"context"
 	"database/sql/driver"
 
-	"github.com/origadmin/toolkits/database"
+	"github.com/origadmin/runtime/interfaces/database"
 )
 
 type (

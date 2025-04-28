@@ -14,7 +14,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	securityv1 "github.com/origadmin/runtime/gen/go/security/v1"
-	"github.com/origadmin/toolkits/security"
+	"github.com/origadmin/runtime/interfaces/security"
 )
 
 var (

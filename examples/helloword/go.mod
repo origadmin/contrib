@@ -2,8 +2,6 @@ module examples/helloword
 
 go 1.23.1
 
-toolchain go1.23.2
-
 require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-kratos/kratos/v2 v2.8.3

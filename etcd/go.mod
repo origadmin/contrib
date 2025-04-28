@@ -2,8 +2,6 @@ module github.com/origadmin/contrib/etcd
 
 go 1.23.1
 
-toolchain go1.23.2
-
 require (
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-20241219093211-5087366d2f90
 	github.com/go-kratos/kratos/v2 v2.8.3
