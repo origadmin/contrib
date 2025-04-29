@@ -13,7 +13,7 @@ import (
 )
 
 // OpenDB opens a database connection using the provided configuration
-func OpenDB(cfg *configv1.Data_Database) (*entsql.Driver, error) {
+func OpenDB(cfg *configv1.Database) (*entsql.Driver, error) {
 	// Open a database connection using the provided dialect and source
 	db, err := sql.Open(cfg.Dialect, cfg.Source)
 	if err != nil {

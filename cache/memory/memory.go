@@ -88,10 +88,10 @@ func (obj *Cache) Close(_ context.Context) error {
 	return nil
 }
 
-func NewCache(data *configv1.Data) *Cache {
-	cfg := data.GetCache().GetMemory()
+func NewCache(storage *configv1.Storage) *Cache {
+	cfg := storage.GetCache().GetMemory()
 	if cfg == nil {
-		cfg = new(configv1.Data_Memory)
+		cfg = new(configv1.Memory)
 	}
 	expiration := types.ZeroOr(time.Duration(cfg.GetExpiration()), 24*time.Hour)
 	interval := types.ZeroOr(time.Duration(cfg.GetCleanupInterval()), 30*time.Minute)

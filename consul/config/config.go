@@ -25,7 +25,7 @@ func init() {
 }
 
 // NewConsulConfig create a new consul config.
-func NewConsulConfig(ccfg *configv1.SourceConfig, ss ...config.OptionSetting) (config.KConfig, error) {
+func NewConsulConfig(ccfg *configv1.SourceConfig, ss ...config.Option) (config.KConfig, error) {
 	consul := ccfg.GetConsul()
 	if consul == nil {
 		return nil, errors.New("consul config error")
@@ -61,7 +61,7 @@ func NewConsulConfig(ccfg *configv1.SourceConfig, ss ...config.OptionSetting) (c
 	return config.NewSourceConfig(option.SourceOptions...), nil
 }
 
-func SyncConfig(ccfg *configv1.SourceConfig, v any, ss ...config.OptionSetting) error {
+func SyncConfig(ccfg *configv1.SourceConfig, v any, ss ...config.Option) error {
 	consul := ccfg.GetConsul()
 	if consul == nil {
 		return errors.New("consul config error")
