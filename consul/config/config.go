@@ -39,9 +39,9 @@ func NewConsulConfig(ccfg *configv1.SourceConfig, ss ...config.Option) (config.K
 	if err != nil {
 		return nil, errors.Wrap(err, "consul client error")
 	}
-
+	option := settings.ApplyOrZero(ss...)
 	if consul.Path == "" {
-		consul.Path = FileConfigPath(ccfg.Name, DefaultPathName)
+		consul.Path = FileConfigPath(option.ServiceName, DefaultPathName)
 	}
 
 	source, err := New(apiClient, WithPath(consul.Path))
@@ -49,7 +49,6 @@ func NewConsulConfig(ccfg *configv1.SourceConfig, ss ...config.Option) (config.K
 		return nil, errors.Wrap(err, "consul source error")
 	}
 
-	option := settings.ApplyOrZero(ss...)
 	var configSources = []config.KSource{source}
 	if ccfg.EnvPrefixes != nil {
 		configSources = append(configSources, env.NewSource(ccfg.EnvPrefixes...))
