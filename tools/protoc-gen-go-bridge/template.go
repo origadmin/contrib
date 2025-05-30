@@ -11,8 +11,8 @@ import (
 	"text/template"
 )
 
-//go:embed agentTemplate.tpl
-var agent string
+//go:embed bridge.tpl
+var bridge string
 
 type serviceDesc struct {
 	ServiceType string // Greeter
@@ -49,7 +49,7 @@ func (s *serviceDesc) execute() string {
 		s.MethodSets[m.Name] = m
 	}
 	buf := new(bytes.Buffer)
-	tmpl, err := template.New("agent").Parse(strings.TrimSpace(agent))
+	tmpl, err := template.New("bridge").Parse(strings.TrimSpace(bridge))
 	if err != nil {
 		panic(err)
 	}

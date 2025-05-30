@@ -21,7 +21,7 @@ var (
 func main() {
 	flag.Parse()
 	if *showVersion {
-		fmt.Printf("protoc-gen-go-agent %v\n", version)
+		fmt.Printf("protoc-gen-go-bridge %v\n", version)
 		return
 	}
 	protogen.Options{

@@ -4,5 +4,5 @@
 
 package main
 
-// version is the current protoc-gen-go-agent version.
+// version is the current protoc-gen-go-bridge version.
 var version = "unknown"

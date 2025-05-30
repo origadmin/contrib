@@ -1,4 +1,4 @@
-module github.com/origadmin/contrib/tools/protoc-gen-go-agent
+module github.com/origadmin/contrib/tools/protoc-gen-go-bridge
 
 go 1.23.1
 

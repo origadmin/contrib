@@ -8,7 +8,7 @@
 
 version: 2
 
-project_name: protoc-gen-go-agent
+project_name: protoc-gen-go-bridge
 
 before:
   hooks:
@@ -24,8 +24,8 @@ builds:
     flags:
       - -trimpath
     ldflags: -s -w -X main.version={{.Version}}
-    dir: ./tools/protoc-gen-go-agent
-    binary: protoc-gen-go-agent
+    dir: ./tools/protoc-gen-go-bridge
+    binary: protoc-gen-go-bridge
     #    main: ./main.go
     goos:
       - darwin
