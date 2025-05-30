@@ -11,7 +11,7 @@ import (
 	"text/template"
 )
 
-//go:embed bridge.tpl
+//go:embed bridgeTmpl.tpl
 var bridge string
 
 type serviceDesc struct {
