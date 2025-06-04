@@ -68,7 +68,7 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 
 	g.P("var (")
 	g.P("  _ = ", ioPackage.Ident("EOF"))
-	g.P("  _ = ", grpcStatusPackage.Ident("Status"))
+	g.P("  _ = ", grpcStatusPackage.Ident("Errorf"))
 	g.P("  _ = ", grpcCodesPackage.Ident("Unimplemented"))
 	g.P(")")
 
@@ -130,7 +130,7 @@ func hasHTTPRule(services []*protogen.Service) bool {
 func buildStreamingMethodDesc(g *protogen.GeneratedFile, m *protogen.Method) *methodDesc {
 	comment := m.Comments.Leading.String() + m.Comments.Trailing.String()
 	if comment != "" {
-		comment = "// " + m.GoName + strings.TrimPrefix(strings.TrimSuffix(comment, "\n"), "//")
+		comment = "// " + strings.TrimPrefix(strings.TrimSuffix(comment, "\n"), "//")
 	}
 	return &methodDesc{
 		Name:         m.GoName,
