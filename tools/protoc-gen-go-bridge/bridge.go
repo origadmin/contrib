@@ -21,8 +21,11 @@ import (
 
 const (
 	contextPackage       = protogen.GoImportPath("context")
+	ioPackage            = protogen.GoImportPath("io")
 	transportHTTPPackage = protogen.GoImportPath("github.com/go-kratos/kratos/v2/transport/http")
 	transportGRPCPackage = protogen.GoImportPath("google.golang.org/grpc")
+	grpcStatusPackage    = protogen.GoImportPath("google.golang.org/grpc/status")
+	grpcCodesPackage     = protogen.GoImportPath("google.golang.org/grpc/codes")
 )
 
 var methodSets = make(map[string]int)
@@ -59,11 +62,15 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 	g.P("// This is a compile-time assertion to ensure that this generated file")
 	g.P("// is compatible with the kratos package it is being compiled against.")
 	g.P("var _ = new(", contextPackage.Ident("Context"), ")")
-	//g.P("var _ = new(", ginPackage.Ident("H"), ")")
-	//g.P("var _ = ", bindingPackage.Ident("EncodeURL"))
 	g.P("const _ = ", transportHTTPPackage.Ident("SupportPackageIsVersion1"))
 	g.P("const _ = ", transportGRPCPackage.Ident("SupportPackageIsVersion9"))
 	g.P()
+
+	g.P("var (")
+	g.P("  _ = ", ioPackage.Ident("EOF"))
+	g.P("  _ = ", grpcStatusPackage.Ident("Status"))
+	g.P("  _ = ", grpcCodesPackage.Ident("Unimplemented"))
+	g.P(")")
 
 	for _, service := range file.Services {
 		genService(gen, file, g, service, omitempty, omitemptyPrefix)
@@ -77,12 +84,16 @@ func genService(_ *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFi
 	}
 	// HTTP Server.
 	sd := &serviceDesc{
-		ServiceType: service.GoName,
-		ServiceName: string(service.Desc.FullName()),
-		Metadata:    file.Desc.Path(),
+		ServiceType:   service.GoName,
+		ServiceName:   string(service.Desc.FullName()),
+		Metadata:      file.Desc.Path(),
+		MethodSets:    make(map[string]*methodDesc),
+		ExtMethodSets: make(map[string]*methodDesc),
 	}
 	for _, method := range service.Methods {
 		if method.Desc.IsStreamingClient() || method.Desc.IsStreamingServer() {
+			m := buildStreamingMethodDesc(g, method)
+			sd.ExtMethodSets[m.Name] = m
 			continue
 		}
 		rule, ok := proto.GetExtension(method.Desc.Options(), annotations.E_Http).(*annotations.HttpRule)
@@ -114,6 +125,23 @@ func hasHTTPRule(services []*protogen.Service) bool {
 		}
 	}
 	return false
+}
+
+func buildStreamingMethodDesc(g *protogen.GeneratedFile, m *protogen.Method) *methodDesc {
+	comment := m.Comments.Leading.String() + m.Comments.Trailing.String()
+	if comment != "" {
+		comment = "// " + m.GoName + strings.TrimPrefix(strings.TrimSuffix(comment, "\n"), "//")
+	}
+	return &methodDesc{
+		Name:         m.GoName,
+		OriginalName: string(m.Desc.Name()),
+		Request:      g.QualifiedGoIdent(m.Input.GoIdent),
+		Reply:        g.QualifiedGoIdent(m.Output.GoIdent),
+		Comment:      comment,
+		Path:         "/" + string(m.Desc.FullName()), // 默认路径
+		Method:       "",
+		Streaming:    true,
+	}
 }
 
 func buildHTTPRule(g *protogen.GeneratedFile, service *protogen.Service, m *protogen.Method, rule *annotations.HttpRule, omitemptyPrefix string) *methodDesc {

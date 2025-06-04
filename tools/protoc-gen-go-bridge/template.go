@@ -15,11 +15,12 @@ import (
 var bridge string
 
 type serviceDesc struct {
-	ServiceType string // Greeter
-	ServiceName string // helloworld.Greeter
-	Metadata    string // api/helloworld/helloworld.proto
-	Methods     []*methodDesc
-	MethodSets  map[string]*methodDesc
+	ServiceType   string // Greeter
+	ServiceName   string // helloworld.Greeter
+	Metadata      string // api/helloworld/helloworld.proto
+	Methods       []*methodDesc
+	MethodSets    map[string]*methodDesc
+	ExtMethodSets map[string]*methodDesc
 }
 
 type methodDesc struct {
@@ -41,10 +42,12 @@ type methodDesc struct {
 	HasBody      bool
 	Body         string
 	ResponseBody string
+
+	// grpc_rule
+	Streaming bool
 }
 
 func (s *serviceDesc) execute() string {
-	s.MethodSets = make(map[string]*methodDesc)
 	for _, m := range s.Methods {
 		s.MethodSets[m.Name] = m
 	}

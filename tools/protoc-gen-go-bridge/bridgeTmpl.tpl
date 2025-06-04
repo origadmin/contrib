@@ -14,30 +14,33 @@ type {{.ServiceType}}Bridger interface {
 {{- end}}
 }
 
-type {{.ServiceType}}BridgeHooker interface {
-{{.ServiceType}}Bridger
+type {{.ServiceType}}Hooker interface {
 {{- range .MethodSets}}
-    {{- if ne .Comment ""}}
-        {{.Comment}}
-    {{- end}}
-    Before{{.Name}}(http.Context, *{{.Request}}) (context.Context, error)
-    {{.Name}}Result(http.Context,*{{.Request}}, *{{.Reply}}) error
+    {{$svrType}}{{.Name}}Hooker
 {{- end}}
 }
 
-func Register{{.ServiceType}}Bridger(s *http.Server, srv {{.ServiceType}}Bridger) {
+type {{.ServiceType}}HookedBridger interface {
+		{{.ServiceType}}Hooker
+		{{.ServiceType}}Bridger
+}
+
+{{- range .MethodSets}}
+	type {{$svrType}}{{.Name}}Hooker interface {
+		Before{{.Name}}(http.Context, *{{.Request}}) (context.Context, error)
+    {{.Name}}Result(http.Context,*{{.Request}}, *{{.Reply}}) error
+	}
+{{- end}}
+
+func Register{{.ServiceType}}Bridger(s *http.Server, srv {{.ServiceType}}HookedBridger) {
 r := s.Route("/")
-		hook, ok := srv.({{.ServiceType}}BridgeHooker)
-    if !ok {
-			hook = Unimplemented{{.ServiceType}}Bridger{ {{.ServiceType}}Bridger:srv}
-		}
 {{- range .Methods}}
-	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_Bridge_Handler(hook))
+	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_Bridge_Handler(srv))
 {{- end}}
 }
 
 {{range .Methods}}
-	func _{{$svrType}}_{{.Name}}{{.Num}}_Bridge_Handler(srv {{$svrType}}BridgeHooker) func(ctx http.Context) error {
+	func _{{$svrType}}_{{.Name}}{{.Num}}_Bridge_Handler(srv {{$svrType}}HookedBridger) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 	var in {{.Request}}
   {{- if .HasBody}}
@@ -71,29 +74,41 @@ r := s.Route("/")
 	}
 {{end}}
 
-// Unimplemented{{.ServiceType}}Bridger must be embedded to have
+// Unimplemented{{.ServiceType}}Hooked must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type Unimplemented{{.ServiceType}}Bridger struct{
-{{.ServiceType}}Bridger
-}
+type Unimplemented{{.ServiceType}}Hooked struct{}
 
 {{range .MethodSets}}
-func (Unimplemented{{$svrType}}Bridger)Before{{.Name}}(ctx http.Context,in *{{.Request}}) (context.Context, error){
+	func (Unimplemented{{$svrType}}Hooked)Before{{.Name}}(ctx http.Context,in *{{.Request}}) (context.Context, error){
 	return ctx, nil
+	}
+
+	func (Unimplemented{{$svrType}}Hooked){{.Name}}Result(ctx http.Context,in *{{.Request}},out *{{.Reply}}) error {
+	return ctx.Result(200, out{{.ResponseBody}})
+	}
+{{end}}
+
+
+func With{{.ServiceType}}Hook(h {{.ServiceType}}Hooker) func({{.ServiceType}}Bridger) {{.ServiceType}}HookedBridger {
+return func(b {{.ServiceType}}Bridger) {{.ServiceType}}HookedBridger {
+return {{.ServiceType}}HookedBridge{ {{.ServiceType}}Bridger:b, {{.ServiceType}}Hooker:h}
+}
 }
 
-func (Unimplemented{{$svrType}}Bridger){{.Name}}Result(ctx http.Context,in *{{.Request}},out *{{.Reply}}) error {
-	return ctx.Result(200, out{{.ResponseBody}})
+// {{.ServiceType}}HookedBridge is a bridge between the HTTP and gRPC implementations of {{.ServiceType}}.
+// It implements the HTTP and gRPC implementations of {{.ServiceType}}.
+// It forwards requests and responses between the two implementations.
+type {{.ServiceType}}HookedBridge struct{
+{{.ServiceType}}Bridger
+{{.ServiceType}}Hooker
 }
-{{end}}
 
 type {{.ServiceType}}HTTPBridgeImpl struct {
 		client {{.ServiceType}}HTTPClient
 }
-
 
 func New{{.ServiceType}}HTTPBridge(client *http.Client) {{.ServiceType}}HTTPServer {
 		return &{{.ServiceType}}HTTPBridgeImpl{client:New{{.ServiceType}}HTTPClient(client)}
@@ -110,7 +125,7 @@ type {{.ServiceType}}BridgeImpl struct {
 }
 
 func New{{.ServiceType}}Bridge(client grpc.ClientConnInterface) {{.ServiceType}}Server {
-return &{{.ServiceType}}BridgeImpl{client:New{{.ServiceType}}Client(client)}
+		return &{{.ServiceType}}BridgeImpl{client:New{{.ServiceType}}Client(client)}
 }
 
 {{range .MethodSets}}
@@ -119,4 +134,61 @@ return &{{.ServiceType}}BridgeImpl{client:New{{.ServiceType}}Client(client)}
 	}
 {{end}}
 
+{{range.ExtMethodSets}}
+	func (c *{{$svrType}}BridgeImpl) {{.Name}}(request *{{.Request}}, g grpc.ServerStreamingServer[{{.Reply}}]) error {
+		stream, err := c.client.{{.Name}}(g.Context(), request)
+		if err != nil {
+			return err
+		}
+		for {
+			rule, err := stream.Recv()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				return status.Errorf(status.Code(err), "received stream error: %v", err)
+			}
+			if err := g.Send(rule); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+{{end}}
 func (c *{{.ServiceType}}BridgeImpl) mustEmbedUnimplemented{{.ServiceType}}Server() {}
+
+type {{.ServiceType}}GRPC2HTTPBridgeImpl struct {
+client {{.ServiceType}}Client
+}
+
+func New{{.ServiceType}}GRPC2HTTP(client grpc.ClientConnInterface) {{.ServiceType}}HTTPServer {
+		return &{{.ServiceType}}GRPC2HTTPBridgeImpl{client:New{{.ServiceType}}Client(client)}
+}
+
+{{range .MethodSets}}
+	func (c *{{$svrType}}GRPC2HTTPBridgeImpl) {{.Name}}(ctx context.Context, in *{{.Request}}) (*{{.Reply}}, error) {
+			return c.client.{{.Name}}(ctx, in)
+	}
+{{end}}
+
+type {{.ServiceType}}HTTP2GRPCBridgeImpl struct {
+		client {{.ServiceType}}HTTPClient
+}
+
+func New{{.ServiceType}}HTTP2GRPC(client *http.Client) {{.ServiceType}}Server {
+		return &{{.ServiceType}}HTTP2GRPCBridgeImpl{client:New{{.ServiceType}}HTTPClient(client)}
+}
+
+{{range .MethodSets}}
+	func (c *{{$svrType}}HTTP2GRPCBridgeImpl) {{.Name}}(ctx context.Context, in *{{.Request}}) (*{{.Reply}}, error) {
+	return c.client.{{.Name}}(ctx, in)
+	}
+{{end}}
+
+{{range.ExtMethodSets}}
+func (c *{{$svrType}}HTTP2GRPCBridgeImpl) {{.Name}}(request *{{.Request}}, g grpc.ServerStreamingServer[{{.Reply}}]) error {
+	return status.Errorf(codes.Unimplemented, "StreamRules not implemented")
+}
+{{end}}
+
+func (c *{{.ServiceType}}HTTP2GRPCBridgeImpl) mustEmbedUnimplemented{{.ServiceType}}Server() {}
