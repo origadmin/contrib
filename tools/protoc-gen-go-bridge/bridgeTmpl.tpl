@@ -5,7 +5,7 @@
 	const {{$svrType}}{{.OriginalName}}BridgeOperation = "/{{$svrName}}/{{.OriginalName}}"
 {{- end}}
 
-type {{.ServiceType}}Bridger interface {
+type {{.ServiceType}}BridgeServer interface {
 {{- range .MethodSets}}
     {{- if ne .Comment ""}}
         {{.Comment}}
@@ -22,17 +22,17 @@ type {{.ServiceType}}Hooker interface {
 
 type {{.ServiceType}}HookedBridger interface {
 		{{.ServiceType}}Hooker
-		{{.ServiceType}}Bridger
+		{{.ServiceType}}BridgeServer
 }
 
 {{- range .MethodSets}}
 	type {{$svrType}}{{.Name}}Hooker interface {
-		Before{{.Name}}(http.Context, *{{.Request}}) (context.Context, error)
-    {{.Name}}Result(http.Context,*{{.Request}}, *{{.Reply}}) error
+		Prepare{{.Name}}(http.Context, *{{.Request}}) (context.Context, error)
+		Complete{{.Name}}(http.Context,*{{.Request}}, *{{.Reply}}) error
 	}
 {{- end}}
 
-func Register{{.ServiceType}}Bridger(s *http.Server, srv {{.ServiceType}}HookedBridger) {
+func Register{{.ServiceType}}BridgeServer(s *http.Server, srv {{.ServiceType}}HookedBridger) {
 r := s.Route("/")
 {{- range .Methods}}
 	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_Bridge_Handler(srv))
@@ -49,7 +49,7 @@ r := s.Route("/")
 		}
   {{- end}}
 	if err := ctx.BindQuery(&in); err != nil {
-	return err
+		return err
 	}
   {{- if .HasVars}}
 		if err := ctx.BindVars(&in); err != nil {
@@ -61,7 +61,7 @@ r := s.Route("/")
 	return srv.{{.Name}}(ctx, req.(*{{.Request}}))
 	})
 
-	newctx,err:=srv.Before{{.Name}}(ctx, &in)
+	newctx,err:=srv.Prepare{{.Name}}(ctx, &in)
 	if err != nil {
 	return err
 	}
@@ -69,7 +69,7 @@ r := s.Route("/")
 	if err != nil {
 	return err
 	}
-	return srv.{{.Name}}Result(ctx,&in, out.(*{{.Reply}}))
+	return srv.Complete{{.Name}}(ctx,&in, out.(*{{.Reply}}))
 	}
 	}
 {{end}}
@@ -82,19 +82,19 @@ r := s.Route("/")
 type Unimplemented{{.ServiceType}}Hooked struct{}
 
 {{range .MethodSets}}
-	func (Unimplemented{{$svrType}}Hooked)Before{{.Name}}(ctx http.Context,in *{{.Request}}) (context.Context, error){
+	func (Unimplemented{{$svrType}}Hooked)Prepare{{.Name}}(ctx http.Context,in *{{.Request}}) (context.Context, error){
 	return ctx, nil
 	}
 
-	func (Unimplemented{{$svrType}}Hooked){{.Name}}Result(ctx http.Context,in *{{.Request}},out *{{.Reply}}) error {
+	func (Unimplemented{{$svrType}}Hooked)Complete{{.Name}}(ctx http.Context,in *{{.Request}},out *{{.Reply}}) error {
 	return ctx.Result(200, out{{.ResponseBody}})
 	}
 {{end}}
 
 
-func With{{.ServiceType}}Hook(h {{.ServiceType}}Hooker) func({{.ServiceType}}Bridger) {{.ServiceType}}HookedBridger {
-return func(b {{.ServiceType}}Bridger) {{.ServiceType}}HookedBridger {
-return {{.ServiceType}}HookedBridge{ {{.ServiceType}}Bridger:b, {{.ServiceType}}Hooker:h}
+func With{{.ServiceType}}Hook(h {{.ServiceType}}Hooker) func({{.ServiceType}}BridgeServer) {{.ServiceType}}HookedBridger {
+return func(srv {{.ServiceType}}BridgeServer) {{.ServiceType}}HookedBridger {
+return {{.ServiceType}}HookedBridge{ {{.ServiceType}}BridgeServer:srv, {{.ServiceType}}Hooker:h}
 }
 }
 
@@ -102,7 +102,7 @@ return {{.ServiceType}}HookedBridge{ {{.ServiceType}}Bridger:b, {{.ServiceType}}
 // It implements the HTTP and gRPC implementations of {{.ServiceType}}.
 // It forwards requests and responses between the two implementations.
 type {{.ServiceType}}HookedBridge struct{
-{{.ServiceType}}Bridger
+{{.ServiceType}}BridgeServer
 {{.ServiceType}}Hooker
 }
 

@@ -130,7 +130,7 @@ func hasHTTPRule(services []*protogen.Service) bool {
 func buildStreamingMethodDesc(g *protogen.GeneratedFile, m *protogen.Method) *methodDesc {
 	comment := m.Comments.Leading.String() + m.Comments.Trailing.String()
 	if comment != "" {
-		comment = "// " + strings.TrimPrefix(strings.TrimSuffix(comment, "\n"), "//")
+		comment = "// " + m.GoName + strings.TrimPrefix(strings.TrimSuffix(comment, "\n"), "//")
 	}
 	return &methodDesc{
 		Name:         m.GoName,
@@ -241,7 +241,7 @@ func buildMethodDesc(g *protogen.GeneratedFile, m *protogen.Method, method, path
 	}
 	comment := m.Comments.Leading.String() + m.Comments.Trailing.String()
 	if comment != "" {
-		comment = "// " + m.GoName + strings.TrimPrefix(strings.TrimSuffix(comment, "\n"), "//")
+		comment = "//" + strings.TrimPrefix(strings.TrimSuffix(comment, "\n"), "//")
 	}
 	return &methodDesc{
 		Name:         m.GoName,
