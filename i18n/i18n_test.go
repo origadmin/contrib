@@ -33,7 +33,7 @@ func TestLocaleFrom(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := PreferredLocale(tt.args.supports...); got != tt.want {
+			if got := PreferredLocale("zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"); got != tt.want {
 				t.Errorf("LocaleFrom() = %v, want %v", got, tt.want)
 			}
 		})

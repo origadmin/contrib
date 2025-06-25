@@ -105,14 +105,18 @@ var (
 // PreferredLocale gets the current system language settings
 // multi-language are supported, the first match is returned
 // if no match is found, the default system language settings is returned
-func PreferredLocale(tags []Tag, localeStrings ...string) string {
-	for _, localeString := range localeStrings {
-		for _, tag := range tags {
-			prefer := Make(localeString)
-			if Compare(tag, prefer) == 1 {
-				return localeString
-			}
-		}
+func PreferredLocale(acceptLanguage string) string {
+	localeStrings, _, err := language.ParseAcceptLanguage(acceptLanguage)
+	if err != nil {
+		return defaultLocaleString
+	}
+	m := language.NewMatcher(Locales)
+	tag, index, c := m.Match(localeStrings...)
+	if c == 0 {
+		return tag.String()
+	}
+	if index < len(Locales) {
+		return Locales[index].String()
 	}
 	return defaultLocaleString
 }
