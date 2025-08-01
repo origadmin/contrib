@@ -1,0 +1,3597 @@
+{
+  "version": {
+    "number": "$Revision$"
+  },
+  "windows_zones": {
+    "map_timezones": {
+      "other_version": "7e11800",
+      "type_version": "2021a",
+      "map_zone": [
+        {
+          "other": "Dateline Standard Time",
+          "territory": "001",
+          "types": [
+            "Etc/GMT+12"
+          ]
+        },
+        {
+          "other": "Dateline Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT+12"
+          ]
+        },
+        {
+          "other": "UTC-11",
+          "territory": "001",
+          "types": [
+            "Etc/GMT+11"
+          ]
+        },
+        {
+          "other": "UTC-11",
+          "territory": "AS",
+          "types": [
+            "Pacific/Pago_Pago"
+          ]
+        },
+        {
+          "other": "UTC-11",
+          "territory": "NU",
+          "types": [
+            "Pacific/Niue"
+          ]
+        },
+        {
+          "other": "UTC-11",
+          "territory": "UM",
+          "types": [
+            "Pacific/Midway"
+          ]
+        },
+        {
+          "other": "UTC-11",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT+11"
+          ]
+        },
+        {
+          "other": "Aleutian Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Adak"
+          ]
+        },
+        {
+          "other": "Aleutian Standard Time",
+          "territory": "US",
+          "types": [
+            "America/Adak"
+          ]
+        },
+        {
+          "other": "Hawaiian Standard Time",
+          "territory": "001",
+          "types": [
+            "Pacific/Honolulu"
+          ]
+        },
+        {
+          "other": "Hawaiian Standard Time",
+          "territory": "CK",
+          "types": [
+            "Pacific/Rarotonga"
+          ]
+        },
+        {
+          "other": "Hawaiian Standard Time",
+          "territory": "PF",
+          "types": [
+            "Pacific/Tahiti"
+          ]
+        },
+        {
+          "other": "Hawaiian Standard Time",
+          "territory": "US",
+          "types": [
+            "Pacific/Honolulu"
+          ]
+        },
+        {
+          "other": "Hawaiian Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT+10"
+          ]
+        },
+        {
+          "other": "Marquesas Standard Time",
+          "territory": "001",
+          "types": [
+            "Pacific/Marquesas"
+          ]
+        },
+        {
+          "other": "Marquesas Standard Time",
+          "territory": "PF",
+          "types": [
+            "Pacific/Marquesas"
+          ]
+        },
+        {
+          "other": "Alaskan Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Anchorage"
+          ]
+        },
+        {
+          "other": "Alaskan Standard Time",
+          "territory": "US",
+          "types": [
+            "America/Anchorage",
+            "America/Juneau",
+            "America/Metlakatla",
+            "America/Nome",
+            "America/Sitka",
+            "America/Yakutat"
+          ]
+        },
+        {
+          "other": "UTC-09",
+          "territory": "001",
+          "types": [
+            "Etc/GMT+9"
+          ]
+        },
+        {
+          "other": "UTC-09",
+          "territory": "PF",
+          "types": [
+            "Pacific/Gambier"
+          ]
+        },
+        {
+          "other": "UTC-09",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT+9"
+          ]
+        },
+        {
+          "other": "Pacific Standard Time (Mexico)",
+          "territory": "001",
+          "types": [
+            "America/Tijuana"
+          ]
+        },
+        {
+          "other": "Pacific Standard Time (Mexico)",
+          "territory": "MX",
+          "types": [
+            "America/Tijuana"
+          ]
+        },
+        {
+          "other": "UTC-08",
+          "territory": "001",
+          "types": [
+            "Etc/GMT+8"
+          ]
+        },
+        {
+          "other": "UTC-08",
+          "territory": "PN",
+          "types": [
+            "Pacific/Pitcairn"
+          ]
+        },
+        {
+          "other": "UTC-08",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT+8"
+          ]
+        },
+        {
+          "other": "Pacific Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Los_Angeles"
+          ]
+        },
+        {
+          "other": "Pacific Standard Time",
+          "territory": "CA",
+          "types": [
+            "America/Vancouver"
+          ]
+        },
+        {
+          "other": "Pacific Standard Time",
+          "territory": "US",
+          "types": [
+            "America/Los_Angeles"
+          ]
+        },
+        {
+          "other": "US Mountain Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Phoenix"
+          ]
+        },
+        {
+          "other": "US Mountain Standard Time",
+          "territory": "CA",
+          "types": [
+            "America/Creston",
+            "America/Dawson_Creek",
+            "America/Fort_Nelson"
+          ]
+        },
+        {
+          "other": "US Mountain Standard Time",
+          "territory": "MX",
+          "types": [
+            "America/Hermosillo"
+          ]
+        },
+        {
+          "other": "US Mountain Standard Time",
+          "territory": "US",
+          "types": [
+            "America/Phoenix"
+          ]
+        },
+        {
+          "other": "US Mountain Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT+7"
+          ]
+        },
+        {
+          "other": "Mountain Standard Time (Mexico)",
+          "territory": "001",
+          "types": [
+            "America/Mazatlan"
+          ]
+        },
+        {
+          "other": "Mountain Standard Time (Mexico)",
+          "territory": "MX",
+          "types": [
+            "America/Mazatlan"
+          ]
+        },
+        {
+          "other": "Mountain Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Denver"
+          ]
+        },
+        {
+          "other": "Mountain Standard Time",
+          "territory": "CA",
+          "types": [
+            "America/Edmonton",
+            "America/Cambridge_Bay",
+            "America/Inuvik"
+          ]
+        },
+        {
+          "other": "Mountain Standard Time",
+          "territory": "MX",
+          "types": [
+            "America/Ciudad_Juarez"
+          ]
+        },
+        {
+          "other": "Mountain Standard Time",
+          "territory": "US",
+          "types": [
+            "America/Denver",
+            "America/Boise"
+          ]
+        },
+        {
+          "other": "Yukon Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Whitehorse"
+          ]
+        },
+        {
+          "other": "Yukon Standard Time",
+          "territory": "CA",
+          "types": [
+            "America/Whitehorse",
+            "America/Dawson"
+          ]
+        },
+        {
+          "other": "Central America Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Guatemala"
+          ]
+        },
+        {
+          "other": "Central America Standard Time",
+          "territory": "BZ",
+          "types": [
+            "America/Belize"
+          ]
+        },
+        {
+          "other": "Central America Standard Time",
+          "territory": "CR",
+          "types": [
+            "America/Costa_Rica"
+          ]
+        },
+        {
+          "other": "Central America Standard Time",
+          "territory": "EC",
+          "types": [
+            "Pacific/Galapagos"
+          ]
+        },
+        {
+          "other": "Central America Standard Time",
+          "territory": "GT",
+          "types": [
+            "America/Guatemala"
+          ]
+        },
+        {
+          "other": "Central America Standard Time",
+          "territory": "HN",
+          "types": [
+            "America/Tegucigalpa"
+          ]
+        },
+        {
+          "other": "Central America Standard Time",
+          "territory": "NI",
+          "types": [
+            "America/Managua"
+          ]
+        },
+        {
+          "other": "Central America Standard Time",
+          "territory": "SV",
+          "types": [
+            "America/El_Salvador"
+          ]
+        },
+        {
+          "other": "Central America Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT+6"
+          ]
+        },
+        {
+          "other": "Central Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Chicago"
+          ]
+        },
+        {
+          "other": "Central Standard Time",
+          "territory": "CA",
+          "types": [
+            "America/Winnipeg",
+            "America/Rankin_Inlet",
+            "America/Resolute"
+          ]
+        },
+        {
+          "other": "Central Standard Time",
+          "territory": "MX",
+          "types": [
+            "America/Matamoros",
+            "America/Ojinaga"
+          ]
+        },
+        {
+          "other": "Central Standard Time",
+          "territory": "US",
+          "types": [
+            "America/Chicago",
+            "America/Indiana/Knox",
+            "America/Indiana/Tell_City",
+            "America/Menominee",
+            "America/North_Dakota/Beulah",
+            "America/North_Dakota/Center",
+            "America/North_Dakota/New_Salem"
+          ]
+        },
+        {
+          "other": "Easter Island Standard Time",
+          "territory": "001",
+          "types": [
+            "Pacific/Easter"
+          ]
+        },
+        {
+          "other": "Easter Island Standard Time",
+          "territory": "CL",
+          "types": [
+            "Pacific/Easter"
+          ]
+        },
+        {
+          "other": "Central Standard Time (Mexico)",
+          "territory": "001",
+          "types": [
+            "America/Mexico_City"
+          ]
+        },
+        {
+          "other": "Central Standard Time (Mexico)",
+          "territory": "MX",
+          "types": [
+            "America/Mexico_City",
+            "America/Bahia_Banderas",
+            "America/Merida",
+            "America/Monterrey",
+            "America/Chihuahua",
+            ""
+          ]
+        },
+        {
+          "other": "Canada Central Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Regina"
+          ]
+        },
+        {
+          "other": "Canada Central Standard Time",
+          "territory": "CA",
+          "types": [
+            "America/Regina",
+            "America/Swift_Current"
+          ]
+        },
+        {
+          "other": "SA Pacific Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Bogota"
+          ]
+        },
+        {
+          "other": "SA Pacific Standard Time",
+          "territory": "BR",
+          "types": [
+            "America/Rio_Branco",
+            "America/Eirunepe"
+          ]
+        },
+        {
+          "other": "SA Pacific Standard Time",
+          "territory": "CA",
+          "types": [
+            "America/Coral_Harbour"
+          ]
+        },
+        {
+          "other": "SA Pacific Standard Time",
+          "territory": "CO",
+          "types": [
+            "America/Bogota"
+          ]
+        },
+        {
+          "other": "SA Pacific Standard Time",
+          "territory": "EC",
+          "types": [
+            "America/Guayaquil"
+          ]
+        },
+        {
+          "other": "SA Pacific Standard Time",
+          "territory": "JM",
+          "types": [
+            "America/Jamaica"
+          ]
+        },
+        {
+          "other": "SA Pacific Standard Time",
+          "territory": "KY",
+          "types": [
+            "America/Cayman"
+          ]
+        },
+        {
+          "other": "SA Pacific Standard Time",
+          "territory": "PA",
+          "types": [
+            "America/Panama"
+          ]
+        },
+        {
+          "other": "SA Pacific Standard Time",
+          "territory": "PE",
+          "types": [
+            "America/Lima"
+          ]
+        },
+        {
+          "other": "SA Pacific Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT+5"
+          ]
+        },
+        {
+          "other": "Eastern Standard Time (Mexico)",
+          "territory": "001",
+          "types": [
+            "America/Cancun"
+          ]
+        },
+        {
+          "other": "Eastern Standard Time (Mexico)",
+          "territory": "MX",
+          "types": [
+            "America/Cancun"
+          ]
+        },
+        {
+          "other": "Eastern Standard Time",
+          "territory": "001",
+          "types": [
+            "America/New_York"
+          ]
+        },
+        {
+          "other": "Eastern Standard Time",
+          "territory": "BS",
+          "types": [
+            "America/Nassau"
+          ]
+        },
+        {
+          "other": "Eastern Standard Time",
+          "territory": "CA",
+          "types": [
+            "America/Toronto",
+            "America/Iqaluit"
+          ]
+        },
+        {
+          "other": "Eastern Standard Time",
+          "territory": "US",
+          "types": [
+            "America/New_York",
+            "America/Detroit",
+            "America/Indiana/Petersburg",
+            "America/Indiana/Vincennes",
+            "America/Indiana/Winamac",
+            "America/Kentucky/Monticello",
+            "America/Louisville"
+          ]
+        },
+        {
+          "other": "Haiti Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Port-au-Prince"
+          ]
+        },
+        {
+          "other": "Haiti Standard Time",
+          "territory": "HT",
+          "types": [
+            "America/Port-au-Prince"
+          ]
+        },
+        {
+          "other": "Cuba Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Havana"
+          ]
+        },
+        {
+          "other": "Cuba Standard Time",
+          "territory": "CU",
+          "types": [
+            "America/Havana"
+          ]
+        },
+        {
+          "other": "US Eastern Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Indianapolis"
+          ]
+        },
+        {
+          "other": "US Eastern Standard Time",
+          "territory": "US",
+          "types": [
+            "America/Indianapolis",
+            "America/Indiana/Marengo",
+            "America/Indiana/Vevay"
+          ]
+        },
+        {
+          "other": "Turks And Caicos Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Grand_Turk"
+          ]
+        },
+        {
+          "other": "Turks And Caicos Standard Time",
+          "territory": "TC",
+          "types": [
+            "America/Grand_Turk"
+          ]
+        },
+        {
+          "other": "Paraguay Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Asuncion"
+          ]
+        },
+        {
+          "other": "Paraguay Standard Time",
+          "territory": "PY",
+          "types": [
+            "America/Asuncion"
+          ]
+        },
+        {
+          "other": "Atlantic Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Halifax"
+          ]
+        },
+        {
+          "other": "Atlantic Standard Time",
+          "territory": "BM",
+          "types": [
+            "Atlantic/Bermuda"
+          ]
+        },
+        {
+          "other": "Atlantic Standard Time",
+          "territory": "CA",
+          "types": [
+            "America/Halifax",
+            "America/Glace_Bay",
+            "America/Goose_Bay",
+            "America/Moncton"
+          ]
+        },
+        {
+          "other": "Atlantic Standard Time",
+          "territory": "GL",
+          "types": [
+            "America/Thule"
+          ]
+        },
+        {
+          "other": "Venezuela Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Caracas"
+          ]
+        },
+        {
+          "other": "Venezuela Standard Time",
+          "territory": "VE",
+          "types": [
+            "America/Caracas"
+          ]
+        },
+        {
+          "other": "Central Brazilian Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Cuiaba"
+          ]
+        },
+        {
+          "other": "Central Brazilian Standard Time",
+          "territory": "BR",
+          "types": [
+            "America/Cuiaba",
+            "America/Campo_Grande"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "001",
+          "types": [
+            "America/La_Paz"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "AG",
+          "types": [
+            "America/Antigua"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "AI",
+          "types": [
+            "America/Anguilla"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "AW",
+          "types": [
+            "America/Aruba"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "BB",
+          "types": [
+            "America/Barbados"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "BL",
+          "types": [
+            "America/St_Barthelemy"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "BO",
+          "types": [
+            "America/La_Paz"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "BQ",
+          "types": [
+            "America/Kralendijk"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "BR",
+          "types": [
+            "America/Manaus",
+            "America/Boa_Vista",
+            "America/Porto_Velho"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "CA",
+          "types": [
+            "America/Blanc-Sablon"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "CW",
+          "types": [
+            "America/Curacao"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "DM",
+          "types": [
+            "America/Dominica"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "DO",
+          "types": [
+            "America/Santo_Domingo"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "GD",
+          "types": [
+            "America/Grenada"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "GP",
+          "types": [
+            "America/Guadeloupe"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "GY",
+          "types": [
+            "America/Guyana"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "KN",
+          "types": [
+            "America/St_Kitts"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "LC",
+          "types": [
+            "America/St_Lucia"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "MF",
+          "types": [
+            "America/Marigot"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "MQ",
+          "types": [
+            "America/Martinique"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "MS",
+          "types": [
+            "America/Montserrat"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "PR",
+          "types": [
+            "America/Puerto_Rico"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "SX",
+          "types": [
+            "America/Lower_Princes"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "TT",
+          "types": [
+            "America/Port_of_Spain"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "VC",
+          "types": [
+            "America/St_Vincent"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "VG",
+          "types": [
+            "America/Tortola"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "VI",
+          "types": [
+            "America/St_Thomas"
+          ]
+        },
+        {
+          "other": "SA Western Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT+4"
+          ]
+        },
+        {
+          "other": "Pacific SA Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Santiago"
+          ]
+        },
+        {
+          "other": "Pacific SA Standard Time",
+          "territory": "CL",
+          "types": [
+            "America/Santiago"
+          ]
+        },
+        {
+          "other": "Newfoundland Standard Time",
+          "territory": "001",
+          "types": [
+            "America/St_Johns"
+          ]
+        },
+        {
+          "other": "Newfoundland Standard Time",
+          "territory": "CA",
+          "types": [
+            "America/St_Johns"
+          ]
+        },
+        {
+          "other": "Tocantins Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Araguaina"
+          ]
+        },
+        {
+          "other": "Tocantins Standard Time",
+          "territory": "BR",
+          "types": [
+            "America/Araguaina"
+          ]
+        },
+        {
+          "other": "E. South America Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Sao_Paulo"
+          ]
+        },
+        {
+          "other": "E. South America Standard Time",
+          "territory": "BR",
+          "types": [
+            "America/Sao_Paulo"
+          ]
+        },
+        {
+          "other": "SA Eastern Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Cayenne"
+          ]
+        },
+        {
+          "other": "SA Eastern Standard Time",
+          "territory": "AQ",
+          "types": [
+            "Antarctica/Rothera",
+            "Antarctica/Palmer"
+          ]
+        },
+        {
+          "other": "SA Eastern Standard Time",
+          "territory": "BR",
+          "types": [
+            "America/Fortaleza",
+            "America/Belem",
+            "America/Maceio",
+            "America/Recife",
+            "America/Santarem"
+          ]
+        },
+        {
+          "other": "SA Eastern Standard Time",
+          "territory": "FK",
+          "types": [
+            "Atlantic/Stanley"
+          ]
+        },
+        {
+          "other": "SA Eastern Standard Time",
+          "territory": "GF",
+          "types": [
+            "America/Cayenne"
+          ]
+        },
+        {
+          "other": "SA Eastern Standard Time",
+          "territory": "SR",
+          "types": [
+            "America/Paramaribo"
+          ]
+        },
+        {
+          "other": "SA Eastern Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT+3"
+          ]
+        },
+        {
+          "other": "Argentina Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Buenos_Aires"
+          ]
+        },
+        {
+          "other": "Argentina Standard Time",
+          "territory": "AR",
+          "types": [
+            "America/Buenos_Aires",
+            "America/Argentina/La_Rioja",
+            "America/Argentina/Rio_Gallegos",
+            "America/Argentina/Salta",
+            "America/Argentina/San_Juan",
+            "America/Argentina/San_Luis",
+            "America/Argentina/Tucuman",
+            "America/Argentina/Ushuaia",
+            "America/Catamarca",
+            "America/Cordoba",
+            "America/Jujuy",
+            "America/Mendoza"
+          ]
+        },
+        {
+          "other": "Greenland Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Godthab"
+          ]
+        },
+        {
+          "other": "Greenland Standard Time",
+          "territory": "GL",
+          "types": [
+            "America/Godthab"
+          ]
+        },
+        {
+          "other": "Montevideo Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Montevideo"
+          ]
+        },
+        {
+          "other": "Montevideo Standard Time",
+          "territory": "UY",
+          "types": [
+            "America/Montevideo"
+          ]
+        },
+        {
+          "other": "Magallanes Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Punta_Arenas"
+          ]
+        },
+        {
+          "other": "Magallanes Standard Time",
+          "territory": "CL",
+          "types": [
+            "America/Punta_Arenas"
+          ]
+        },
+        {
+          "other": "Saint Pierre Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Miquelon"
+          ]
+        },
+        {
+          "other": "Saint Pierre Standard Time",
+          "territory": "PM",
+          "types": [
+            "America/Miquelon"
+          ]
+        },
+        {
+          "other": "Bahia Standard Time",
+          "territory": "001",
+          "types": [
+            "America/Bahia"
+          ]
+        },
+        {
+          "other": "Bahia Standard Time",
+          "territory": "BR",
+          "types": [
+            "America/Bahia"
+          ]
+        },
+        {
+          "other": "UTC-02",
+          "territory": "001",
+          "types": [
+            "Etc/GMT+2"
+          ]
+        },
+        {
+          "other": "UTC-02",
+          "territory": "BR",
+          "types": [
+            "America/Noronha"
+          ]
+        },
+        {
+          "other": "UTC-02",
+          "territory": "GS",
+          "types": [
+            "Atlantic/South_Georgia"
+          ]
+        },
+        {
+          "other": "UTC-02",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT+2"
+          ]
+        },
+        {
+          "other": "Azores Standard Time",
+          "territory": "001",
+          "types": [
+            "Atlantic/Azores"
+          ]
+        },
+        {
+          "other": "Azores Standard Time",
+          "territory": "GL",
+          "types": [
+            "America/Scoresbysund"
+          ]
+        },
+        {
+          "other": "Azores Standard Time",
+          "territory": "PT",
+          "types": [
+            "Atlantic/Azores"
+          ]
+        },
+        {
+          "other": "Cape Verde Standard Time",
+          "territory": "001",
+          "types": [
+            "Atlantic/Cape_Verde"
+          ]
+        },
+        {
+          "other": "Cape Verde Standard Time",
+          "territory": "CV",
+          "types": [
+            "Atlantic/Cape_Verde"
+          ]
+        },
+        {
+          "other": "Cape Verde Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT+1"
+          ]
+        },
+        {
+          "other": "UTC",
+          "territory": "001",
+          "types": [
+            "Etc/UTC"
+          ]
+        },
+        {
+          "other": "UTC",
+          "territory": "ZZ",
+          "types": [
+            "Etc/UTC",
+            "Etc/GMT"
+          ]
+        },
+        {
+          "other": "GMT Standard Time",
+          "territory": "001",
+          "types": [
+            "Europe/London"
+          ]
+        },
+        {
+          "other": "GMT Standard Time",
+          "territory": "ES",
+          "types": [
+            "Atlantic/Canary"
+          ]
+        },
+        {
+          "other": "GMT Standard Time",
+          "territory": "FO",
+          "types": [
+            "Atlantic/Faeroe"
+          ]
+        },
+        {
+          "other": "GMT Standard Time",
+          "territory": "GB",
+          "types": [
+            "Europe/London"
+          ]
+        },
+        {
+          "other": "GMT Standard Time",
+          "territory": "GG",
+          "types": [
+            "Europe/Guernsey"
+          ]
+        },
+        {
+          "other": "GMT Standard Time",
+          "territory": "IE",
+          "types": [
+            "Europe/Dublin"
+          ]
+        },
+        {
+          "other": "GMT Standard Time",
+          "territory": "IM",
+          "types": [
+            "Europe/Isle_of_Man"
+          ]
+        },
+        {
+          "other": "GMT Standard Time",
+          "territory": "JE",
+          "types": [
+            "Europe/Jersey"
+          ]
+        },
+        {
+          "other": "GMT Standard Time",
+          "territory": "PT",
+          "types": [
+            "Europe/Lisbon",
+            "Atlantic/Madeira"
+          ]
+        },
+        {
+          "other": "Greenwich Standard Time",
+          "territory": "001",
+          "types": [
+            "Atlantic/Reykjavik"
+          ]
+        },
+        {
+          "other": "Greenwich Standard Time",
+          "territory": "BF",
+          "types": [
+            "Africa/Ouagadougou"
+          ]
+        },
+        {
+          "other": "Greenwich Standard Time",
+          "territory": "CI",
+          "types": [
+            "Africa/Abidjan"
+          ]
+        },
+        {
+          "other": "Greenwich Standard Time",
+          "territory": "GH",
+          "types": [
+            "Africa/Accra"
+          ]
+        },
+        {
+          "other": "Greenwich Standard Time",
+          "territory": "GL",
+          "types": [
+            "America/Danmarkshavn"
+          ]
+        },
+        {
+          "other": "Greenwich Standard Time",
+          "territory": "GM",
+          "types": [
+            "Africa/Banjul"
+          ]
+        },
+        {
+          "other": "Greenwich Standard Time",
+          "territory": "GN",
+          "types": [
+            "Africa/Conakry"
+          ]
+        },
+        {
+          "other": "Greenwich Standard Time",
+          "territory": "GW",
+          "types": [
+            "Africa/Bissau"
+          ]
+        },
+        {
+          "other": "Greenwich Standard Time",
+          "territory": "IS",
+          "types": [
+            "Atlantic/Reykjavik"
+          ]
+        },
+        {
+          "other": "Greenwich Standard Time",
+          "territory": "LR",
+          "types": [
+            "Africa/Monrovia"
+          ]
+        },
+        {
+          "other": "Greenwich Standard Time",
+          "territory": "ML",
+          "types": [
+            "Africa/Bamako"
+          ]
+        },
+        {
+          "other": "Greenwich Standard Time",
+          "territory": "MR",
+          "types": [
+            "Africa/Nouakchott"
+          ]
+        },
+        {
+          "other": "Greenwich Standard Time",
+          "territory": "SH",
+          "types": [
+            "Atlantic/St_Helena"
+          ]
+        },
+        {
+          "other": "Greenwich Standard Time",
+          "territory": "SL",
+          "types": [
+            "Africa/Freetown"
+          ]
+        },
+        {
+          "other": "Greenwich Standard Time",
+          "territory": "SN",
+          "types": [
+            "Africa/Dakar"
+          ]
+        },
+        {
+          "other": "Greenwich Standard Time",
+          "territory": "TG",
+          "types": [
+            "Africa/Lome"
+          ]
+        },
+        {
+          "other": "Sao Tome Standard Time",
+          "territory": "001",
+          "types": [
+            "Africa/Sao_Tome"
+          ]
+        },
+        {
+          "other": "Sao Tome Standard Time",
+          "territory": "ST",
+          "types": [
+            "Africa/Sao_Tome"
+          ]
+        },
+        {
+          "other": "Morocco Standard Time",
+          "territory": "001",
+          "types": [
+            "Africa/Casablanca"
+          ]
+        },
+        {
+          "other": "Morocco Standard Time",
+          "territory": "EH",
+          "types": [
+            "Africa/El_Aaiun"
+          ]
+        },
+        {
+          "other": "Morocco Standard Time",
+          "territory": "MA",
+          "types": [
+            "Africa/Casablanca"
+          ]
+        },
+        {
+          "other": "W. Europe Standard Time",
+          "territory": "001",
+          "types": [
+            "Europe/Berlin"
+          ]
+        },
+        {
+          "other": "W. Europe Standard Time",
+          "territory": "AD",
+          "types": [
+            "Europe/Andorra"
+          ]
+        },
+        {
+          "other": "W. Europe Standard Time",
+          "territory": "AT",
+          "types": [
+            "Europe/Vienna"
+          ]
+        },
+        {
+          "other": "W. Europe Standard Time",
+          "territory": "CH",
+          "types": [
+            "Europe/Zurich"
+          ]
+        },
+        {
+          "other": "W. Europe Standard Time",
+          "territory": "DE",
+          "types": [
+            "Europe/Berlin",
+            "Europe/Busingen"
+          ]
+        },
+        {
+          "other": "W. Europe Standard Time",
+          "territory": "GI",
+          "types": [
+            "Europe/Gibraltar"
+          ]
+        },
+        {
+          "other": "W. Europe Standard Time",
+          "territory": "IT",
+          "types": [
+            "Europe/Rome"
+          ]
+        },
+        {
+          "other": "W. Europe Standard Time",
+          "territory": "LI",
+          "types": [
+            "Europe/Vaduz"
+          ]
+        },
+        {
+          "other": "W. Europe Standard Time",
+          "territory": "LU",
+          "types": [
+            "Europe/Luxembourg"
+          ]
+        },
+        {
+          "other": "W. Europe Standard Time",
+          "territory": "MC",
+          "types": [
+            "Europe/Monaco"
+          ]
+        },
+        {
+          "other": "W. Europe Standard Time",
+          "territory": "MT",
+          "types": [
+            "Europe/Malta"
+          ]
+        },
+        {
+          "other": "W. Europe Standard Time",
+          "territory": "NL",
+          "types": [
+            "Europe/Amsterdam"
+          ]
+        },
+        {
+          "other": "W. Europe Standard Time",
+          "territory": "NO",
+          "types": [
+            "Europe/Oslo"
+          ]
+        },
+        {
+          "other": "W. Europe Standard Time",
+          "territory": "SE",
+          "types": [
+            "Europe/Stockholm"
+          ]
+        },
+        {
+          "other": "W. Europe Standard Time",
+          "territory": "SJ",
+          "types": [
+            "Arctic/Longyearbyen"
+          ]
+        },
+        {
+          "other": "W. Europe Standard Time",
+          "territory": "SM",
+          "types": [
+            "Europe/San_Marino"
+          ]
+        },
+        {
+          "other": "W. Europe Standard Time",
+          "territory": "VA",
+          "types": [
+            "Europe/Vatican"
+          ]
+        },
+        {
+          "other": "Central Europe Standard Time",
+          "territory": "001",
+          "types": [
+            "Europe/Budapest"
+          ]
+        },
+        {
+          "other": "Central Europe Standard Time",
+          "territory": "AL",
+          "types": [
+            "Europe/Tirane"
+          ]
+        },
+        {
+          "other": "Central Europe Standard Time",
+          "territory": "CZ",
+          "types": [
+            "Europe/Prague"
+          ]
+        },
+        {
+          "other": "Central Europe Standard Time",
+          "territory": "HU",
+          "types": [
+            "Europe/Budapest"
+          ]
+        },
+        {
+          "other": "Central Europe Standard Time",
+          "territory": "ME",
+          "types": [
+            "Europe/Podgorica"
+          ]
+        },
+        {
+          "other": "Central Europe Standard Time",
+          "territory": "RS",
+          "types": [
+            "Europe/Belgrade"
+          ]
+        },
+        {
+          "other": "Central Europe Standard Time",
+          "territory": "SI",
+          "types": [
+            "Europe/Ljubljana"
+          ]
+        },
+        {
+          "other": "Central Europe Standard Time",
+          "territory": "SK",
+          "types": [
+            "Europe/Bratislava"
+          ]
+        },
+        {
+          "other": "Romance Standard Time",
+          "territory": "001",
+          "types": [
+            "Europe/Paris"
+          ]
+        },
+        {
+          "other": "Romance Standard Time",
+          "territory": "BE",
+          "types": [
+            "Europe/Brussels"
+          ]
+        },
+        {
+          "other": "Romance Standard Time",
+          "territory": "DK",
+          "types": [
+            "Europe/Copenhagen"
+          ]
+        },
+        {
+          "other": "Romance Standard Time",
+          "territory": "ES",
+          "types": [
+            "Europe/Madrid",
+            "Africa/Ceuta"
+          ]
+        },
+        {
+          "other": "Romance Standard Time",
+          "territory": "FR",
+          "types": [
+            "Europe/Paris"
+          ]
+        },
+        {
+          "other": "Central European Standard Time",
+          "territory": "001",
+          "types": [
+            "Europe/Warsaw"
+          ]
+        },
+        {
+          "other": "Central European Standard Time",
+          "territory": "BA",
+          "types": [
+            "Europe/Sarajevo"
+          ]
+        },
+        {
+          "other": "Central European Standard Time",
+          "territory": "HR",
+          "types": [
+            "Europe/Zagreb"
+          ]
+        },
+        {
+          "other": "Central European Standard Time",
+          "territory": "MK",
+          "types": [
+            "Europe/Skopje"
+          ]
+        },
+        {
+          "other": "Central European Standard Time",
+          "territory": "PL",
+          "types": [
+            "Europe/Warsaw"
+          ]
+        },
+        {
+          "other": "W. Central Africa Standard Time",
+          "territory": "001",
+          "types": [
+            "Africa/Lagos"
+          ]
+        },
+        {
+          "other": "W. Central Africa Standard Time",
+          "territory": "AO",
+          "types": [
+            "Africa/Luanda"
+          ]
+        },
+        {
+          "other": "W. Central Africa Standard Time",
+          "territory": "BJ",
+          "types": [
+            "Africa/Porto-Novo"
+          ]
+        },
+        {
+          "other": "W. Central Africa Standard Time",
+          "territory": "CD",
+          "types": [
+            "Africa/Kinshasa"
+          ]
+        },
+        {
+          "other": "W. Central Africa Standard Time",
+          "territory": "CF",
+          "types": [
+            "Africa/Bangui"
+          ]
+        },
+        {
+          "other": "W. Central Africa Standard Time",
+          "territory": "CG",
+          "types": [
+            "Africa/Brazzaville"
+          ]
+        },
+        {
+          "other": "W. Central Africa Standard Time",
+          "territory": "CM",
+          "types": [
+            "Africa/Douala"
+          ]
+        },
+        {
+          "other": "W. Central Africa Standard Time",
+          "territory": "DZ",
+          "types": [
+            "Africa/Algiers"
+          ]
+        },
+        {
+          "other": "W. Central Africa Standard Time",
+          "territory": "GA",
+          "types": [
+            "Africa/Libreville"
+          ]
+        },
+        {
+          "other": "W. Central Africa Standard Time",
+          "territory": "GQ",
+          "types": [
+            "Africa/Malabo"
+          ]
+        },
+        {
+          "other": "W. Central Africa Standard Time",
+          "territory": "NE",
+          "types": [
+            "Africa/Niamey"
+          ]
+        },
+        {
+          "other": "W. Central Africa Standard Time",
+          "territory": "NG",
+          "types": [
+            "Africa/Lagos"
+          ]
+        },
+        {
+          "other": "W. Central Africa Standard Time",
+          "territory": "TD",
+          "types": [
+            "Africa/Ndjamena"
+          ]
+        },
+        {
+          "other": "W. Central Africa Standard Time",
+          "territory": "TN",
+          "types": [
+            "Africa/Tunis"
+          ]
+        },
+        {
+          "other": "W. Central Africa Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT-1"
+          ]
+        },
+        {
+          "other": "Jordan Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Amman"
+          ]
+        },
+        {
+          "other": "Jordan Standard Time",
+          "territory": "JO",
+          "types": [
+            "Asia/Amman"
+          ]
+        },
+        {
+          "other": "GTB Standard Time",
+          "territory": "001",
+          "types": [
+            "Europe/Bucharest"
+          ]
+        },
+        {
+          "other": "GTB Standard Time",
+          "territory": "CY",
+          "types": [
+            "Asia/Nicosia",
+            "Asia/Famagusta"
+          ]
+        },
+        {
+          "other": "GTB Standard Time",
+          "territory": "GR",
+          "types": [
+            "Europe/Athens"
+          ]
+        },
+        {
+          "other": "GTB Standard Time",
+          "territory": "RO",
+          "types": [
+            "Europe/Bucharest"
+          ]
+        },
+        {
+          "other": "Middle East Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Beirut"
+          ]
+        },
+        {
+          "other": "Middle East Standard Time",
+          "territory": "LB",
+          "types": [
+            "Asia/Beirut"
+          ]
+        },
+        {
+          "other": "Egypt Standard Time",
+          "territory": "001",
+          "types": [
+            "Africa/Cairo"
+          ]
+        },
+        {
+          "other": "Egypt Standard Time",
+          "territory": "EG",
+          "types": [
+            "Africa/Cairo"
+          ]
+        },
+        {
+          "other": "E. Europe Standard Time",
+          "territory": "001",
+          "types": [
+            "Europe/Chisinau"
+          ]
+        },
+        {
+          "other": "E. Europe Standard Time",
+          "territory": "MD",
+          "types": [
+            "Europe/Chisinau"
+          ]
+        },
+        {
+          "other": "Syria Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Damascus"
+          ]
+        },
+        {
+          "other": "Syria Standard Time",
+          "territory": "SY",
+          "types": [
+            "Asia/Damascus"
+          ]
+        },
+        {
+          "other": "West Bank Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Hebron"
+          ]
+        },
+        {
+          "other": "West Bank Standard Time",
+          "territory": "PS",
+          "types": [
+            "Asia/Hebron",
+            "Asia/Gaza"
+          ]
+        },
+        {
+          "other": "South Africa Standard Time",
+          "territory": "001",
+          "types": [
+            "Africa/Johannesburg"
+          ]
+        },
+        {
+          "other": "South Africa Standard Time",
+          "territory": "BI",
+          "types": [
+            "Africa/Bujumbura"
+          ]
+        },
+        {
+          "other": "South Africa Standard Time",
+          "territory": "BW",
+          "types": [
+            "Africa/Gaborone"
+          ]
+        },
+        {
+          "other": "South Africa Standard Time",
+          "territory": "CD",
+          "types": [
+            "Africa/Lubumbashi"
+          ]
+        },
+        {
+          "other": "South Africa Standard Time",
+          "territory": "LS",
+          "types": [
+            "Africa/Maseru"
+          ]
+        },
+        {
+          "other": "South Africa Standard Time",
+          "territory": "MW",
+          "types": [
+            "Africa/Blantyre"
+          ]
+        },
+        {
+          "other": "South Africa Standard Time",
+          "territory": "MZ",
+          "types": [
+            "Africa/Maputo"
+          ]
+        },
+        {
+          "other": "South Africa Standard Time",
+          "territory": "RW",
+          "types": [
+            "Africa/Kigali"
+          ]
+        },
+        {
+          "other": "South Africa Standard Time",
+          "territory": "SZ",
+          "types": [
+            "Africa/Mbabane"
+          ]
+        },
+        {
+          "other": "South Africa Standard Time",
+          "territory": "ZA",
+          "types": [
+            "Africa/Johannesburg"
+          ]
+        },
+        {
+          "other": "South Africa Standard Time",
+          "territory": "ZM",
+          "types": [
+            "Africa/Lusaka"
+          ]
+        },
+        {
+          "other": "South Africa Standard Time",
+          "territory": "ZW",
+          "types": [
+            "Africa/Harare"
+          ]
+        },
+        {
+          "other": "South Africa Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT-2"
+          ]
+        },
+        {
+          "other": "FLE Standard Time",
+          "territory": "001",
+          "types": [
+            "Europe/Kiev"
+          ]
+        },
+        {
+          "other": "FLE Standard Time",
+          "territory": "AX",
+          "types": [
+            "Europe/Mariehamn"
+          ]
+        },
+        {
+          "other": "FLE Standard Time",
+          "territory": "BG",
+          "types": [
+            "Europe/Sofia"
+          ]
+        },
+        {
+          "other": "FLE Standard Time",
+          "territory": "EE",
+          "types": [
+            "Europe/Tallinn"
+          ]
+        },
+        {
+          "other": "FLE Standard Time",
+          "territory": "FI",
+          "types": [
+            "Europe/Helsinki"
+          ]
+        },
+        {
+          "other": "FLE Standard Time",
+          "territory": "LT",
+          "types": [
+            "Europe/Vilnius"
+          ]
+        },
+        {
+          "other": "FLE Standard Time",
+          "territory": "LV",
+          "types": [
+            "Europe/Riga"
+          ]
+        },
+        {
+          "other": "FLE Standard Time",
+          "territory": "UA",
+          "types": [
+            "Europe/Kiev"
+          ]
+        },
+        {
+          "other": "Israel Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Jerusalem"
+          ]
+        },
+        {
+          "other": "Israel Standard Time",
+          "territory": "IL",
+          "types": [
+            "Asia/Jerusalem"
+          ]
+        },
+        {
+          "other": "South Sudan Standard Time",
+          "territory": "001",
+          "types": [
+            "Africa/Juba"
+          ]
+        },
+        {
+          "other": "South Sudan Standard Time",
+          "territory": "SS",
+          "types": [
+            "Africa/Juba"
+          ]
+        },
+        {
+          "other": "Kaliningrad Standard Time",
+          "territory": "001",
+          "types": [
+            "Europe/Kaliningrad"
+          ]
+        },
+        {
+          "other": "Kaliningrad Standard Time",
+          "territory": "RU",
+          "types": [
+            "Europe/Kaliningrad"
+          ]
+        },
+        {
+          "other": "Sudan Standard Time",
+          "territory": "001",
+          "types": [
+            "Africa/Khartoum"
+          ]
+        },
+        {
+          "other": "Sudan Standard Time",
+          "territory": "SD",
+          "types": [
+            "Africa/Khartoum"
+          ]
+        },
+        {
+          "other": "Libya Standard Time",
+          "territory": "001",
+          "types": [
+            "Africa/Tripoli"
+          ]
+        },
+        {
+          "other": "Libya Standard Time",
+          "territory": "LY",
+          "types": [
+            "Africa/Tripoli"
+          ]
+        },
+        {
+          "other": "Namibia Standard Time",
+          "territory": "001",
+          "types": [
+            "Africa/Windhoek"
+          ]
+        },
+        {
+          "other": "Namibia Standard Time",
+          "territory": "NA",
+          "types": [
+            "Africa/Windhoek"
+          ]
+        },
+        {
+          "other": "Arabic Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Baghdad"
+          ]
+        },
+        {
+          "other": "Arabic Standard Time",
+          "territory": "IQ",
+          "types": [
+            "Asia/Baghdad"
+          ]
+        },
+        {
+          "other": "Turkey Standard Time",
+          "territory": "001",
+          "types": [
+            "Europe/Istanbul"
+          ]
+        },
+        {
+          "other": "Turkey Standard Time",
+          "territory": "TR",
+          "types": [
+            "Europe/Istanbul"
+          ]
+        },
+        {
+          "other": "Arab Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Riyadh"
+          ]
+        },
+        {
+          "other": "Arab Standard Time",
+          "territory": "BH",
+          "types": [
+            "Asia/Bahrain"
+          ]
+        },
+        {
+          "other": "Arab Standard Time",
+          "territory": "KW",
+          "types": [
+            "Asia/Kuwait"
+          ]
+        },
+        {
+          "other": "Arab Standard Time",
+          "territory": "QA",
+          "types": [
+            "Asia/Qatar"
+          ]
+        },
+        {
+          "other": "Arab Standard Time",
+          "territory": "SA",
+          "types": [
+            "Asia/Riyadh"
+          ]
+        },
+        {
+          "other": "Arab Standard Time",
+          "territory": "YE",
+          "types": [
+            "Asia/Aden"
+          ]
+        },
+        {
+          "other": "Belarus Standard Time",
+          "territory": "001",
+          "types": [
+            "Europe/Minsk"
+          ]
+        },
+        {
+          "other": "Belarus Standard Time",
+          "territory": "BY",
+          "types": [
+            "Europe/Minsk"
+          ]
+        },
+        {
+          "other": "Russian Standard Time",
+          "territory": "001",
+          "types": [
+            "Europe/Moscow"
+          ]
+        },
+        {
+          "other": "Russian Standard Time",
+          "territory": "RU",
+          "types": [
+            "Europe/Moscow",
+            "Europe/Kirov"
+          ]
+        },
+        {
+          "other": "Russian Standard Time",
+          "territory": "UA",
+          "types": [
+            "Europe/Simferopol"
+          ]
+        },
+        {
+          "other": "E. Africa Standard Time",
+          "territory": "001",
+          "types": [
+            "Africa/Nairobi"
+          ]
+        },
+        {
+          "other": "E. Africa Standard Time",
+          "territory": "AQ",
+          "types": [
+            "Antarctica/Syowa"
+          ]
+        },
+        {
+          "other": "E. Africa Standard Time",
+          "territory": "DJ",
+          "types": [
+            "Africa/Djibouti"
+          ]
+        },
+        {
+          "other": "E. Africa Standard Time",
+          "territory": "ER",
+          "types": [
+            "Africa/Asmera"
+          ]
+        },
+        {
+          "other": "E. Africa Standard Time",
+          "territory": "ET",
+          "types": [
+            "Africa/Addis_Ababa"
+          ]
+        },
+        {
+          "other": "E. Africa Standard Time",
+          "territory": "KE",
+          "types": [
+            "Africa/Nairobi"
+          ]
+        },
+        {
+          "other": "E. Africa Standard Time",
+          "territory": "KM",
+          "types": [
+            "Indian/Comoro"
+          ]
+        },
+        {
+          "other": "E. Africa Standard Time",
+          "territory": "MG",
+          "types": [
+            "Indian/Antananarivo"
+          ]
+        },
+        {
+          "other": "E. Africa Standard Time",
+          "territory": "SO",
+          "types": [
+            "Africa/Mogadishu"
+          ]
+        },
+        {
+          "other": "E. Africa Standard Time",
+          "territory": "TZ",
+          "types": [
+            "Africa/Dar_es_Salaam"
+          ]
+        },
+        {
+          "other": "E. Africa Standard Time",
+          "territory": "UG",
+          "types": [
+            "Africa/Kampala"
+          ]
+        },
+        {
+          "other": "E. Africa Standard Time",
+          "territory": "YT",
+          "types": [
+            "Indian/Mayotte"
+          ]
+        },
+        {
+          "other": "E. Africa Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT-3"
+          ]
+        },
+        {
+          "other": "Iran Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Tehran"
+          ]
+        },
+        {
+          "other": "Iran Standard Time",
+          "territory": "IR",
+          "types": [
+            "Asia/Tehran"
+          ]
+        },
+        {
+          "other": "Arabian Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Dubai"
+          ]
+        },
+        {
+          "other": "Arabian Standard Time",
+          "territory": "AE",
+          "types": [
+            "Asia/Dubai"
+          ]
+        },
+        {
+          "other": "Arabian Standard Time",
+          "territory": "OM",
+          "types": [
+            "Asia/Muscat"
+          ]
+        },
+        {
+          "other": "Arabian Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT-4"
+          ]
+        },
+        {
+          "other": "Astrakhan Standard Time",
+          "territory": "001",
+          "types": [
+            "Europe/Astrakhan"
+          ]
+        },
+        {
+          "other": "Astrakhan Standard Time",
+          "territory": "RU",
+          "types": [
+            "Europe/Astrakhan",
+            "Europe/Ulyanovsk"
+          ]
+        },
+        {
+          "other": "Azerbaijan Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Baku"
+          ]
+        },
+        {
+          "other": "Azerbaijan Standard Time",
+          "territory": "AZ",
+          "types": [
+            "Asia/Baku"
+          ]
+        },
+        {
+          "other": "Russia Time Zone 3",
+          "territory": "001",
+          "types": [
+            "Europe/Samara"
+          ]
+        },
+        {
+          "other": "Russia Time Zone 3",
+          "territory": "RU",
+          "types": [
+            "Europe/Samara"
+          ]
+        },
+        {
+          "other": "Mauritius Standard Time",
+          "territory": "001",
+          "types": [
+            "Indian/Mauritius"
+          ]
+        },
+        {
+          "other": "Mauritius Standard Time",
+          "territory": "MU",
+          "types": [
+            "Indian/Mauritius"
+          ]
+        },
+        {
+          "other": "Mauritius Standard Time",
+          "territory": "RE",
+          "types": [
+            "Indian/Reunion"
+          ]
+        },
+        {
+          "other": "Mauritius Standard Time",
+          "territory": "SC",
+          "types": [
+            "Indian/Mahe"
+          ]
+        },
+        {
+          "other": "Saratov Standard Time",
+          "territory": "001",
+          "types": [
+            "Europe/Saratov"
+          ]
+        },
+        {
+          "other": "Saratov Standard Time",
+          "territory": "RU",
+          "types": [
+            "Europe/Saratov"
+          ]
+        },
+        {
+          "other": "Georgian Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Tbilisi"
+          ]
+        },
+        {
+          "other": "Georgian Standard Time",
+          "territory": "GE",
+          "types": [
+            "Asia/Tbilisi"
+          ]
+        },
+        {
+          "other": "Volgograd Standard Time",
+          "territory": "001",
+          "types": [
+            "Europe/Volgograd"
+          ]
+        },
+        {
+          "other": "Volgograd Standard Time",
+          "territory": "RU",
+          "types": [
+            "Europe/Volgograd"
+          ]
+        },
+        {
+          "other": "Caucasus Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Yerevan"
+          ]
+        },
+        {
+          "other": "Caucasus Standard Time",
+          "territory": "AM",
+          "types": [
+            "Asia/Yerevan"
+          ]
+        },
+        {
+          "other": "Afghanistan Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Kabul"
+          ]
+        },
+        {
+          "other": "Afghanistan Standard Time",
+          "territory": "AF",
+          "types": [
+            "Asia/Kabul"
+          ]
+        },
+        {
+          "other": "West Asia Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Tashkent"
+          ]
+        },
+        {
+          "other": "West Asia Standard Time",
+          "territory": "AQ",
+          "types": [
+            "Antarctica/Mawson"
+          ]
+        },
+        {
+          "other": "West Asia Standard Time",
+          "territory": "KZ",
+          "types": [
+            "Asia/Oral",
+            "Asia/Almaty",
+            "Asia/Aqtau",
+            "Asia/Aqtobe",
+            "Asia/Atyrau",
+            "Asia/Qostanay"
+          ]
+        },
+        {
+          "other": "West Asia Standard Time",
+          "territory": "MV",
+          "types": [
+            "Indian/Maldives"
+          ]
+        },
+        {
+          "other": "West Asia Standard Time",
+          "territory": "TF",
+          "types": [
+            "Indian/Kerguelen"
+          ]
+        },
+        {
+          "other": "West Asia Standard Time",
+          "territory": "TJ",
+          "types": [
+            "Asia/Dushanbe"
+          ]
+        },
+        {
+          "other": "West Asia Standard Time",
+          "territory": "TM",
+          "types": [
+            "Asia/Ashgabat"
+          ]
+        },
+        {
+          "other": "West Asia Standard Time",
+          "territory": "UZ",
+          "types": [
+            "Asia/Tashkent",
+            "Asia/Samarkand"
+          ]
+        },
+        {
+          "other": "West Asia Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT-5"
+          ]
+        },
+        {
+          "other": "Ekaterinburg Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Yekaterinburg"
+          ]
+        },
+        {
+          "other": "Ekaterinburg Standard Time",
+          "territory": "RU",
+          "types": [
+            "Asia/Yekaterinburg"
+          ]
+        },
+        {
+          "other": "Pakistan Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Karachi"
+          ]
+        },
+        {
+          "other": "Pakistan Standard Time",
+          "territory": "PK",
+          "types": [
+            "Asia/Karachi"
+          ]
+        },
+        {
+          "other": "Qyzylorda Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Qyzylorda"
+          ]
+        },
+        {
+          "other": "Qyzylorda Standard Time",
+          "territory": "KZ",
+          "types": [
+            "Asia/Qyzylorda"
+          ]
+        },
+        {
+          "other": "India Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Calcutta"
+          ]
+        },
+        {
+          "other": "India Standard Time",
+          "territory": "IN",
+          "types": [
+            "Asia/Calcutta"
+          ]
+        },
+        {
+          "other": "Sri Lanka Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Colombo"
+          ]
+        },
+        {
+          "other": "Sri Lanka Standard Time",
+          "territory": "LK",
+          "types": [
+            "Asia/Colombo"
+          ]
+        },
+        {
+          "other": "Nepal Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Katmandu"
+          ]
+        },
+        {
+          "other": "Nepal Standard Time",
+          "territory": "NP",
+          "types": [
+            "Asia/Katmandu"
+          ]
+        },
+        {
+          "other": "Central Asia Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Bishkek"
+          ]
+        },
+        {
+          "other": "Central Asia Standard Time",
+          "territory": "AQ",
+          "types": [
+            "Antarctica/Vostok"
+          ]
+        },
+        {
+          "other": "Central Asia Standard Time",
+          "territory": "CN",
+          "types": [
+            "Asia/Urumqi"
+          ]
+        },
+        {
+          "other": "Central Asia Standard Time",
+          "territory": "IO",
+          "types": [
+            "Indian/Chagos"
+          ]
+        },
+        {
+          "other": "Central Asia Standard Time",
+          "territory": "KG",
+          "types": [
+            "Asia/Bishkek"
+          ]
+        },
+        {
+          "other": "Central Asia Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT-6"
+          ]
+        },
+        {
+          "other": "Bangladesh Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Dhaka"
+          ]
+        },
+        {
+          "other": "Bangladesh Standard Time",
+          "territory": "BD",
+          "types": [
+            "Asia/Dhaka"
+          ]
+        },
+        {
+          "other": "Bangladesh Standard Time",
+          "territory": "BT",
+          "types": [
+            "Asia/Thimphu"
+          ]
+        },
+        {
+          "other": "Omsk Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Omsk"
+          ]
+        },
+        {
+          "other": "Omsk Standard Time",
+          "territory": "RU",
+          "types": [
+            "Asia/Omsk"
+          ]
+        },
+        {
+          "other": "Myanmar Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Rangoon"
+          ]
+        },
+        {
+          "other": "Myanmar Standard Time",
+          "territory": "CC",
+          "types": [
+            "Indian/Cocos"
+          ]
+        },
+        {
+          "other": "Myanmar Standard Time",
+          "territory": "MM",
+          "types": [
+            "Asia/Rangoon"
+          ]
+        },
+        {
+          "other": "SE Asia Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Bangkok"
+          ]
+        },
+        {
+          "other": "SE Asia Standard Time",
+          "territory": "AQ",
+          "types": [
+            "Antarctica/Davis"
+          ]
+        },
+        {
+          "other": "SE Asia Standard Time",
+          "territory": "CX",
+          "types": [
+            "Indian/Christmas"
+          ]
+        },
+        {
+          "other": "SE Asia Standard Time",
+          "territory": "ID",
+          "types": [
+            "Asia/Jakarta",
+            "Asia/Pontianak"
+          ]
+        },
+        {
+          "other": "SE Asia Standard Time",
+          "territory": "KH",
+          "types": [
+            "Asia/Phnom_Penh"
+          ]
+        },
+        {
+          "other": "SE Asia Standard Time",
+          "territory": "LA",
+          "types": [
+            "Asia/Vientiane"
+          ]
+        },
+        {
+          "other": "SE Asia Standard Time",
+          "territory": "TH",
+          "types": [
+            "Asia/Bangkok"
+          ]
+        },
+        {
+          "other": "SE Asia Standard Time",
+          "territory": "VN",
+          "types": [
+            "Asia/Saigon"
+          ]
+        },
+        {
+          "other": "SE Asia Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT-7"
+          ]
+        },
+        {
+          "other": "Altai Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Barnaul"
+          ]
+        },
+        {
+          "other": "Altai Standard Time",
+          "territory": "RU",
+          "types": [
+            "Asia/Barnaul"
+          ]
+        },
+        {
+          "other": "W. Mongolia Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Hovd"
+          ]
+        },
+        {
+          "other": "W. Mongolia Standard Time",
+          "territory": "MN",
+          "types": [
+            "Asia/Hovd"
+          ]
+        },
+        {
+          "other": "North Asia Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Krasnoyarsk"
+          ]
+        },
+        {
+          "other": "North Asia Standard Time",
+          "territory": "RU",
+          "types": [
+            "Asia/Krasnoyarsk",
+            "Asia/Novokuznetsk"
+          ]
+        },
+        {
+          "other": "N. Central Asia Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Novosibirsk"
+          ]
+        },
+        {
+          "other": "N. Central Asia Standard Time",
+          "territory": "RU",
+          "types": [
+            "Asia/Novosibirsk"
+          ]
+        },
+        {
+          "other": "Tomsk Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Tomsk"
+          ]
+        },
+        {
+          "other": "Tomsk Standard Time",
+          "territory": "RU",
+          "types": [
+            "Asia/Tomsk"
+          ]
+        },
+        {
+          "other": "China Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Shanghai"
+          ]
+        },
+        {
+          "other": "China Standard Time",
+          "territory": "CN",
+          "types": [
+            "Asia/Shanghai"
+          ]
+        },
+        {
+          "other": "China Standard Time",
+          "territory": "HK",
+          "types": [
+            "Asia/Hong_Kong"
+          ]
+        },
+        {
+          "other": "China Standard Time",
+          "territory": "MO",
+          "types": [
+            "Asia/Macau"
+          ]
+        },
+        {
+          "other": "North Asia East Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Irkutsk"
+          ]
+        },
+        {
+          "other": "North Asia East Standard Time",
+          "territory": "RU",
+          "types": [
+            "Asia/Irkutsk"
+          ]
+        },
+        {
+          "other": "Singapore Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Singapore"
+          ]
+        },
+        {
+          "other": "Singapore Standard Time",
+          "territory": "BN",
+          "types": [
+            "Asia/Brunei"
+          ]
+        },
+        {
+          "other": "Singapore Standard Time",
+          "territory": "ID",
+          "types": [
+            "Asia/Makassar"
+          ]
+        },
+        {
+          "other": "Singapore Standard Time",
+          "territory": "MY",
+          "types": [
+            "Asia/Kuala_Lumpur",
+            "Asia/Kuching"
+          ]
+        },
+        {
+          "other": "Singapore Standard Time",
+          "territory": "PH",
+          "types": [
+            "Asia/Manila"
+          ]
+        },
+        {
+          "other": "Singapore Standard Time",
+          "territory": "SG",
+          "types": [
+            "Asia/Singapore"
+          ]
+        },
+        {
+          "other": "Singapore Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT-8"
+          ]
+        },
+        {
+          "other": "W. Australia Standard Time",
+          "territory": "001",
+          "types": [
+            "Australia/Perth"
+          ]
+        },
+        {
+          "other": "W. Australia Standard Time",
+          "territory": "AU",
+          "types": [
+            "Australia/Perth"
+          ]
+        },
+        {
+          "other": "Taipei Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Taipei"
+          ]
+        },
+        {
+          "other": "Taipei Standard Time",
+          "territory": "TW",
+          "types": [
+            "Asia/Taipei"
+          ]
+        },
+        {
+          "other": "Ulaanbaatar Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Ulaanbaatar"
+          ]
+        },
+        {
+          "other": "Ulaanbaatar Standard Time",
+          "territory": "MN",
+          "types": [
+            "Asia/Ulaanbaatar"
+          ]
+        },
+        {
+          "other": "Aus Central W. Standard Time",
+          "territory": "001",
+          "types": [
+            "Australia/Eucla"
+          ]
+        },
+        {
+          "other": "Aus Central W. Standard Time",
+          "territory": "AU",
+          "types": [
+            "Australia/Eucla"
+          ]
+        },
+        {
+          "other": "Transbaikal Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Chita"
+          ]
+        },
+        {
+          "other": "Transbaikal Standard Time",
+          "territory": "RU",
+          "types": [
+            "Asia/Chita"
+          ]
+        },
+        {
+          "other": "Tokyo Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Tokyo"
+          ]
+        },
+        {
+          "other": "Tokyo Standard Time",
+          "territory": "ID",
+          "types": [
+            "Asia/Jayapura"
+          ]
+        },
+        {
+          "other": "Tokyo Standard Time",
+          "territory": "JP",
+          "types": [
+            "Asia/Tokyo"
+          ]
+        },
+        {
+          "other": "Tokyo Standard Time",
+          "territory": "PW",
+          "types": [
+            "Pacific/Palau"
+          ]
+        },
+        {
+          "other": "Tokyo Standard Time",
+          "territory": "TL",
+          "types": [
+            "Asia/Dili"
+          ]
+        },
+        {
+          "other": "Tokyo Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT-9"
+          ]
+        },
+        {
+          "other": "North Korea Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Pyongyang"
+          ]
+        },
+        {
+          "other": "North Korea Standard Time",
+          "territory": "KP",
+          "types": [
+            "Asia/Pyongyang"
+          ]
+        },
+        {
+          "other": "Korea Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Seoul"
+          ]
+        },
+        {
+          "other": "Korea Standard Time",
+          "territory": "KR",
+          "types": [
+            "Asia/Seoul"
+          ]
+        },
+        {
+          "other": "Yakutsk Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Yakutsk"
+          ]
+        },
+        {
+          "other": "Yakutsk Standard Time",
+          "territory": "RU",
+          "types": [
+            "Asia/Yakutsk",
+            "Asia/Khandyga"
+          ]
+        },
+        {
+          "other": "Cen. Australia Standard Time",
+          "territory": "001",
+          "types": [
+            "Australia/Adelaide"
+          ]
+        },
+        {
+          "other": "Cen. Australia Standard Time",
+          "territory": "AU",
+          "types": [
+            "Australia/Adelaide",
+            "Australia/Broken_Hill"
+          ]
+        },
+        {
+          "other": "AUS Central Standard Time",
+          "territory": "001",
+          "types": [
+            "Australia/Darwin"
+          ]
+        },
+        {
+          "other": "AUS Central Standard Time",
+          "territory": "AU",
+          "types": [
+            "Australia/Darwin"
+          ]
+        },
+        {
+          "other": "E. Australia Standard Time",
+          "territory": "001",
+          "types": [
+            "Australia/Brisbane"
+          ]
+        },
+        {
+          "other": "E. Australia Standard Time",
+          "territory": "AU",
+          "types": [
+            "Australia/Brisbane",
+            "Australia/Lindeman"
+          ]
+        },
+        {
+          "other": "AUS Eastern Standard Time",
+          "territory": "001",
+          "types": [
+            "Australia/Sydney"
+          ]
+        },
+        {
+          "other": "AUS Eastern Standard Time",
+          "territory": "AU",
+          "types": [
+            "Australia/Sydney",
+            "Australia/Melbourne"
+          ]
+        },
+        {
+          "other": "West Pacific Standard Time",
+          "territory": "001",
+          "types": [
+            "Pacific/Port_Moresby"
+          ]
+        },
+        {
+          "other": "West Pacific Standard Time",
+          "territory": "AQ",
+          "types": [
+            "Antarctica/DumontDUrville"
+          ]
+        },
+        {
+          "other": "West Pacific Standard Time",
+          "territory": "FM",
+          "types": [
+            "Pacific/Truk"
+          ]
+        },
+        {
+          "other": "West Pacific Standard Time",
+          "territory": "GU",
+          "types": [
+            "Pacific/Guam"
+          ]
+        },
+        {
+          "other": "West Pacific Standard Time",
+          "territory": "MP",
+          "types": [
+            "Pacific/Saipan"
+          ]
+        },
+        {
+          "other": "West Pacific Standard Time",
+          "territory": "PG",
+          "types": [
+            "Pacific/Port_Moresby"
+          ]
+        },
+        {
+          "other": "West Pacific Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT-10"
+          ]
+        },
+        {
+          "other": "Tasmania Standard Time",
+          "territory": "001",
+          "types": [
+            "Australia/Hobart"
+          ]
+        },
+        {
+          "other": "Tasmania Standard Time",
+          "territory": "AU",
+          "types": [
+            "Australia/Hobart",
+            "Antarctica/Macquarie"
+          ]
+        },
+        {
+          "other": "Vladivostok Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Vladivostok"
+          ]
+        },
+        {
+          "other": "Vladivostok Standard Time",
+          "territory": "RU",
+          "types": [
+            "Asia/Vladivostok",
+            "Asia/Ust-Nera"
+          ]
+        },
+        {
+          "other": "Lord Howe Standard Time",
+          "territory": "001",
+          "types": [
+            "Australia/Lord_Howe"
+          ]
+        },
+        {
+          "other": "Lord Howe Standard Time",
+          "territory": "AU",
+          "types": [
+            "Australia/Lord_Howe"
+          ]
+        },
+        {
+          "other": "Bougainville Standard Time",
+          "territory": "001",
+          "types": [
+            "Pacific/Bougainville"
+          ]
+        },
+        {
+          "other": "Bougainville Standard Time",
+          "territory": "PG",
+          "types": [
+            "Pacific/Bougainville"
+          ]
+        },
+        {
+          "other": "Russia Time Zone 10",
+          "territory": "001",
+          "types": [
+            "Asia/Srednekolymsk"
+          ]
+        },
+        {
+          "other": "Russia Time Zone 10",
+          "territory": "RU",
+          "types": [
+            "Asia/Srednekolymsk"
+          ]
+        },
+        {
+          "other": "Magadan Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Magadan"
+          ]
+        },
+        {
+          "other": "Magadan Standard Time",
+          "territory": "RU",
+          "types": [
+            "Asia/Magadan"
+          ]
+        },
+        {
+          "other": "Norfolk Standard Time",
+          "territory": "001",
+          "types": [
+            "Pacific/Norfolk"
+          ]
+        },
+        {
+          "other": "Norfolk Standard Time",
+          "territory": "NF",
+          "types": [
+            "Pacific/Norfolk"
+          ]
+        },
+        {
+          "other": "Sakhalin Standard Time",
+          "territory": "001",
+          "types": [
+            "Asia/Sakhalin"
+          ]
+        },
+        {
+          "other": "Sakhalin Standard Time",
+          "territory": "RU",
+          "types": [
+            "Asia/Sakhalin"
+          ]
+        },
+        {
+          "other": "Central Pacific Standard Time",
+          "territory": "001",
+          "types": [
+            "Pacific/Guadalcanal"
+          ]
+        },
+        {
+          "other": "Central Pacific Standard Time",
+          "territory": "AQ",
+          "types": [
+            "Antarctica/Casey"
+          ]
+        },
+        {
+          "other": "Central Pacific Standard Time",
+          "territory": "FM",
+          "types": [
+            "Pacific/Ponape",
+            "Pacific/Kosrae"
+          ]
+        },
+        {
+          "other": "Central Pacific Standard Time",
+          "territory": "NC",
+          "types": [
+            "Pacific/Noumea"
+          ]
+        },
+        {
+          "other": "Central Pacific Standard Time",
+          "territory": "SB",
+          "types": [
+            "Pacific/Guadalcanal"
+          ]
+        },
+        {
+          "other": "Central Pacific Standard Time",
+          "territory": "VU",
+          "types": [
+            "Pacific/Efate"
+          ]
+        },
+        {
+          "other": "Central Pacific Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT-11"
+          ]
+        },
+        {
+          "other": "Russia Time Zone 11",
+          "territory": "001",
+          "types": [
+            "Asia/Kamchatka"
+          ]
+        },
+        {
+          "other": "Russia Time Zone 11",
+          "territory": "RU",
+          "types": [
+            "Asia/Kamchatka",
+            "Asia/Anadyr"
+          ]
+        },
+        {
+          "other": "New Zealand Standard Time",
+          "territory": "001",
+          "types": [
+            "Pacific/Auckland"
+          ]
+        },
+        {
+          "other": "New Zealand Standard Time",
+          "territory": "AQ",
+          "types": [
+            "Antarctica/McMurdo"
+          ]
+        },
+        {
+          "other": "New Zealand Standard Time",
+          "territory": "NZ",
+          "types": [
+            "Pacific/Auckland"
+          ]
+        },
+        {
+          "other": "UTC+12",
+          "territory": "001",
+          "types": [
+            "Etc/GMT-12"
+          ]
+        },
+        {
+          "other": "UTC+12",
+          "territory": "KI",
+          "types": [
+            "Pacific/Tarawa"
+          ]
+        },
+        {
+          "other": "UTC+12",
+          "territory": "MH",
+          "types": [
+            "Pacific/Majuro",
+            "Pacific/Kwajalein"
+          ]
+        },
+        {
+          "other": "UTC+12",
+          "territory": "NR",
+          "types": [
+            "Pacific/Nauru"
+          ]
+        },
+        {
+          "other": "UTC+12",
+          "territory": "TV",
+          "types": [
+            "Pacific/Funafuti"
+          ]
+        },
+        {
+          "other": "UTC+12",
+          "territory": "UM",
+          "types": [
+            "Pacific/Wake"
+          ]
+        },
+        {
+          "other": "UTC+12",
+          "territory": "WF",
+          "types": [
+            "Pacific/Wallis"
+          ]
+        },
+        {
+          "other": "UTC+12",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT-12"
+          ]
+        },
+        {
+          "other": "Fiji Standard Time",
+          "territory": "001",
+          "types": [
+            "Pacific/Fiji"
+          ]
+        },
+        {
+          "other": "Fiji Standard Time",
+          "territory": "FJ",
+          "types": [
+            "Pacific/Fiji"
+          ]
+        },
+        {
+          "other": "Chatham Islands Standard Time",
+          "territory": "001",
+          "types": [
+            "Pacific/Chatham"
+          ]
+        },
+        {
+          "other": "Chatham Islands Standard Time",
+          "territory": "NZ",
+          "types": [
+            "Pacific/Chatham"
+          ]
+        },
+        {
+          "other": "UTC+13",
+          "territory": "001",
+          "types": [
+            "Etc/GMT-13"
+          ]
+        },
+        {
+          "other": "UTC+13",
+          "territory": "KI",
+          "types": [
+            "Pacific/Enderbury"
+          ]
+        },
+        {
+          "other": "UTC+13",
+          "territory": "TK",
+          "types": [
+            "Pacific/Fakaofo"
+          ]
+        },
+        {
+          "other": "UTC+13",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT-13"
+          ]
+        },
+        {
+          "other": "Tonga Standard Time",
+          "territory": "001",
+          "types": [
+            "Pacific/Tongatapu"
+          ]
+        },
+        {
+          "other": "Tonga Standard Time",
+          "territory": "TO",
+          "types": [
+            "Pacific/Tongatapu"
+          ]
+        },
+        {
+          "other": "Samoa Standard Time",
+          "territory": "001",
+          "types": [
+            "Pacific/Apia"
+          ]
+        },
+        {
+          "other": "Samoa Standard Time",
+          "territory": "WS",
+          "types": [
+            "Pacific/Apia"
+          ]
+        },
+        {
+          "other": "Line Islands Standard Time",
+          "territory": "001",
+          "types": [
+            "Pacific/Kiritimati"
+          ]
+        },
+        {
+          "other": "Line Islands Standard Time",
+          "territory": "KI",
+          "types": [
+            "Pacific/Kiritimati"
+          ]
+        },
+        {
+          "other": "Line Islands Standard Time",
+          "territory": "ZZ",
+          "types": [
+            "Etc/GMT-14"
+          ]
+        }
+      ]
+    }
+  }
+}
