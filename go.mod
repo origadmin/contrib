@@ -1,9 +1,3 @@
-module github.com/origadmin/framework
+module github.com/origadmin/contrib
 
-go 1.13
-
-replace (
-	github.com/origadmin/contrib => ./contrib
-	github.com/origadmin/runtime => ./runtime
-	github.com/origadmin/toolkits => ./toolkits
-)
+go 1.23.1

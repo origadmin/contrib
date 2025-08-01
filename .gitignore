@@ -11,6 +11,9 @@
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
+.idea/**/contrib.iml
+.idea/**/modules.xml
+.idea/**/vcs.xml
 
 # AWS User-specific
 .idea/**/aws.xml
@@ -111,6 +114,7 @@ fabric.properties
 # vendor/
 
 # Go workspace file
+go.work
 
 ### VisualStudio template
 ## Ignore Visual Studio temporary files, build results, and

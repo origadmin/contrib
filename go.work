@@ -1,9 +1,0 @@
-go 1.22
-
-use (
-	./runtime
-	./toolkits
-	./contrib
-	./tools/origen
-	.
-)
