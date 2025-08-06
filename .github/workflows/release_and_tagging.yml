@@ -51,7 +51,7 @@ jobs:
         run: |
           chmod +x ./.github/scripts/git/release.sh
           HEAD_TAG=$(./.github/scripts/git/release.sh get_head_version_tag .)
-          NEXT_TAG=$(./.github/scripts/git/release.sh get_next_module_version .)   
+          NEXT_TAG=$(./.github/scripts/git/release.sh get_next_module_version .)
           echo "HEAD_TAG=$HEAD_TAG"
           echo "HEAD_TAG=$HEAD_TAG" >> $GITHUB_OUTPUT
           echo "NEXT_TAG=$NEXT_TAG"
