@@ -8,4 +8,3 @@ g, role:global_admin, role:reader, domain1
 g, role:global_admin, role:writer, domain1
 
 g, alice, role:global_admin, domain1
-

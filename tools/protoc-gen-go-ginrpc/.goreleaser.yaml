@@ -112,5 +112,5 @@ release:
 
   header: |
     # Changelog
-    
+
     ## [{{ .Tag }}](https://github.com/origadmin/contrib/compare/{{ .PreviousTag }}...{{ .Tag }}) ({{ .Date }})
