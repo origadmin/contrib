@@ -1,19 +1,20 @@
 module github.com/origadmin/toolkits/queue/nats
 
-go 1.23.1
+go 1.24.0
 
-toolchain go1.23.2
+toolchain go1.24.6
 
 require (
-	github.com/goexts/generic v0.1.5
-	github.com/nats-io/nats.go v1.38.0
+	github.com/goexts/generic v0.3.0
+	github.com/nats-io/nats.go v1.45.0
 	github.com/origadmin/toolkits v0.1.24
 )
 
 require (
-	github.com/klauspost/compress v1.17.11 // indirect
-	github.com/nats-io/nkeys v0.4.9 // indirect
+	github.com/klauspost/compress v1.18.0 // indirect
+	github.com/nats-io/nkeys v0.4.11 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
-	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/crypto v0.41.0 // indirect
+	golang.org/x/exp v0.0.0-20250819193227-8b4c13bb791b // indirect
+	golang.org/x/sys v0.35.0 // indirect
 )

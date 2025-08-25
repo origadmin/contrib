@@ -38,7 +38,7 @@ func FromConfig(cfg *configv1.Logger) slogx.Setting {
 		//option.Level = cfg.Level
 		//option.ReplaceAttr = cfg.ReplaceAttr
 		//option.AddSource = cfg.AddSource
-		//option.LumberjackConfig = cfg.Lumberjack
+		//option.LumberjackLogger = cfg.Lumberjack
 		//option.DevConfig = cfg.Dev
 		//option.NoColor = cfg.NoColor
 		//option.Default = cfg.Default
