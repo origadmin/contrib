@@ -13,9 +13,9 @@ github.com/hashicorp/go-multierror v1.1.1 h1:H5DkEtf6CXdFp0N0Em5UCwQpXMWke8IA0+l
 github.com/hashicorp/go-multierror v1.1.1/go.mod h1:iw975J/qwKPdAO1clOe2L8331t/9/fmwbPZ6JB6eMoM=
 github.com/origadmin/toolkits v0.1.24 h1:J/OFSq5iPjsA6TN2sxdXGTmXuftQz2AKlAANXj6hvBk=
 github.com/origadmin/toolkits v0.1.24/go.mod h1:+BZ3uvvrsJIqRMbga6zalMinuTldHut/yaJbvVW4994=
-github.com/origadmin/toolkits/errors v0.0.36 h1:B7WS42rL1jDpo/EqWIeOtAA2qSIkbCeUSYcxCMvmKNI=
-github.com/origadmin/toolkits/errors v0.0.36/go.mod h1:6DM+lY0GU/UWobF66Fh/zeLJl3zF6Ll9+8ujHjSCwFQ=
+github.com/origadmin/toolkits/errors v0.3.19 h1:xlp5DCQFVut5z4C5l9RaIcrFFXvtbhz7p75OtLRPw8A=
+github.com/origadmin/toolkits/errors v0.3.19/go.mod h1:kqVUSV6sz+wiUeesrBxZ3oyUPrNl0alF0+jO0qehBvM=
 github.com/pkg/errors v0.9.1 h1:FEBLx1zS214owpjy7qsBeixbURkuhQAwrK5UwLGTwt4=
 github.com/pkg/errors v0.9.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINEl0=
-github.com/redis/go-redis/v9 v9.7.0 h1:HhLSs+B6O021gwzl+locl0zEDnyNkxMtf/Z3NNBMa9E=
-github.com/redis/go-redis/v9 v9.7.0/go.mod h1:f6zhXITC7JUJIlPEiBOTXxJgPLdZcA93GewI7inzyWw=
+github.com/redis/go-redis/v9 v9.12.1 h1:k5iquqv27aBtnTm2tIkROUDp8JBXhXZIVu1InSgvovg=
+github.com/redis/go-redis/v9 v9.12.1/go.mod h1:huWgSWd8mW6+m0VPhJjSSQ+d6Nh1VICQ6Q5lHuCH/Iw=
