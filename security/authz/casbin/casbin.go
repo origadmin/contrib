@@ -8,7 +8,7 @@ import (
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	"github.com/casbin/casbin/v2/persist"
-	"github.com/goexts/generic/settings"
+	"github.com/goexts/generic/configure"
 	"github.com/origadmin/runtime/log"
 
 	"github.com/origadmin/runtime/context"

@@ -4,7 +4,7 @@ go 1.24.6
 
 require (
 	github.com/coocood/freecache v1.2.4
-	github.com/goexts/generic v0.3.0
+	github.com/goexts/generic v0.4.0
 	github.com/origadmin/runtime v0.1.57
 	github.com/origadmin/toolkits/errors v0.3.19
 )

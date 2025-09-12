@@ -9,7 +9,7 @@ import (
 	"maps"
 	"strings"
 
-	"github.com/goexts/generic/settings"
+	"github.com/goexts/generic/configure"
 
 	"github.com/origadmin/toolkits/codec"
 	"github.com/origadmin/toolkits/errors"

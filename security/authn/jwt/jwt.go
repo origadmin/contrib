@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/dchest/uniuri"
-	"github.com/goexts/generic/settings"
+	"github.com/goexts/generic/configure"
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 	securityv1 "github.com/origadmin/runtime/gen/go/security/v1"
 	"github.com/origadmin/runtime/log"

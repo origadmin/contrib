@@ -14,7 +14,7 @@ require (
 	github.com/bytedance/sonic v1.14.0 // indirect
 	github.com/bytedance/sonic/loader v0.3.0 // indirect
 	github.com/cloudwego/base64x v0.1.6 // indirect
-	github.com/goexts/generic v0.3.0 // indirect
+	github.com/goexts/generic v0.4.0 // indirect
 	github.com/golang-cz/devslog v0.0.15 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect

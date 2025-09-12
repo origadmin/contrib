@@ -8,7 +8,7 @@ package replacer
 import (
 	"strings"
 
-	"github.com/goexts/generic/settings"
+	"github.com/goexts/generic/configure"
 )
 
 const (
