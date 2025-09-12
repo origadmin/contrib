@@ -5,7 +5,7 @@ go 1.24.0
 toolchain go1.24.6
 
 require (
-	github.com/goexts/generic v0.3.0
+	github.com/goexts/generic v0.4.0
 	github.com/origadmin/toolkits/codec v0.3.19
 	github.com/origadmin/toolkits/errors v0.3.19
 )

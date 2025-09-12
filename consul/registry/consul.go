@@ -1,0 +1,15 @@
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
+
+// Package registry implements the functions, types, and interfaces for the module.
+package registry
+
+import (
+	_ "github.com/hashicorp/consul/api"
+)
+
+const Type = "consul"
+
+//go:generate adptool .
+//go:adapter:package github.com/hashicorp/consul/api

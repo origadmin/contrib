@@ -8,7 +8,7 @@ import (
 	"encoding/json"
 
 	"github.com/go-kratos/kratos/v2/config/env"
-	"github.com/goexts/generic/settings"
+	"github.com/goexts/generic/configure"
 	"github.com/hashicorp/consul/api"
 	"github.com/origadmin/toolkits/errors"
 	"google.golang.org/protobuf/encoding/protojson"

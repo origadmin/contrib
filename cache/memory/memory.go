@@ -11,16 +11,18 @@ import (
 
 	"github.com/coocood/freecache"
 	"github.com/goexts/generic/types"
+	"github.com/origadmin/framework/runtime/api/gen/go/apierrors"
+	oer "github.com/origadmin/framework/runtime/errors"
 	configv1 "github.com/origadmin/runtime/gen/go/config/v1"
-	"github.com/origadmin/toolkits/errors"
 )
 
 const (
 	defaultSize = 64 * 1024 * 1024
 )
 
-const (
-	ErrNotFound = errors.String("not found")
+var (
+	// ErrNotFound is now a standard framework error, ensuring consistency across the application.
+	ErrNotFound = oer.FromReason(apierrors.ErrorReason_NOT_FOUND)
 )
 
 type Cache struct {

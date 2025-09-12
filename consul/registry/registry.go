@@ -5,89 +5,125 @@
 package registry
 
 import (
-	"time"
-
+	kratosconsul "github.com/go-kratos/kratos/contrib/registry/consul/v2"
+	"github.com/goexts/generic/configure"
 	"github.com/hashicorp/consul/api"
-	"github.com/origadmin/runtime"
-	configv1 "github.com/origadmin/runtime/gen/go/config/v1"
+
+	configv1 "github.com/origadmin/runtime/api/gen/go/config/v1"
 	"github.com/origadmin/runtime/registry"
 	"github.com/origadmin/toolkits/errors"
 )
 
-type consulBuilder struct {
-}
+// factory implements the registry.Factory interface for Consul.
+type factory struct{}
 
 func init() {
-	runtime.RegisterRegistry(Type, &consulBuilder{})
+	// The const 'Type' is defined in 'consul.go' as `const Type = "consul"`.
+	registry.Register(Type, &factory{})
 }
 
-func configFromConfig(registry *configv1.Registry) *api.Config {
-	apiconfig := api.DefaultConfig()
-	cfg := registry.GetConsul()
-	if cfg == nil {
-		return apiconfig
+// newClient creates a new Consul API client from the given configuration.
+func newClient(cfg *configv1.Discovery) (*api.Client, error) {
+	if cfg == nil || cfg.GetConsul() == nil {
+		return nil, errors.New("consul configuration is missing")
 	}
-	if cfg.Address != "" {
-		apiconfig.Address = cfg.Address
+
+	consulCfg := cfg.GetConsul()
+	apiConfig := api.DefaultConfig()
+
+	if consulCfg.Address != "" {
+		apiConfig.Address = consulCfg.Address
 	}
-	if cfg.Scheme != "" {
-		apiconfig.Scheme = cfg.Scheme
+	if consulCfg.Scheme != "" {
+		apiConfig.Scheme = consulCfg.Scheme
 	}
-	if cfg.Datacenter != "" {
-		apiconfig.Datacenter = cfg.Datacenter
+	if consulCfg.Datacenter != "" {
+		apiConfig.Datacenter = consulCfg.Datacenter
 	}
-	if cfg.Token != "" {
-		apiconfig.Token = cfg.Token
+	if consulCfg.Token != "" {
+		apiConfig.Token = consulCfg.Token
 	}
-	return apiconfig
+
+	return api.NewClient(apiConfig)
 }
 
-func optionsFromConfig(registry *configv1.Registry) []Option {
-	var opts []Option
-
-	cfg := registry.GetConsul()
-	if cfg == nil {
-		return opts
+// buildKratosOptions converts config and programmatic options into Kratos-Consul options.
+func buildKratosOptions(cfg *configv1.Discovery, opts ...registry.Option) []kratosconsul.Option {
+	// Apply programmatic options to a registry.Options struct to populate the context.
+	regOpts := configure.Apply(&registry.Options{}, opts)
+	for _, o := range opts {
+		o(regOpts)
 	}
 
-	if cfg.HealthCheck {
-		opts = append(opts, WithHealthCheck(cfg.HealthCheck))
+	var progOpts consulOptions
+	if regOpts.Context != nil {
+		if co, ok := regOpts.Context.Value(optionsKey{}).(consulOptions); ok {
+			progOpts = co
+		}
 	}
-	if cfg.HeartBeat {
-		opts = append(opts, WithHeartbeat(cfg.HeartBeat))
+
+	kratosOpts := []kratosconsul.Option{}
+	consulCfg := cfg.GetConsul()
+
+	// Determine final values, with programmatic options taking precedence over config files.
+	var (
+		healthCheck                    bool
+		heartbeat                      bool
+		healthCheckInterval            int
+		deregisterCriticalServiceAfter int
+	)
+
+	if consulCfg != nil {
+		healthCheck = consulCfg.HealthCheck
+		heartbeat = consulCfg.HeartBeat
+		healthCheckInterval = int(consulCfg.GetHealthCheckInterval())
+		deregisterCriticalServiceAfter = int(consulCfg.GetDeregisterCriticalServiceAfter())
 	}
-	if cfg.Timeout != 0 {
-		opts = append(opts, WithTimeout(time.Duration(cfg.Timeout)))
+
+	if progOpts.healthCheck != nil {
+		healthCheck = *progOpts.healthCheck
 	}
-	if cfg.Datacenter != "" {
-		opts = append(opts, WithDatacenter(Datacenter(cfg.Datacenter)))
+	if progOpts.heartbeat != nil {
+		heartbeat = *progOpts.heartbeat
 	}
-	if cfg.HealthCheckInterval > 0 {
-		opts = append(opts, WithHealthCheckInterval(int(cfg.HealthCheckInterval)))
+	if progOpts.healthCheckInterval != nil {
+		healthCheckInterval = *progOpts.healthCheckInterval
 	}
-	if cfg.DeregisterCriticalServiceAfter > 0 {
-		opts = append(opts, WithDeregisterCriticalServiceAfter(int(cfg.DeregisterCriticalServiceAfter)))
+	if progOpts.deregisterCriticalServiceAfter != nil {
+		deregisterCriticalServiceAfter = *progOpts.deregisterCriticalServiceAfter
 	}
-	return opts
+
+	// Append options to the final slice if they are meaningful.
+	kratosOpts = append(kratosOpts, kratosconsul.WithHealthCheck(healthCheck))
+	kratosOpts = append(kratosOpts, kratosconsul.WithHeartbeat(heartbeat))
+	if healthCheckInterval > 0 {
+		kratosOpts = append(kratosOpts, kratosconsul.WithHealthCheckInterval(healthCheckInterval))
+	}
+	if deregisterCriticalServiceAfter > 0 {
+		kratosOpts = append(kratosOpts, kratosconsul.WithDeregisterCriticalServiceAfter(deregisterCriticalServiceAfter))
+	}
+
+	return kratosOpts
 }
 
-func (c *consulBuilder) NewDiscovery(cfg *configv1.Registry, opts ...registry.OptionSetting) (registry.KDiscovery, error) {
-	return c.Create(cfg, opts...)
-}
-
-func (c *consulBuilder) NewRegistrar(cfg *configv1.Registry, opts ...registry.OptionSetting) (registry.KRegistrar, error) {
-	return c.Create(cfg, opts...)
-}
-
-func (c *consulBuilder) Create(cfg *configv1.Registry, _ ...registry.OptionSetting) (registry.Registry, error) {
-	if cfg == nil || cfg.Consul == nil {
-		return nil, errors.New("configuration: consul config is required")
-	}
-	apiConfig := configFromConfig(cfg)
-	apiClient, err := api.NewClient(apiConfig)
+// NewDiscovery creates a new Consul discovery component.
+func (f *factory) NewDiscovery(cfg *configv1.Discovery, opts ...registry.Option) (registry.KDiscovery, error) {
+	client, err := newClient(cfg)
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create consul client")
+		return nil, errors.Wrap(err, "failed to create consul client for discovery")
 	}
-	r := New(apiClient, optionsFromConfig(cfg)...)
-	return r, nil
+
+	kratosOpts := buildKratosOptions(cfg, opts...)
+	return kratosconsul.New(client, kratosOpts...), nil
+}
+
+// NewRegistrar creates a new Consul registrar component.
+func (f *factory) NewRegistrar(cfg *configv1.Discovery, opts ...registry.Option) (registry.KRegistrar, error) {
+	client, err := newClient(cfg)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create consul client for registrar")
+	}
+
+	kratosOpts := buildKratosOptions(cfg, opts...)
+	return kratosconsul.New(client, kratosOpts...), nil
 }
