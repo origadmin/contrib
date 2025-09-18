@@ -25,7 +25,7 @@ func init() {
 }
 
 // NewConsulConfig create a new consul config.
-func NewConsulConfig(ccfg *configv1.SourceConfig, ss ...config.Option) (config.KConfig, error) {
+func NewConsulConfig(ccfg *configv1.SourceConfig, ss ...bootstrap.Option) (bootstrap.KConfig, error) {
 	consul := ccfg.GetConsul()
 	if consul == nil {
 		return nil, errors.New("consul config error")
@@ -49,18 +49,18 @@ func NewConsulConfig(ccfg *configv1.SourceConfig, ss ...config.Option) (config.K
 		return nil, errors.Wrap(err, "consul source error")
 	}
 
-	var configSources = []config.KSource{source}
+	var configSources = []bootstrap.KSource{source}
 	if ccfg.EnvPrefixes != nil {
 		configSources = append(configSources, env.NewSource(ccfg.EnvPrefixes...))
 	}
-	option.SourceOptions = append(option.SourceOptions, config.WithSource(configSources...))
+	option.SourceOptions = append(option.SourceOptions, bootstrap.WithSource(configSources...))
 	if option.Decoder != nil {
-		option.SourceOptions = append(option.SourceOptions, config.WithDecoder(option.Decoder))
+		option.SourceOptions = append(option.SourceOptions, bootstrap.WithDecoder(option.Decoder))
 	}
-	return config.NewSourceConfig(option.SourceOptions...), nil
+	return bootstrap.NewSourceConfig(option.SourceOptions...), nil
 }
 
-func SyncConfig(ccfg *configv1.SourceConfig, v any, ss ...config.Option) error {
+func SyncConfig(ccfg *configv1.SourceConfig, v any, ss ...bootstrap.Option) error {
 	consul := ccfg.GetConsul()
 	if consul == nil {
 		return errors.New("consul config error")

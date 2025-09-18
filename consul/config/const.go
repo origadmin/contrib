@@ -23,7 +23,7 @@ type (
 )
 
 // New returns a new consul config source
-func New(client *api.Client, opts ...Option) (config.KSource, error) {
+func New(client *api.Client, opts ...Option) (bootstrap.KSource, error) {
 	return consul.New(client, opts...)
 }
 
