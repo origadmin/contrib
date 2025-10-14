@@ -3,7 +3,7 @@
  */
 
 // Package config implements the functions, types, and interfaces for the module.
-package config
+package consul
 
 import (
 	"github.com/go-kratos/kratos/contrib/config/consul/v2"

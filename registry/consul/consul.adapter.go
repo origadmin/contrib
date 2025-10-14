@@ -3,7 +3,7 @@
 // This file is generated from consul.go.
 
 // Package registry contains generated code by adptool.
-package registry
+package consul
 
 import (
 	"crypto/tls"

@@ -3,7 +3,7 @@
  */
 
 // Package registry implements the functions, types, and interfaces for the module.
-package registry
+package consul
 
 import (
 	_ "github.com/hashicorp/consul/api"
