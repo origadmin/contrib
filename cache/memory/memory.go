@@ -2,108 +2,57 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package memory implements the functions, types, and interfaces for the module.
+// Package memory provides a memory-based cache implementation.
 package memory
 
 import (
-	"context"
-	"time"
-
-	"github.com/coocood/freecache"
-	"github.com/goexts/generic/types"
-	"github.com/origadmin/framework/runtime/api/gen/go/apierrors"
-	oer "github.com/origadmin/framework/runtime/errors"
-	configv1 "github.com/origadmin/runtime/gen/go/config/v1"
+	cachev1 "github.com/origadmin/runtime/api/gen/go/runtime/data/cache/v1"
+	storageiface "github.com/origadmin/runtime/interfaces/storage"
 )
 
-const (
-	defaultSize = 64 * 1024 * 1024
-)
-
-var (
-	// ErrNotFound is now a standard framework error, ensuring consistency across the application.
-	ErrNotFound = oer.FromReason(apierrors.ErrorReason_NOT_FOUND)
-)
-
-type Cache struct {
-	Expiration      time.Duration
-	CleanupInterval time.Duration
-	Cache           *freecache.Cache
+// memoryCache implements the storageiface.Cache interface for in-memory caching.
+type memoryCache struct {
+	// Add fields for memory cache implementation here
 }
 
-func (obj *Cache) Set(ctx context.Context, key, value string, expiration ...time.Duration) error {
-	var exp time.Duration
-	if len(expiration) > 0 {
-		exp = expiration[0]
-	}
-	return obj.Cache.Set([]byte(key), []byte(value), int(exp))
+// NewMemoryCache creates a new memory cache instance.
+func NewMemoryCache(cfg *cachev1.MemoryConfig) storageiface.Cache {
+	// Implement memory cache initialization logic here
+	return &memoryCache{}
 }
 
-func (obj *Cache) Get(ctx context.Context, key string) (string, error) {
-	val, err := obj.Cache.Get([]byte(key))
-	if err != nil {
-		return "", ErrNotFound
-	}
-	return string(val), nil
+// Get retrieves a value from the cache.
+func (c *memoryCache) Get(key string) (interface{}, error) {
+	// Implement Get logic
+	return nil, nil
 }
 
-func (obj *Cache) Exists(ctx context.Context, key string) error {
-	_, err := obj.Cache.Get([]byte(key))
-	if err != nil {
-		return ErrNotFound
-	}
+// Set sets a value in the cache.
+func (c *memoryCache) Set(key string, value interface{}) error {
+	// Implement Set logic
 	return nil
 }
 
-func (obj *Cache) Delete(ctx context.Context, key string) error {
-	affected := obj.Cache.Del([]byte(key))
-	if !affected {
-		return ErrNotFound
-	}
+// Delete removes a value from the cache.
+func (c *memoryCache) Delete(key string) error {
+	// Implement Delete logic
 	return nil
 }
 
-func (obj *Cache) GetAndDelete(ctx context.Context, key string) (string, error) {
-	value, err := obj.Get(ctx, key)
-	if err != nil {
-		return "", err
-	}
-	err = obj.Delete(ctx, key)
-	if err != nil {
-		return "", err
-	}
-	return value, nil
+// Has checks if a key exists in the cache.
+func (c *memoryCache) Has(key string) bool {
+	// Implement Has logic
+	return false
 }
 
-func (obj *Cache) Iterator(ctx context.Context, fn func(ctx context.Context, key, value string) bool) error {
-	iter := obj.Cache.NewIterator()
-	for entry := iter.Next(); entry != nil; entry = iter.Next() {
-		if !fn(ctx, string(entry.Key), string(entry.Value)) {
-			break
-		}
-	}
+// Clear clears all items from the cache.
+func (c *memoryCache) Clear() error {
+	// Implement Clear logic
 	return nil
 }
 
-func (obj *Cache) Close(_ context.Context) error {
-	obj.Cache.Clear()
+// Close closes the cache connection.
+func (c *memoryCache) Close() error {
+	// Implement Close logic
 	return nil
-}
-
-func NewCache(storage *configv1.Storage) *Cache {
-	cfg := storage.GetCache().GetMemory()
-	if cfg == nil {
-		cfg = new(configv1.Memory)
-	}
-	expiration := types.ZeroOr(time.Duration(cfg.GetExpiration()), 24*time.Hour)
-	interval := types.ZeroOr(time.Duration(cfg.GetCleanupInterval()), 30*time.Minute)
-	return &Cache{
-		Expiration:      expiration,
-		CleanupInterval: interval,
-		Cache:           newFreeCache(defaultSize),
-	}
-}
-
-func newFreeCache(size int) *freecache.Cache {
-	return freecache.NewCache(size)
 }
