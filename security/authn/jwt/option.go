@@ -30,6 +30,8 @@ type Option struct {
 	issuer               string
 	audience             []string
 	extraClaims          map[string]string
+	clock                func() time.Time
+	generateID           func() string
 }
 
 // Apply merges the JWT configuration from the proto message into the Option struct.
@@ -237,6 +239,20 @@ func WithIssuer(issuer string) options.Option {
 func WithAudience(audience []string) options.Option {
 	return optionutil.Update(func(o *Option) {
 		o.audience = audience
+	})
+}
+
+// WithClock provides a function to return the current time, useful for testing.
+func WithClock(c func() time.Time) options.Option {
+	return optionutil.Update(func(o *Option) {
+		o.clock = c
+	})
+}
+
+// WithGenerateID provides a function to generate unique IDs (e.g., for 'jti' claims).
+func WithGenerateID(g func() string) options.Option {
+	return optionutil.Update(func(o *Option) {
+		o.generateID = g
 	})
 }
 

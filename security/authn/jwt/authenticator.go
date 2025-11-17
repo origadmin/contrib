@@ -13,7 +13,6 @@ import (
 
 	"github.com/dchest/uniuri"
 	jwtv5 "github.com/golang-jwt/jwt/v5"
-	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/structpb"
 
 	authnv1 "github.com/origadmin/runtime/api/gen/go/config/security/authn/v1"
@@ -22,8 +21,8 @@ import (
 	"github.com/origadmin/runtime/interfaces/security"
 	"github.com/origadmin/runtime/interfaces/security/token"
 	"github.com/origadmin/runtime/log"
-	runtimeSecurity "github.com/origadmin/runtime/security"
 	"github.com/origadmin/runtime/security/authn"
+	"github.com/origadmin/runtime/security/credential"
 	"github.com/origadmin/runtime/security/principal"
 )
 
@@ -142,11 +141,20 @@ type Authenticator struct {
 func NewJWTAuthenticator(cfg *authnv1.Authenticator, opts ...options.Option) (security.Authenticator, error) {
 	jwtCfg := cfg.GetJwt()
 	if jwtCfg == nil {
-		return nil, runtimeSecurity.ErrInvalidArgument(nil, "JWT configuration is missing")
+		return nil, securityv1.ErrorCredentialsInvalid("JWT configuration is missing")
 	}
 	o := FromOptions(opts...)
 	if err := o.Apply(jwtCfg); err != nil {
 		return nil, err
+	}
+
+	clock := o.clock
+	if clock == nil {
+		clock = time.Now
+	}
+	generateID := o.generateID
+	if generateID == nil {
+		generateID = uniuri.New
 	}
 
 	a := &Authenticator{
@@ -157,8 +165,8 @@ func NewJWTAuthenticator(cfg *authnv1.Authenticator, opts ...options.Option) (se
 		accessTokenLifetime:  o.accessTokenLifetime,
 		refreshTokenLifetime: o.refreshTokenLifetime,
 		cache:                o.cache,
-		generateID:           uniuri.New,
-		clock:                time.Now,
+		generateID:           generateID,
+		clock:                clock,
 		skipAudienceCheck:    len(o.audience) == 0,
 	}
 
@@ -172,16 +180,16 @@ func init() {
 // Authenticate validates the provided credential and returns a Principal if successful.
 func (a *Authenticator) Authenticate(ctx context.Context, cred security.Credential) (security.Principal, error) {
 	if !a.Supports(cred) {
-		return nil, runtimeSecurity.ErrUnsupportedCredentialType()
+		return nil, securityv1.ErrorCredentialsInvalid("unsupported credential type: %s", cred.Type())
 	}
 
 	var bc securityv1.BearerCredential
 	if err := cred.ParsedPayload(&bc); err != nil {
-		return nil, runtimeSecurity.ErrInvalidCredential(err)
+		return nil, securityv1.ErrorBearerTokenInvalid("failed to parse bearer credential: %v", err)
 	}
 	tokenStr := bc.GetToken()
 	if tokenStr == "" {
-		return nil, runtimeSecurity.ErrInvalidCredential(nil, "token is empty")
+		return nil, securityv1.ErrorTokenMissing("token is empty")
 	}
 
 	claims, err := a.parseAndValidateToken(tokenStr)
@@ -191,20 +199,20 @@ func (a *Authenticator) Authenticate(ctx context.Context, cred security.Credenti
 
 	if a.cache != nil {
 		if claims.ID == "" {
-			return nil, runtimeSecurity.ErrInvalidCredential(nil, "missing 'jti' claim for revocation check")
+			return nil, securityv1.ErrorClaimsInvalid("missing 'jti' claim for revocation check")
 		}
 		isRevoked, err := a.isTokenRevoked(ctx, claims.ID)
 		if err != nil {
 			log.Warnf("Failed to check token revocation status: %v", err)
-			return nil, runtimeSecurity.ErrAuthentication(err, "token revocation check failed")
+			return nil, securityv1.ErrorTokenInvalid("token revocation check failed: %v", err)
 		}
 		if isRevoked {
-			return nil, runtimeSecurity.ErrTokenRevoked()
+			return nil, securityv1.ErrorTokenExpired("token has been revoked")
 		}
 	}
 
 	if claims.Subject == "" {
-		return nil, runtimeSecurity.ErrInvalidCredential(nil, "missing or invalid 'sub' claim")
+		return nil, securityv1.ErrorClaimsInvalid("missing or invalid 'sub' claim")
 	}
 
 	p := principal.New(
@@ -244,7 +252,7 @@ func (a *Authenticator) CreateCredential(ctx context.Context, p security.Princip
 	}
 	accessToken, err := a.signToken(accessClaims)
 	if err != nil {
-		return nil, runtimeSecurity.ErrAuthentication(err, "failed to sign access token")
+		return nil, err
 	}
 
 	refreshClaims := &jwtv5.RegisteredClaims{
@@ -258,7 +266,7 @@ func (a *Authenticator) CreateCredential(ctx context.Context, p security.Princip
 	}
 	refreshToken, err := a.signToken(refreshClaims)
 	if err != nil {
-		return nil, runtimeSecurity.ErrAuthentication(err, "failed to sign refresh token")
+		return nil, err
 	}
 
 	tokenCred := &securityv1.TokenCredential{
@@ -268,18 +276,18 @@ func (a *Authenticator) CreateCredential(ctx context.Context, p security.Princip
 		TokenType:    "Bearer",
 	}
 
-	anyPayload, err := anypb.New(tokenCred)
-	if err != nil {
-		return nil, runtimeSecurity.ErrInternal(err, "failed to marshal token credential")
+	// Create a securityv1.Payload and set the Token field
+	payload := &securityv1.Payload{
+		Token: tokenCred,
 	}
 
-	return runtimeSecurity.NewCredentialResponse("jwt", anyPayload), nil
+	return credential.NewCredentialResponse("jwt", payload, make(map[string][]string)), nil
 }
 
 // Revoke invalidates the given raw credential string.
 func (a *Authenticator) Revoke(ctx context.Context, rawCredential string) error {
 	if a.cache == nil {
-		return runtimeSecurity.ErrUnsupportedOperation(nil, "cache is not configured for token revocation")
+		return securityv1.ErrorSigningMethodUnsupported("cache is not configured for token revocation")
 	}
 
 	claims, err := a.parseAndValidateToken(rawCredential)
@@ -288,11 +296,11 @@ func (a *Authenticator) Revoke(ctx context.Context, rawCredential string) error 
 	}
 
 	if claims.ID == "" {
-		return runtimeSecurity.ErrInvalidCredential(nil, "missing 'jti' claim for revocation")
+		return securityv1.ErrorClaimsInvalid("missing 'jti' claim for revocation")
 	}
 
 	if claims.ExpiresAt == nil {
-		return runtimeSecurity.ErrInvalidCredential(nil, "missing or invalid 'exp' claim")
+		return securityv1.ErrorClaimsInvalid("missing or invalid 'exp' claim")
 	}
 
 	remainingTTL := time.Until(claims.ExpiresAt.Time)
@@ -301,7 +309,7 @@ func (a *Authenticator) Revoke(ctx context.Context, rawCredential string) error 
 	}
 
 	if err := a.cache.Store(ctx, revocationKey(claims.ID), remainingTTL); err != nil {
-		return runtimeSecurity.ErrAuthentication(err, "failed to revoke token")
+		return securityv1.ErrorTokenInvalid("failed to revoke token in cache: %v", err)
 	}
 	return nil
 }
@@ -328,7 +336,7 @@ func (a *Authenticator) parseAndValidateToken(tokenStr string) (*Claims, error) 
 	}
 
 	if !parsedToken.Valid {
-		return nil, runtimeSecurity.ErrInvalidCredential(nil, "token is invalid")
+		return nil, securityv1.ErrorTokenInvalid("token is invalid")
 	}
 
 	return claims, nil
@@ -339,7 +347,7 @@ func (a *Authenticator) signToken(claims jwtv5.Claims) (string, error) {
 	token := jwtv5.NewWithClaims(a.signingMethod, claims)
 	key, err := a.keyFunc(token)
 	if err != nil {
-		return "", runtimeSecurity.ErrInternal(err, "failed to get signing key")
+		return "", securityv1.ErrorTokenSignFailed("failed to get signing key: %v", err)
 	}
 	return token.SignedString(key)
 }
@@ -353,26 +361,26 @@ func revocationKey(tokenID string) string {
 func mapJWTError(err error) error {
 	switch {
 	case errors.Is(err, jwtv5.ErrTokenMalformed):
-		return runtimeSecurity.ErrInvalidCredential(err, "token is malformed")
+		return securityv1.ErrorTokenInvalid("token is malformed: %v", err)
 	case errors.Is(err, jwtv5.ErrTokenSignatureInvalid):
-		return runtimeSecurity.ErrInvalidCredential(err, "token signature is invalid")
+		return securityv1.ErrorTokenInvalid("token signature is invalid: %v", err)
 	case errors.Is(err, jwtv5.ErrTokenExpired):
-		return runtimeSecurity.ErrTokenExpired()
+		return securityv1.ErrorTokenExpired("token has expired: %v", err)
 	case errors.Is(err, jwtv5.ErrTokenNotValidYet):
-		return runtimeSecurity.ErrInvalidCredential(err, "token not valid yet")
+		return securityv1.ErrorTokenInvalid("token not valid yet: %v", err)
 	case errors.Is(err, jwtv5.ErrTokenInvalidIssuer):
-		return runtimeSecurity.ErrInvalidCredential(err, "invalid issuer")
+		return securityv1.ErrorClaimsInvalid("invalid issuer: %v", err)
 	case errors.Is(err, jwtv5.ErrTokenInvalidAudience):
-		return runtimeSecurity.ErrInvalidCredential(err, "invalid audience")
+		return securityv1.ErrorClaimsInvalid("invalid audience: %v", err)
 	default:
-		return runtimeSecurity.ErrAuthentication(err)
+		return securityv1.ErrorTokenInvalid("unexpected token error: %v", err)
 	}
 }
 
 // Interface compliance checks.
 var (
 	_ security.Authenticator     = (*Authenticator)(nil)
-	_ security.CredentialCreator = (*Authenticator)(nil)
+	_ security.CredentialCreator  = (*Authenticator)(nil)
 	_ security.CredentialRevoker = (*Authenticator)(nil)
 	_ security.Claims            = (*Claims)(nil)
 )
