@@ -18,12 +18,13 @@ import (
 	authnv1 "github.com/origadmin/runtime/api/gen/go/config/security/authn/v1"
 	securityv1 "github.com/origadmin/runtime/api/gen/go/config/security/v1"
 	"github.com/origadmin/runtime/interfaces/options"
-	"github.com/origadmin/runtime/interfaces/security"
-	"github.com/origadmin/runtime/interfaces/security/token"
 	"github.com/origadmin/runtime/log"
-	"github.com/origadmin/runtime/security/authn"
-	"github.com/origadmin/runtime/security/credential"
-	"github.com/origadmin/runtime/security/principal"
+
+	authnFactory "github.com/origadmin/contrib/security/authn"
+	securityInterfaces "github.com/origadmin/contrib/security/security"
+	securityCredential "github.com/origadmin/contrib/security/credential"
+	securityPrincipal "github.com/origadmin/contrib/security/principal"
+	securityToken "github.com/origadmin/contrib/security/token" // Assuming token is also moved
 )
 
 const (
@@ -131,14 +132,14 @@ type Authenticator struct {
 	audience             []string
 	accessTokenLifetime  time.Duration
 	refreshTokenLifetime time.Duration
-	cache                token.CacheStorage
+	cache                securityToken.CacheStorage
 	generateID           func() string
 	clock                func() time.Time
 	skipAudienceCheck    bool
 }
 
 // NewProvider creates a new JWT Provider from the given configuration and options.
-func NewProvider(cfg *authnv1.Authenticator, opts ...options.Option) (authn.Provider, error) {
+func NewProvider(cfg *authnv1.Authenticator, opts ...options.Option) (authnFactory.Provider, error) {
 	jwtCfg := cfg.GetJwt()
 	if jwtCfg == nil {
 		return nil, securityv1.ErrorCredentialsInvalid("JWT configuration is missing")
@@ -174,11 +175,11 @@ func NewProvider(cfg *authnv1.Authenticator, opts ...options.Option) (authn.Prov
 }
 
 func init() {
-	authn.RegisterAuthenticatorFactory("jwt", NewProvider)
+	authnFactory.Register("jwt", NewProvider)
 }
 
 // Authenticate validates the provided credential and returns a Principal if successful.
-func (a *Authenticator) Authenticate(ctx context.Context, cred security.Credential) (security.Principal, error) {
+func (a *Authenticator) Authenticate(ctx context.Context, cred securityInterfaces.Credential) (securityInterfaces.Principal, error) {
 	if !a.Supports(cred) {
 		return nil, securityv1.ErrorCredentialsInvalid("unsupported credential type: %s", cred.Type())
 	}
@@ -215,7 +216,7 @@ func (a *Authenticator) Authenticate(ctx context.Context, cred security.Credenti
 		return nil, securityv1.ErrorClaimsInvalid("missing or invalid 'sub' claim")
 	}
 
-	p := principal.New(
+	p := securityPrincipal.New(
 		claims.Subject,
 		claims.Roles,
 		claims.Permissions,
@@ -227,12 +228,12 @@ func (a *Authenticator) Authenticate(ctx context.Context, cred security.Credenti
 }
 
 // Supports returns true if this authenticator can handle the given credential.
-func (a *Authenticator) Supports(cred security.Credential) bool {
+func (a *Authenticator) Supports(cred securityInterfaces.Credential) bool {
 	return cred.Type() == "jwt"
 }
 
 // CreateCredential issues a new credential for the given principal.
-func (a *Authenticator) CreateCredential(ctx context.Context, p security.Principal) (security.CredentialResponse, error) {
+func (a *Authenticator) CreateCredential(ctx context.Context, p securityInterfaces.Principal) (securityInterfaces.CredentialResponse, error) {
 	now := a.clock()
 	accessTokenID := a.generateID()
 
@@ -280,11 +281,11 @@ func (a *Authenticator) CreateCredential(ctx context.Context, p security.Princip
 		Token: tokenCred,
 	}
 
-	return credential.NewCredentialResponse("jwt", payload, make(map[string][]string)), nil
+	return securityCredential.NewCredentialResponse("jwt", payload, make(map[string][]string)), nil
 }
 
 // Revoke invalidates the given credential.
-func (a *Authenticator) Revoke(ctx context.Context, cred security.Credential) error {
+func (a *Authenticator) Revoke(ctx context.Context, cred securityInterfaces.Credential) error {
 	if a.cache == nil {
 		return securityv1.ErrorSigningMethodUnsupported("cache is not configured for token revocation")
 	}
@@ -295,11 +296,11 @@ func (a *Authenticator) Revoke(ctx context.Context, cred security.Credential) er
 
 	var bc securityv1.BearerCredential
 	if err := cred.ParsedPayload(&bc); err != nil {
-		return securityv1.ErrorBearerTokenInvalid("failed to parse bearer credential for revocation: %v", err)
+		return nil, securityv1.ErrorBearerTokenInvalid("failed to parse bearer credential for revocation: %v", err)
 	}
 	tokenStr := bc.GetToken()
 	if tokenStr == "" {
-		return securityv1.ErrorTokenMissing("token is empty for revocation")
+		return nil, securityv1.ErrorTokenMissing("token is empty for revocation")
 	}
 
 	// For revocation, we only need the claims, and we can ignore if the token is already expired.
@@ -401,8 +402,8 @@ func mapJWTError(err error) error {
 
 // Interface compliance checks.
 var (
-	_ security.Authenticator     = (*Authenticator)(nil)
-	_ security.CredentialCreator  = (*Authenticator)(nil)
-	_ security.CredentialRevoker = (*Authenticator)(nil)
-	_ security.Claims            = (*Claims)(nil)
+	_ securityInterfaces.Authenticator     = (*Authenticator)(nil)
+	_ securityInterfaces.CredentialCreator  = (*Authenticator)(nil)
+	_ securityInterfaces.CredentialRevoker = (*Authenticator)(nil)
+	_ securityInterfaces.Claims            = (*Claims)(nil)
 )

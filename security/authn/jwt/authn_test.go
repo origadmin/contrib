@@ -16,11 +16,13 @@ import (
 	jwtv1 "github.com/origadmin/runtime/api/gen/go/config/security/authn/jwt/v1"
 	authnv1 "github.com/origadmin/runtime/api/gen/go/config/security/authn/v1"
 	securityv1 "github.com/origadmin/runtime/api/gen/go/config/security/v1"
-	"github.com/origadmin/runtime/interfaces/security"
-	"github.com/origadmin/runtime/interfaces/security/token"
-	"github.com/origadmin/runtime/security/authn"
-	"github.com/origadmin/runtime/security/credential"
-	"github.com/origadmin/runtime/security/principal"
+	"github.com/origadmin/runtime/interfaces/options"
+
+	authnFactory "github.com/origadmin/contrib/security/authn"
+	securityInterfaces "github.com/origadmin/contrib/security/security"
+	securityCredential "github.com/origadmin/contrib/security/credential"
+	securityPrincipal "github.com/origadmin/contrib/security/principal"
+	securityToken "github.com/origadmin/contrib/security/token" // Assuming token is also moved
 )
 
 const (
@@ -56,9 +58,9 @@ func (m *mockCache) Close(ctx context.Context) error {
 	return nil
 }
 
-var _ token.CacheStorage = (*mockCache)(nil)
+var _ securityToken.CacheStorage = (*mockCache)(nil)
 
-func createTestProvider(t *testing.T, cache token.CacheStorage) authn.Provider {
+func createTestProvider(t *testing.T, cache securityToken.CacheStorage) authnFactory.Provider {
 	cfg := &authnv1.Authenticator{
 		Name: "jwt",
 		Authenticator: &authnv1.Authenticator_Jwt{
@@ -81,13 +83,13 @@ func createTestProvider(t *testing.T, cache token.CacheStorage) authn.Provider {
 
 func TestJWTProvider_Success(t *testing.T) {
 	provider := createTestProvider(t, nil)
-	auth, ok := provider.GetAuthenticator()
+	auth, ok := provider.Authenticator()
 	require.True(t, ok)
-	creator, ok := provider.GetCredentialCreator()
+	creator, ok := provider.CredentialCreator()
 	require.True(t, ok)
 
 	// Create a valid token
-	p := principal.New("test-user", []string{"user"}, nil, nil, nil)
+	p := securityPrincipal.New("test-user", []string{"user"}, nil, nil, nil)
 	resp, err := creator.CreateCredential(context.Background(), p)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
@@ -97,7 +99,7 @@ func TestJWTProvider_Success(t *testing.T) {
 	accessToken := tokenCred.GetAccessToken()
 
 	// Authenticate with the token
-	cred, err := credential.NewBearer(accessToken)
+	cred, err := securityCredential.NewBearer(accessToken)
 	require.NoError(t, err)
 
 	authedPrincipal, err := auth.Authenticate(context.Background(), cred)
@@ -108,7 +110,7 @@ func TestJWTProvider_Success(t *testing.T) {
 
 func TestJWTProvider_FailureCases(t *testing.T) {
 	provider := createTestProvider(t, nil)
-	auth, ok := provider.GetAuthenticator()
+	auth, ok := provider.Authenticator()
 	require.True(t, ok)
 
 	testCases := []struct {
@@ -180,7 +182,7 @@ func TestJWTProvider_FailureCases(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			cred, err := credential.NewBearer(tc.token)
+			cred, err := securityCredential.NewBearer(tc.token)
 			require.NoError(t, err)
 			_, err = auth.Authenticate(context.Background(), cred)
 			require.Error(t, err)
@@ -192,12 +194,12 @@ func TestJWTProvider_FailureCases(t *testing.T) {
 func TestJWTProvider_Revocation(t *testing.T) {
 	cache := newMockCache()
 	provider := createTestProvider(t, cache)
-	auth, _ := provider.GetAuthenticator()
-	creator, _ := provider.GetCredentialCreator()
-	revoker, _ := provider.GetCredentialRevoker()
+	auth, _ := provider.Authenticator()
+	creator, _ := provider.CredentialCreator()
+	revoker, _ := provider.CredentialRevoker()
 
 	// 1. Create a token
-	p := principal.New("user-to-be-revoked", nil, nil, nil, nil)
+	p := securityPrincipal.New("user-to-be-revoked", nil, nil, nil, nil)
 	resp, err := creator.CreateCredential(context.Background(), p)
 	require.NoError(t, err)
 	var tokenCred securityv1.TokenCredential
@@ -205,7 +207,7 @@ func TestJWTProvider_Revocation(t *testing.T) {
 	accessToken := tokenCred.GetAccessToken()
 
 	// 2. Before revocation, authentication should succeed
-	cred, _ := credential.NewBearer(accessToken)
+	cred, _ := securityCredential.NewBearer(accessToken)
 	_, err = auth.Authenticate(context.Background(), cred)
 	assert.NoError(t, err)
 

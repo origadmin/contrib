@@ -17,12 +17,12 @@ import (
 	jwtv1 "github.com/origadmin/runtime/api/gen/go/config/security/authn/jwt/v1"
 	"github.com/origadmin/runtime/extension/optionutil"
 	"github.com/origadmin/runtime/interfaces/options"
-	"github.com/origadmin/runtime/interfaces/security/token"
+	securityToken "github.com/origadmin/contrib/security/token" // Updated import path
 )
 
 // Option holds the configuration options for the JWT authenticator.
 type Option struct {
-	cache                token.CacheStorage
+	cache                securityToken.CacheStorage // Use securityToken.CacheStorage
 	signingMethod        jwtv5.SigningMethod
 	keyFunc              jwtv5.Keyfunc
 	accessTokenLifetime  time.Duration
@@ -194,7 +194,7 @@ func WithExtraClaims(extras map[string]string) options.Option {
 }
 
 // WithCache returns an options.Option that sets the token cache.
-func WithCache(cache token.CacheStorage) options.Option {
+func WithCache(cache securityToken.CacheStorage) options.Option { // Use securityToken.CacheStorage
 	return optionutil.Update(func(o *Option) {
 		o.cache = cache
 	})
