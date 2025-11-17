@@ -210,7 +210,7 @@ func TestJWTProvider_Revocation(t *testing.T) {
 	assert.NoError(t, err)
 
 	// 3. Revoke the token
-	err = revoker.Revoke(context.Background(), accessToken)
+	err = revoker.Revoke(context.Background(), cred)
 	assert.NoError(t, err)
 
 	// 4. After revocation, authentication should fail

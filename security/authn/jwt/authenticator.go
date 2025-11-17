@@ -192,7 +192,7 @@ func (a *Authenticator) Authenticate(ctx context.Context, cred security.Credenti
 		return nil, securityv1.ErrorTokenMissing("token is empty")
 	}
 
-	claims, err := a.parseAndValidateToken(tokenStr)
+	claims, err := a.parseAndValidateToken(tokenStr, false) // Full validation for authentication
 	if err != nil {
 		return nil, err
 	}
@@ -283,14 +283,29 @@ func (a *Authenticator) CreateCredential(ctx context.Context, p security.Princip
 	return credential.NewCredentialResponse("jwt", payload, make(map[string][]string)), nil
 }
 
-// Revoke invalidates the given raw credential string.
-func (a *Authenticator) Revoke(ctx context.Context, rawCredential string) error {
+// Revoke invalidates the given credential.
+func (a *Authenticator) Revoke(ctx context.Context, cred security.Credential) error {
 	if a.cache == nil {
 		return securityv1.ErrorSigningMethodUnsupported("cache is not configured for token revocation")
 	}
 
-	claims, err := a.parseAndValidateToken(rawCredential)
+	if !a.Supports(cred) {
+		return securityv1.ErrorCredentialsInvalid("unsupported credential type for revocation: %s", cred.Type())
+	}
+
+	var bc securityv1.BearerCredential
+	if err := cred.ParsedPayload(&bc); err != nil {
+		return securityv1.ErrorBearerTokenInvalid("failed to parse bearer credential for revocation: %v", err)
+	}
+	tokenStr := bc.GetToken()
+	if tokenStr == "" {
+		return securityv1.ErrorTokenMissing("token is empty for revocation")
+	}
+
+	// For revocation, we only need the claims, and we can ignore if the token is already expired.
+	claims, err := a.parseAndValidateToken(tokenStr, true) // `true` to skip expiration check
 	if err != nil {
+		// Any error other than expiration is still a problem (e.g., bad signature).
 		return err
 	}
 
@@ -298,13 +313,14 @@ func (a *Authenticator) Revoke(ctx context.Context, rawCredential string) error 
 		return securityv1.ErrorClaimsInvalid("missing 'jti' claim for revocation")
 	}
 
+	// We still need the expiration time to set a TTL on the revocation entry in the cache.
 	if claims.ExpiresAt == nil {
-		return securityv1.ErrorClaimsInvalid("missing or invalid 'exp' claim")
+		return securityv1.ErrorClaimsInvalid("missing or invalid 'exp' claim for revocation")
 	}
 
 	remainingTTL := time.Until(claims.ExpiresAt.Time)
 	if remainingTTL <= 0 {
-		return nil // Already expired
+		return nil // Already expired, no need to add to cache.
 	}
 
 	if err := a.cache.Store(ctx, revocationKey(claims.ID), remainingTTL); err != nil {
@@ -319,7 +335,8 @@ func (a *Authenticator) isTokenRevoked(ctx context.Context, tokenID string) (boo
 }
 
 // parseAndValidateToken parses a JWT string and validates its claims.
-func (a *Authenticator) parseAndValidateToken(tokenStr string) (*Claims, error) {
+// If skipExpCheck is true, it will not return an error for expired tokens.
+func (a *Authenticator) parseAndValidateToken(tokenStr string, skipExpCheck bool) (*Claims, error) {
 	claims := &Claims{}
 	parserOpts := []jwtv5.ParserOption{
 		jwtv5.WithIssuer(a.issuer),
@@ -331,6 +348,12 @@ func (a *Authenticator) parseAndValidateToken(tokenStr string) (*Claims, error) 
 
 	parsedToken, err := jwtv5.ParseWithClaims(tokenStr, claims, a.keyFunc, parserOpts...)
 	if err != nil {
+		// If we are skipping the expiration check and the only error is expiration, return the claims.
+		if skipExpCheck && errors.Is(err, jwtv5.ErrTokenExpired) {
+			// The token is expired, but the caller wants to proceed, so we return the parsed claims.
+			// The claims are still populated even when this error occurs.
+			return claims, nil
+		}
 		return nil, mapJWTError(err)
 	}
 
