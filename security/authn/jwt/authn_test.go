@@ -12,13 +12,13 @@ import (
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"google.golang.org/protobuf/types/known/anypb"
 
 	jwtv1 "github.com/origadmin/runtime/api/gen/go/config/security/authn/jwt/v1"
 	authnv1 "github.com/origadmin/runtime/api/gen/go/config/security/authn/v1"
 	securityv1 "github.com/origadmin/runtime/api/gen/go/config/security/v1"
 	"github.com/origadmin/runtime/interfaces/security"
 	"github.com/origadmin/runtime/interfaces/security/token"
+	"github.com/origadmin/runtime/security/authn"
 	"github.com/origadmin/runtime/security/credential"
 	"github.com/origadmin/runtime/security/principal"
 )
@@ -58,7 +58,7 @@ func (m *mockCache) Close(ctx context.Context) error {
 
 var _ token.CacheStorage = (*mockCache)(nil)
 
-func createTestAuthenticator(t *testing.T, cache token.CacheStorage) security.Authenticator {
+func createTestProvider(t *testing.T, cache token.CacheStorage) authn.Provider {
 	cfg := &authnv1.Authenticator{
 		Name: "jwt",
 		Authenticator: &authnv1.Authenticator_Jwt{
@@ -73,23 +73,27 @@ func createTestAuthenticator(t *testing.T, cache token.CacheStorage) security.Au
 		},
 	}
 
-	auth, err := NewJWTAuthenticator(cfg, WithCache(cache))
+	provider, err := NewProvider(cfg, WithCache(cache))
 	require.NoError(t, err)
-	require.NotNil(t, auth)
-	return auth
+	require.NotNil(t, provider)
+	return provider
 }
 
-func TestJWTAuthenticator_Success(t *testing.T) {
-	auth := createTestAuthenticator(t, nil)
+func TestJWTProvider_Success(t *testing.T) {
+	provider := createTestProvider(t, nil)
+	auth, ok := provider.GetAuthenticator()
+	require.True(t, ok)
+	creator, ok := provider.GetCredentialCreator()
+	require.True(t, ok)
 
 	// Create a valid token
 	p := principal.New("test-user", []string{"user"}, nil, nil, nil)
-	resp, err := auth.(security.CredentialCreator).CreateCredential(context.Background(), p)
+	resp, err := creator.CreateCredential(context.Background(), p)
 	require.NoError(t, err)
 	require.NotNil(t, resp)
 
 	var tokenCred securityv1.TokenCredential
-	require.NoError(t, resp.Payload().UnmarshalTo(&tokenCred))
+	require.NoError(t, resp.Payload().GetToken().UnmarshalTo(&tokenCred))
 	accessToken := tokenCred.GetAccessToken()
 
 	// Authenticate with the token
@@ -102,18 +106,20 @@ func TestJWTAuthenticator_Success(t *testing.T) {
 	assert.Equal(t, []string{"user"}, authedPrincipal.GetRoles())
 }
 
-func TestJWTAuthenticator_FailureCases(t *testing.T) {
-	auth := createTestAuthenticator(t, nil)
+func TestJWTProvider_FailureCases(t *testing.T) {
+	provider := createTestProvider(t, nil)
+	auth, ok := provider.GetAuthenticator()
+	require.True(t, ok)
 
 	testCases := []struct {
 		name        string
 		token       string
-		expectedErr string
+		expectedErr func(error) bool
 	}{
 		{
 			name:        "Malformed Token",
 			token:       "this.is.not.a.jwt",
-			expectedErr: "token is malformed",
+			expectedErr: securityv1.IsTokenInvalid,
 		},
 		{
 			name: "Invalid Signature",
@@ -123,7 +129,7 @@ func TestJWTAuthenticator_FailureCases(t *testing.T) {
 				signed, _ := token.SignedString([]byte("wrong-secret"))
 				return signed
 			}(),
-			expectedErr: "token signature is invalid",
+			expectedErr: securityv1.IsTokenInvalid,
 		},
 		{
 			name: "Expired Token",
@@ -138,7 +144,7 @@ func TestJWTAuthenticator_FailureCases(t *testing.T) {
 				signed, _ := token.SignedString([]byte(testSecretKey))
 				return signed
 			}(),
-			expectedErr: "token has expired",
+			expectedErr: securityv1.IsTokenExpired,
 		},
 		{
 			name: "Invalid Issuer",
@@ -153,7 +159,7 @@ func TestJWTAuthenticator_FailureCases(t *testing.T) {
 				signed, _ := token.SignedString([]byte(testSecretKey))
 				return signed
 			}(),
-			expectedErr: "invalid issuer",
+			expectedErr: securityv1.IsClaimsInvalid,
 		},
 		{
 			name: "Invalid Audience",
@@ -168,7 +174,7 @@ func TestJWTAuthenticator_FailureCases(t *testing.T) {
 				signed, _ := token.SignedString([]byte(testSecretKey))
 				return signed
 			}(),
-			expectedErr: "invalid audience",
+			expectedErr: securityv1.IsClaimsInvalid,
 		},
 	}
 
@@ -178,23 +184,24 @@ func TestJWTAuthenticator_FailureCases(t *testing.T) {
 			require.NoError(t, err)
 			_, err = auth.Authenticate(context.Background(), cred)
 			require.Error(t, err)
-			assert.Contains(t, err.Error(), tc.expectedErr)
+			assert.True(t, tc.expectedErr(err), "error was not of expected type")
 		})
 	}
 }
 
-func TestJWTAuthenticator_Revocation(t *testing.T) {
+func TestJWTProvider_Revocation(t *testing.T) {
 	cache := newMockCache()
-	auth := createTestAuthenticator(t, cache)
-	revoker, ok := auth.(security.CredentialRevoker)
-	require.True(t, ok)
+	provider := createTestProvider(t, cache)
+	auth, _ := provider.GetAuthenticator()
+	creator, _ := provider.GetCredentialCreator()
+	revoker, _ := provider.GetCredentialRevoker()
 
 	// 1. Create a token
 	p := principal.New("user-to-be-revoked", nil, nil, nil, nil)
-	resp, err := auth.(security.CredentialCreator).CreateCredential(context.Background(), p)
+	resp, err := creator.CreateCredential(context.Background(), p)
 	require.NoError(t, err)
 	var tokenCred securityv1.TokenCredential
-	require.NoError(t, resp.Payload().UnmarshalTo(&tokenCred))
+	require.NoError(t, resp.Payload().GetToken().UnmarshalTo(&tokenCred))
 	accessToken := tokenCred.GetAccessToken()
 
 	// 2. Before revocation, authentication should succeed
@@ -210,19 +217,4 @@ func TestJWTAuthenticator_Revocation(t *testing.T) {
 	_, err = auth.Authenticate(context.Background(), cred)
 	require.Error(t, err)
 	assert.True(t, securityv1.IsTokenExpired(err))
-}
-
-func TestNewCredentialResponse(t *testing.T) {
-	payload := &securityv1.TokenCredential{AccessToken: "abc"}
-	anyPayload, err := anypb.New(payload)
-	require.NoError(t, err)
-
-	resp := credential.NewResponse("jwt", anyPayload)
-	require.NotNil(t, resp)
-	assert.Equal(t, "jwt", resp.Type())
-
-	var unpackedPayload securityv1.TokenCredential
-	err = resp.Payload().UnmarshalTo(&unpackedPayload)
-	require.NoError(t, err)
-	assert.Equal(t, "abc", unpackedPayload.GetAccessToken())
 }

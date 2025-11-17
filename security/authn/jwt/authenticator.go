@@ -137,8 +137,8 @@ type Authenticator struct {
 	skipAudienceCheck    bool
 }
 
-// NewJWTAuthenticator creates a new JWT authenticator from the given configuration and options.
-func NewJWTAuthenticator(cfg *authnv1.Authenticator, opts ...options.Option) (security.Authenticator, error) {
+// NewProvider creates a new JWT Provider from the given configuration and options.
+func NewProvider(cfg *authnv1.Authenticator, opts ...options.Option) (authn.Provider, error) {
 	jwtCfg := cfg.GetJwt()
 	if jwtCfg == nil {
 		return nil, securityv1.ErrorCredentialsInvalid("JWT configuration is missing")
@@ -157,7 +157,7 @@ func NewJWTAuthenticator(cfg *authnv1.Authenticator, opts ...options.Option) (se
 		generateID = uniuri.New
 	}
 
-	a := &Authenticator{
+	auth := &Authenticator{
 		keyFunc:              o.keyFunc,
 		signingMethod:        o.signingMethod,
 		issuer:               o.issuer,
@@ -170,11 +170,11 @@ func NewJWTAuthenticator(cfg *authnv1.Authenticator, opts ...options.Option) (se
 		skipAudienceCheck:    len(o.audience) == 0,
 	}
 
-	return a, nil
+	return newProvider(auth), nil
 }
 
 func init() {
-	authn.RegisterAuthenticatorFactory("jwt", NewJWTAuthenticator)
+	authn.RegisterAuthenticatorFactory("jwt", NewProvider)
 }
 
 // Authenticate validates the provided credential and returns a Principal if successful.
@@ -276,7 +276,6 @@ func (a *Authenticator) CreateCredential(ctx context.Context, p security.Princip
 		TokenType:    "Bearer",
 	}
 
-	// Create a securityv1.Payload and set the Token field
 	payload := &securityv1.Payload{
 		Token: tokenCred,
 	}
