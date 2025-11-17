@@ -9,14 +9,17 @@ import (
 	"time"
 
 	jwtv5 "github.com/golang-jwt/jwt/v5"
-	configv1 "github.com/origadmin/runtime/gen/go/config/v1"
-	"github.com/origadmin/runtime/interfaces/security"
+
+	jwtv1 "github.com/origadmin/runtime/api/gen/go/config/security/authn/jwt/v1"
+	"github.com/origadmin/runtime/extension/optionutil"
+	"github.com/origadmin/runtime/interfaces/options"
+	"github.com/origadmin/runtime/interfaces/security/token"
 	"github.com/origadmin/toolkits/errors"
 )
 
 type Option struct {
-	cache             security.TokenCacheService
-	schemeType        security.Scheme
+	cache             token.CacheStorage
+	tokenSource       string
 	signingMethod     jwtv5.SigningMethod
 	keyFunc           func(token *jwtv5.Token) (any, error)
 	enabledJTI        bool
@@ -30,10 +33,7 @@ type Option struct {
 	extraClaims       map[string]string
 }
 
-// Setting is a function type for setting the Authenticator.
-type Setting = func(*Option)
-
-func (option *Option) WithConfig(config *configv1.AuthNConfig_JWTConfig) error {
+func (option *Option) Apply(config *jwtv1.Config) error {
 	if option.signingMethod != nil || option.keyFunc != nil {
 		return nil
 	}
@@ -45,7 +45,7 @@ func (option *Option) WithConfig(config *configv1.AuthNConfig_JWTConfig) error {
 	}
 
 	// Get the signing method and key function from the signing key.
-	signingMethod, keyFunc, err := getSigningMethodAndKeyFunc(config.Algorithm, config.SigningKey)
+	signingMethod, keyFunc, err := getSigningMethodAndKeyFunc(config.SigningMethod, config.SigningKey)
 	if err != nil {
 		return err
 	}
@@ -57,10 +57,6 @@ func (option *Option) WithConfig(config *configv1.AuthNConfig_JWTConfig) error {
 		// Set the signing method and key function.
 		option.signingMethod = signingMethod
 	}
-	return nil
-}
-
-func (option *Option) ApplyDefaults() error {
 	return nil
 }
 
@@ -135,103 +131,97 @@ func GetAlgorithmSigningMethod(algorithm string) jwtv5.SigningMethod {
 	}
 }
 
-// WithExtraClaims returns a Setting function that sets the extra keys for an Authenticator.
-func WithExtraClaims(extras map[string]string) Setting {
+// WithExtraClaims returns a options.Option function that sets the extra keys for an Authenticator.
+func WithExtraClaims(extras map[string]string) options.Option {
 	// Return a function that sets the extra keys for an Authenticator.
-	return func(option *Option) {
+	return optionutil.Update(func(option *Option) {
 		// Set the extra keys for the Authenticator.
 		option.extraClaims = extras
-	}
+	})
 }
 
-// WithCache returns a Setting function that sets the token cache service for an Authenticator.
-func WithCache(cache security.TokenCacheService) Setting {
+// WithCache returns a options.Option function that sets the token cache service for an Authenticator.
+func WithCache(cache token.CacheStorage) options.Option {
 	// Return a function that sets the token cache service for an Authenticator.
-	return func(option *Option) {
+	return optionutil.Update(func(option *Option) {
 		// Set the token cache service for the Authenticator.
 		option.cache = cache
-	}
+	})
 }
 
-// WithScheme returns a Setting function that sets the scheme for an Authenticator.
-func WithScheme(scheme security.Scheme) Setting {
+// WithTokenSource returns an options.Option function that sets the scheme for an Authenticator.
+func WithTokenSource(scheme string) options.Option {
 	// Return a function that sets the scheme for an Authenticator.
-	return func(option *Option) {
+	return optionutil.Update(func(option *Option) {
 		// Set the scheme for the Authenticator.
-		option.schemeType = scheme
-	}
+		option.tokenSource = scheme
+	})
 }
 
-// WithSigningMethod returns a Setting function that sets the signing method for an Authenticator.
+// WithSigningMethod returns a options.Option function that sets the signing method for an Authenticator.
 // The signing method is used to sign and verify tokens.
-func WithSigningMethod(signingMethod jwtv5.SigningMethod) Setting {
+func WithSigningMethod(signingMethod jwtv5.SigningMethod) options.Option {
 	// Return a function that sets the signing method for an Authenticator.
-	return func(option *Option) {
+	return optionutil.Update(func(option *Option) {
 		// Set the signing method for the Authenticator.
 		option.signingMethod = signingMethod
-	}
+	})
 }
 
-// WithKeyFunc returns a Setting function that sets the key function for an Authenticator.
+// WithKeyFunc returns a options.Option function that sets the key function for an Authenticator.
 // The key function is used to retrieve the key for a given token.
-func WithKeyFunc(keyFunc func(token *jwtv5.Token) (any, error)) Setting {
+func WithKeyFunc(keyFunc func(token *jwtv5.Token) (any, error)) options.Option {
 	// Return a function that sets the key function for an Authenticator.
-	return func(option *Option) {
+	return optionutil.Update(func(option *Option) {
 		// Set the key function for the Authenticator.
 		option.keyFunc = keyFunc
-	}
+	})
 }
 
-// WithJTI returns a Setting function that sets the JTI generator function for an Authenticator.
-func WithJTI(fn func() string) Setting {
-	return func(option *Option) {
+// WithJTI returns a options.Option function that sets the JTI generator function for an Authenticator.
+func WithJTI(fn func() string) options.Option {
+	return optionutil.Update(func(option *Option) {
 		option.genJTI = fn
 		option.enabledJTI = true
-	}
+	})
 }
 
-// WithExpireAccess returns a Setting function that sets the expiration time for an Authenticator.
-func WithExpireAccess(expiresAt time.Duration) Setting {
-	return func(option *Option) {
+// WithExpireAccess returns a options.Option function that sets the expiration time for an Authenticator.
+func WithExpireAccess(expiresAt time.Duration) options.Option {
+	return optionutil.Update(func(option *Option) {
 		option.expirationAccess = expiresAt
-	}
+	})
 }
 
-// WithExpireRefresh returns a Setting function that sets the expiration time for an Authenticator.
-func WithExpireRefresh(expiresAt time.Duration) Setting {
-	return func(option *Option) {
+// WithExpireRefresh returns a options.Option function that sets the expiration time for an Authenticator.
+func WithExpireRefresh(expiresAt time.Duration) options.Option {
+	return optionutil.Update(func(option *Option) {
 		option.expirationRefresh = expiresAt
-	}
+	})
 }
 
-// WithIssuer returns a Setting function that sets the issuer for an Authenticator.
-func WithIssuer(issuer string) Setting {
-	return func(option *Option) {
+// WithIssuer returns a options.Option function that sets the issuer for an Authenticator.
+func WithIssuer(issuer string) options.Option {
+	return optionutil.Update(func(option *Option) {
 		option.issuer = issuer
-	}
+	})
 }
 
-// WithAudience returns a Setting function that sets the audience for an Authenticator.
-func WithAudience(audience []string) Setting {
-	return func(option *Option) {
+// WithAudience returns a options.Option function that sets the audience for an Authenticator.
+func WithAudience(audience []string) options.Option {
+	return optionutil.Update(func(option *Option) {
 		option.audience = audience
-	}
+	})
 }
 
-// WithScopes returns a Setting function that sets the scoped flag for an Authenticator.
+// WithScopes returns a options.Option function that sets the scoped flag for an Authenticator.
 // The scoped flag determines whether the Authenticator should use scoped tokens.
-func WithScopes(scopes map[string]bool) Setting {
-	return func(option *Option) {
+func WithScopes(scopes map[string]bool) options.Option {
+	return optionutil.Update(func(option *Option) {
 		option.scopes = scopes
 		option.scoped = true
-	}
+	})
 }
-
-//func WithSerializer(serializer security.Serializer) Setting {
-//	return func(option *Option) {
-//		auth.serializer = serializer
-//	}
-//}
 
 func getSigningMethodAndKeyFunc(algorithm string, signingKey string) (jwtv5.SigningMethod, func(*jwtv5.Token) (any, error), error) {
 	signingMethod := GetAlgorithmSigningMethod(algorithm)
@@ -245,4 +235,8 @@ func getSigningMethodAndKeyFunc(algorithm string, signingKey string) (jwtv5.Sign
 	}
 
 	return signingMethod, keyFunc, nil
+}
+
+func FromOptions(opts []options.Option) *Option {
+	return optionutil.NewT[Option](opts...)
 }

@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/go-kratos/kratos/v2/errors"
-	"github.com/go-kratos/kratos/v2/transport"
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 	middlewaresecurity "github.com/origadmin/runtime/agent/middleware/security"
 	configv1 "github.com/origadmin/runtime/gen/go/config/v1"
@@ -20,6 +19,7 @@ import (
 	"github.com/origadmin/runtime/interfaces/security"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/protobuf/types/known/timestamppb"
+	"github.com/go-kratos/kratos/v2/transport"
 )
 
 const (
@@ -92,8 +92,6 @@ func generateJwtKey(key, sub string) string {
 	return token
 }
 
-var ErrMissingBearerToken = ErrBearerTokenMissing
-
 func TestServer(t *testing.T) {
 	testKey := "testKey"
 
@@ -117,7 +115,7 @@ func TestServer(t *testing.T) {
 			name:      "miss token",
 			ctx:       transport.NewServerContext(context.Background(), &Transport{reqHeader: headerCarrier{}}),
 			alg:       "HS256",
-			exceptErr: ErrMissingBearerToken,
+			exceptErr: ErrBearerTokenMissing,
 			key:       testKey,
 		},
 		{
@@ -141,10 +139,8 @@ func TestServer(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			var testToken security.Claims
-			next := func(ctx context.Context, req interface{}) (interface{}, error) {
-				t.Log(req)
+			next := func(ctx context.Context, _ interface{}) (interface{}, error) {
 				testToken = middlewaresecurity.ClaimsFromContext(ctx)
-				t.Log(testToken)
 				return "reply", nil
 			}
 			cfg := &configv1.Security{
@@ -159,19 +155,16 @@ func TestServer(t *testing.T) {
 					},
 				},
 			}
-			authenticator, err := NewAuthenticator(cfg) //WithKey([]byte(testKey)),
-			//WithSigningMethod(test.alg),
-
+			authenticator, err := NewAuthenticator(cfg)
 			assert.Nil(t, err)
-			server, _ := middlewaresecurity.NewAuthN(cfg,
+			server, err := middlewaresecurity.NewAuthN(cfg,
 				middlewaresecurity.WithAuthenticator(authenticator),
 				middlewaresecurity.WithSkipper())
+			assert.Nil(t, err)
 			handle := server(next)
 			ctx := middlewaresecurity.WithSkipContextServer(test.ctx, middlewaresecurity.MetadataSecuritySkipKey)
-			_, err2 := handle(ctx, test.name)
-			if !errors.Is(test.exceptErr, err2) {
-				t.Errorf("except error %v, but got %v", test.exceptErr, err2)
-			}
+			_, err = handle(ctx, test.name)
+			assert.ErrorIs(t, err, test.exceptErr)
 			if test.exceptErr == nil {
 				if testToken == nil {
 					t.Errorf("except testToken not nil, but got nil")
@@ -196,12 +189,10 @@ func TestClient(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			next := func(ctx context.Context, req interface{}) (interface{}, error) {
-				if header, ok := transport.FromClientContext(ctx); ok {
-					t.Log("token: ", header.RequestHeader().Get(HeaderAuthorize))
-				}
+			next := func(ctx context.Context, _ interface{}) (interface{}, error) {
 				return "reply", nil
 			}
+
 			cfg := &configv1.Security{
 				Authn: &configv1.AuthNConfig{
 					Jwt: &configv1.AuthNConfig_JWTConfig{
@@ -217,29 +208,26 @@ func TestClient(t *testing.T) {
 			authenticator, err := NewAuthenticator(cfg)
 			assert.Nil(t, err)
 
-			principal := SecurityClaims{
-				Claims: &securityv1.Claims{
-					Sub:    "user_name",
-					Scopes: make(map[string]bool),
-				},
-			}
-			principal.Scopes["local:admin:user_name"] = true
-			principal.Scopes["tenant:admin:user_name"] = true
-			auth, _ := middlewaresecurity.NewAuthN(cfg,
+			auth, err := middlewaresecurity.NewAuthN(cfg,
 				middlewaresecurity.WithAuthenticator(authenticator),
 			)
-			header := newTokenHeader(HeaderAuthorize, generateJwtKey(testKey, "fly"))
-			ctx := transport.NewClientContext(context.Background(), &Transport{reqHeader: header})
+			assert.Nil(t, err)
+
+			// The client middleware should add the token, not expect it.
+			// It should pull claims from the context.
+			claims := &SecurityClaims{Claims: &securityv1.Claims{Sub: "fly"}}
+			ctx := middlewaresecurity.NewContextWithClaims(context.Background(), claims)
+			ctx = transport.NewClientContext(ctx, &Transport{reqHeader: &headerCarrier{}})
+
 			handle := auth(next)
-			_, err2 := handle(ctx, "ok")
-			if !errors.Is(test.expectError, err2) {
-				t.Errorf("except error %v, but got %v", test.expectError, err2)
-			}
+			_, err = handle(ctx, "ok")
+			assert.ErrorIs(t, err, test.expectError)
 		})
 	}
 }
 
 func TestAuth(t *testing.T) {
+	t.Parallel()
 	//cache := memory.NewCache(memory.Selector{CleanupInterval: time.Second})
 	//c:=security.WithCache(cache)
 	//store := Memory
@@ -259,9 +247,7 @@ func TestAuth(t *testing.T) {
 	}
 	jwtAuth, err := NewAuthenticator(cfg, WithCache(security.DefaultTokenCacheService()))
 	assert.Nil(t, err)
-	if err != nil {
-		t.Fatal(err)
-	}
+
 	userID := "test"
 	claims := &securityv1.Claims{
 		Sub: userID,
@@ -278,23 +264,25 @@ func TestAuth(t *testing.T) {
 	token, err := jwtAuth.CreateToken(ctx, &SecurityClaims{Claims: claims})
 	assert.Nil(t, err)
 	assert.NotNil(t, token)
-	t.Log("token: ", token)
+
+	// Authenticate
 	resultClaims, err := jwtAuth.Authenticate(ctx, token)
 	assert.Nil(t, err)
-	fmt.Println("error", err)
-	fmt.Println("result_id:", resultClaims.GetSubject())
-	fmt.Println("user_id: ", userID)
 	assert.Equal(t, userID, resultClaims.GetSubject())
-	var ok bool
-	ok, err = jwtAuth.Verify(ctx, token)
+
+	// Verify
+	ok, err := jwtAuth.Verify(ctx, token)
 	assert.Nil(t, err)
 	assert.True(t, ok)
+
+	// Destroy
 	err = jwtAuth.DestroyToken(ctx, token)
 	assert.Nil(t, err)
+
+	// Verify after destroy
 	ok, err = jwtAuth.Verify(ctx, token)
 	assert.NotNil(t, err)
 	assert.False(t, ok)
-	t.Log("token: ", token)
 	resultClaims, err = jwtAuth.Authenticate(ctx, token)
 	assert.NotNil(t, err)
 	assert.EqualError(t, err, ErrTokenNotFound.Error())
