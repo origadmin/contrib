@@ -1,6 +1,6 @@
-module github.com/origadmin/contrib/config
+module github.com/origadmin/contrib/registry
 
-go 1.25.0
+go 1.24.6
 
 require (
 	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20250912104010-25b6c0fb9f38
