@@ -2,7 +2,7 @@
 package noop
 
 import (
-	authnv1 "github.com/origadmin/runtime/api/gen/go/config/security/authn/v1"
+	authnv1 "github.com/origadmin/contrib/api/gen/go/config/security/authn/v1"
 	"github.com/origadmin/runtime/context"
 	"github.com/origadmin/runtime/extension/optionutil"
 	"github.com/origadmin/runtime/interfaces/options"

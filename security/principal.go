@@ -5,7 +5,7 @@ import (
 
 	"google.golang.org/protobuf/types/known/structpb"
 
-	securityv1 "github.com/origadmin/runtime/api/gen/go/config/security/v1"
+	securityv1 "github.com/origadmin/contrib/api/gen/go/config/security/v1"
 )
 
 // Principal represents the identity of the entity making a request.

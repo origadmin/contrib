@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"sync"
 
-	authzv1 "github.com/origadmin/runtime/api/gen/go/config/security/authz/v1"
+	authzv1 "github.com/origadmin/contrib/api/gen/go/config/security/authz/v1"
 	"github.com/origadmin/runtime/interfaces/options"
 	// No need to import securityInterfaces here, as Provider and Factory are defined in this package.
 )

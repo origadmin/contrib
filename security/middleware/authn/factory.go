@@ -9,7 +9,7 @@ import (
 
 	kratosMiddleware "github.com/go-kratos/kratos/v2/middleware"
 
-	authnv1 "github.com/origadmin/runtime/api/gen/go/config/security/authn/v1"
+	authnv1 "github.com/origadmin/contrib/api/gen/go/config/security/authn/v1"
 	runtimeMiddleware "github.com/origadmin/runtime/middleware"
 	"github.com/origadmin/runtime/interfaces/options"
 	authnFactory "github.com/origadmin/contrib/security/authn"

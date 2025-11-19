@@ -12,7 +12,7 @@ import (
 
 	"github.com/goexts/generic/configure"
 
-	storagev1 "github.com/origadmin/runtime/api/gen/go/config/data/cache/v1"
+	storagev1 "github.com/origadmin/contrib/api/gen/go/config/data/cache/v1"
 	"github.com/origadmin/runtime/data/storage/cache"
 	securityToken "github.com/origadmin/contrib/security/token" // Updated import path
 	storageiface "github.com/origadmin/runtime/interfaces/storage"

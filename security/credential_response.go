@@ -6,7 +6,7 @@
 package security
 
 import (
-	securityv1 "github.com/origadmin/runtime/api/gen/go/config/security/v1"
+	securityv1 "github.com/origadmin/contrib/api/gen/go/config/security/v1"
 )
 
 // CredentialResponse represents a credential structure intended for

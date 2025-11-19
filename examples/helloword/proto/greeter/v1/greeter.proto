@@ -32,5 +32,5 @@ message SayHelloResponse {
 }
 
 message ExampleCors {
-  config.v1.Cors cors = 1;
+  runtime.api.config.middleware.cors.v1.Cors cors = 1;
 }

@@ -10,11 +10,11 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 
-	apikeyv1 "github.com/origadmin/runtime/api/gen/go/config/security/authn/apikey/v1"
-	oidcv1 "github.com/origadmin/runtime/api/gen/go/config/security/authn/oidc/v1"
-	securityv1 "github.com/origadmin/runtime/api/gen/go/config/security/v1"
+	apikeyv1 "github.com/origadmin/contrib/api/gen/go/config/security/authn/apikey/v1"
+	oidcv1 "github.com/origadmin/contrib/api/gen/go/config/security/authn/oidc/v1"
+	securityv1 "github.com/origadmin/contrib/api/gen/go/config/security/v1"
 	securityInterfaces "github.com/origadmin/contrib/security/security" // Updated import path
-	"github.com/origadmin/contrib/security/meta" // Updated import path
+	"github.com/origadmin/contrib/security/meta"                        // Updated import path
 )
 
 // credential is the concrete implementation of the security.Credential interface.

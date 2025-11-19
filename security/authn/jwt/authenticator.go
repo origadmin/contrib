@@ -15,8 +15,8 @@ import (
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 	"google.golang.org/protobuf/types/known/structpb"
 
-	authnv1 "github.com/origadmin/runtime/api/gen/go/config/security/authn/v1"
-	securityv1 "github.com/origadmin/runtime/api/gen/go/config/security/v1"
+	authnv1 "github.com/origadmin/contrib/api/gen/go/config/security/authn/v1"
+	securityv1 "github.com/origadmin/contrib/api/gen/go/config/security/v1"
 	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/runtime/log"
 
@@ -403,7 +403,7 @@ func mapJWTError(err error) error {
 // Interface compliance checks.
 var (
 	_ securityInterfaces.Authenticator     = (*Authenticator)(nil)
-	_ securityInterfaces.CredentialCreator  = (*Authenticator)(nil)
+	_ securityInterfaces.CredentialCreator = (*Authenticator)(nil)
 	_ securityInterfaces.CredentialRevoker = (*Authenticator)(nil)
 	_ securityInterfaces.Claims            = (*Claims)(nil)
 )

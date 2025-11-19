@@ -10,10 +10,10 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	securityv1 "github.com/origadmin/runtime/api/gen/go/config/security/v1"
-	"github.com/origadmin/runtime/errors" // This import needs to be handled carefully
+	securityv1 "github.com/origadmin/contrib/api/gen/go/config/security/v1"
+	"github.com/origadmin/runtime/errors"                               // This import needs to be handled carefully
 	securityInterfaces "github.com/origadmin/contrib/security/security" // Updated import path
-	"github.com/go-kratos/kratos/v2/transport" // Added missing import
+	"github.com/go-kratos/kratos/v2/transport"                          // Added missing import
 )
 
 const (

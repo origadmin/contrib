@@ -8,7 +8,7 @@ package security
 import (
 	"google.golang.org/protobuf/proto" // Import proto for proto.Message
 
-	securityv1 "github.com/origadmin/runtime/api/gen/go/config/security/v1"
+	securityv1 "github.com/origadmin/contrib/api/gen/go/config/security/v1"
 )
 
 // Credential represents a credential, either received from a request or newly issued.

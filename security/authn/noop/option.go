@@ -2,7 +2,7 @@
 package noop
 
 import (
-	authnv1 "github.com/origadmin/runtime/api/gen/go/config/security/authn/v1"
+	authnv1 "github.com/origadmin/contrib/api/gen/go/config/security/authn/v1"
 )
 
 type Options struct {

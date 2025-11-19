@@ -5,9 +5,9 @@
 package credential
 
 import (
-	securityv1 "github.com/origadmin/runtime/api/gen/go/config/security/v1"
+	securityv1 "github.com/origadmin/contrib/api/gen/go/config/security/v1"
 	securityInterfaces "github.com/origadmin/contrib/security/security" // Updated import path
-	"github.com/origadmin/contrib/security/meta" // Updated import path
+	"github.com/origadmin/contrib/security/meta"                        // Updated import path
 )
 
 // credentialResponse is the internal implementation of the security.CredentialResponse interface.

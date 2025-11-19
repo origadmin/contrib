@@ -9,7 +9,7 @@ import (
 
 	kratosMiddleware "github.com/go-kratos/kratos/v2/middleware"
 
-	authzv1 "github.com/origadmin/runtime/api/gen/go/config/security/authz/v1"
+	authzv1 "github.com/origadmin/contrib/api/gen/go/config/security/authz/v1"
 	runtimeMiddleware "github.com/origadmin/runtime/middleware"
 	"github.com/origadmin/runtime/interfaces/options"
 

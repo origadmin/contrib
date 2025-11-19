@@ -11,8 +11,8 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 
-	authzv1 "github.com/origadmin/runtime/api/gen/go/config/security/authz/v1"
-	securityv1 "github.com/origadmin/runtime/api/gen/go/config/security/v1"
+	authzv1 "github.com/origadmin/contrib/api/gen/go/config/security/authz/v1"
+	securityv1 "github.com/origadmin/contrib/api/gen/go/config/security/v1"
 	"github.com/origadmin/runtime/interfaces/options"
 
 	authzFactory "github.com/origadmin/contrib/security/authz"

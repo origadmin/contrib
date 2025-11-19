@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"sync"
 
-	authnv1 "github.com/origadmin/runtime/api/gen/go/config/security/authn/v1"
+	authnv1 "github.com/origadmin/contrib/api/gen/go/config/security/authn/v1"
 	"github.com/origadmin/runtime/interfaces/options"
 	// No need to import securityInterfaces here, as Provider and Factory are defined in this package.
 )

@@ -73,7 +73,7 @@ type SayHelloRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m SayHelloRequestMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -175,7 +175,7 @@ type SayHelloResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m SayHelloResponseMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
@@ -303,7 +303,7 @@ type ExampleCorsMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
 func (m ExampleCorsMultiError) Error() string {
-	var msgs []string
+	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
 	}
