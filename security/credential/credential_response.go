@@ -5,9 +5,9 @@
 package credential
 
 import (
-	securityv1 "github.com/origadmin/contrib/api/gen/go/config/security/v1"
-	securityInterfaces "github.com/origadmin/contrib/security/security" // Updated import path
-	"github.com/origadmin/contrib/security/meta"                        // Updated import path
+	securityifaces "github.com/origadmin/contrib/security" // Updated import path
+	securityv1 "github.com/origadmin/contrib/security/api/gen/go/config/v1"
+	"github.com/origadmin/contrib/security/meta" // Updated import path
 )
 
 // credentialResponse is the internal implementation of the security.CredentialResponse interface.
@@ -24,7 +24,7 @@ func NewCredentialResponse(
 	crType string,
 	payload *securityv1.Payload,
 	meta map[string][]string,
-) securityInterfaces.CredentialResponse { // Use securityInterfaces.CredentialResponse
+) securityifaces.CredentialResponse { // Use securityifaces.CredentialResponse
 	return &credentialResponse{
 		crType:  crType,
 		payload: payload,

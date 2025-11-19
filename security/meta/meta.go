@@ -6,8 +6,9 @@ import (
 
 	"google.golang.org/grpc/metadata"
 
-	securityv1 "github.com/origadmin/contrib/api/gen/go/config/security/v1"
-	interfaces "github.com/origadmin/contrib/security" // Updated path
+	"github.com/origadmin/contrib/security"
+	securityv1 "github.com/origadmin/contrib/security/api/gen/go/config/v1"
+	metadataifaces "github.com/origadmin/runtime/interfaces/metadata" // Updated path
 )
 
 type Meta map[string][]string
@@ -16,7 +17,7 @@ func (m Meta) Append(key string, values ...string) {
 	m[key] = append(m[key], values...)
 }
 
-func (m Meta) Clone() interfaces.Meta { // Updated usage
+func (m Meta) Clone() metadataifaces.Meta { // Updated usage
 	return maps.Clone(m)
 }
 
@@ -39,7 +40,7 @@ func (m Meta) Set(key string, value string) {
 	m[key] = []string{value}
 }
 
-func FromProvider(p interfaces.Request) Meta {
+func FromProvider(p security.Request) Meta {
 	meta := maps.Clone(p.GetAll())
 	return meta
 }
@@ -83,4 +84,4 @@ func FromProtoMeta(protoMeta map[string]*securityv1.MetaValue) Meta {
 	return m
 }
 
-var _ interfaces.Meta = Meta(nil) // Updated usage
+var _ metadataifaces.Meta = Meta(nil) // Updated usage

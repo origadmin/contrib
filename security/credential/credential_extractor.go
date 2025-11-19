@@ -10,10 +10,11 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	securityv1 "github.com/origadmin/contrib/api/gen/go/config/security/v1"
-	"github.com/origadmin/runtime/errors"                               // This import needs to be handled carefully
-	securityInterfaces "github.com/origadmin/contrib/security/security" // Updated import path
-	"github.com/go-kratos/kratos/v2/transport"                          // Added missing import
+	"github.com/go-kratos/kratos/v2/transport" // Added missing import
+
+	securityifaces "github.com/origadmin/contrib/security" // Updated import path
+	securityv1 "github.com/origadmin/contrib/security/api/gen/go/config/v1"
+	"github.com/origadmin/runtime/errors" // This import needs to be handled carefully
 )
 
 const (
@@ -26,13 +27,13 @@ const (
 type HeaderCredentialExtractor struct{}
 
 // NewHeaderCredentialExtractor creates a new instance of HeaderCredentialExtractor.
-func NewHeaderCredentialExtractor() securityInterfaces.CredentialExtractor { // Use securityInterfaces.CredentialExtractor
+func NewHeaderCredentialExtractor() securityifaces.CredentialExtractor { // Use securityifaces.CredentialExtractor
 	return &HeaderCredentialExtractor{}
 }
 
 // Extract is responsible for all extraction and parsing logic. It prepares all
 // necessary components and then calls the pure NewCredential constructor.
-func (e *HeaderCredentialExtractor) Extract(ctx context.Context, request securityInterfaces.Request) (securityInterfaces.Credential, error) { // Use securityInterfaces.Request and securityInterfaces.Credential
+func (e *HeaderCredentialExtractor) Extract(ctx context.Context, request securityifaces.Request) (securityifaces.Credential, error) { // Use securityifaces.Request and securityifaces.Credential
 	authHeader := request.Get(AuthorizationHeader)
 	if authHeader == "" {
 		return nil, errors.New(401, "AUTHORIZATION_HEADER_NOT_FOUND", "authorization header not found")
@@ -71,7 +72,7 @@ func (e *HeaderCredentialExtractor) Extract(ctx context.Context, request securit
 }
 
 // NewEmptyCredential creates an empty credential for cases where no credential is found in the request.
-func NewEmptyCredential() securityInterfaces.Credential {
+func NewEmptyCredential() securityifaces.Credential {
 	return &credential{
 		credentialType: "none",
 		rawCredential:  "",
@@ -81,7 +82,7 @@ func NewEmptyCredential() securityInterfaces.Credential {
 }
 
 // ExtractFromTransport extracts credential from Kratos transport.
-func ExtractFromTransport(tr transport.Transporter) (securityInterfaces.Credential, error) {
+func ExtractFromTransport(tr transport.Transporter) (securityifaces.Credential, error) {
 	// For gRPC, metadata is in tr.RequestHeader()
 	// For HTTP, headers are in tr.RequestHeader()
 	// This is a simplified example. A real implementation might need to check transport type.

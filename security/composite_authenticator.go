@@ -8,25 +8,23 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/errors"
-
-	security "github.com/origadmin/contrib/security/interfaces"
 )
 
 // CompositeAuthenticator is an authenticator that delegates to a list of other authenticators.
 // It tries each authenticator in order until one of them successfully authenticates the credential.
 type CompositeAuthenticator struct {
-	authenticators []security.Authenticator
+	authenticators []Authenticator
 }
 
 // NewCompositeAuthenticator creates a new CompositeAuthenticator.
 // It takes a variadic list of authenticators to be tried in order.
-func NewCompositeAuthenticator(authenticators ...security.Authenticator) security.Authenticator {
+func NewCompositeAuthenticator(authenticators ...Authenticator) Authenticator {
 	return &CompositeAuthenticator{authenticators: authenticators}
 }
 
 // Authenticate iterates through the list of authenticators and calls the first one that supports the credential.
 // If no authenticator supports the credential, it returns an "authenticator not found" error.
-func (c *CompositeAuthenticator) Authenticate(ctx context.Context, cred security.Credential) (security.Principal, error) {
+func (c *CompositeAuthenticator) Authenticate(ctx context.Context, cred Credential) (Principal, error) {
 	for _, auth := range c.authenticators {
 		if auth.Supports(cred) {
 			return auth.Authenticate(ctx, cred)
@@ -36,7 +34,7 @@ func (c *CompositeAuthenticator) Authenticate(ctx context.Context, cred security
 }
 
 // Supports returns true if any of the underlying authenticators supports the credential.
-func (c *CompositeAuthenticator) Supports(cred security.Credential) bool {
+func (c *CompositeAuthenticator) Supports(cred Credential) bool {
 	for _, auth := range c.authenticators {
 		if auth.Supports(cred) {
 			return true

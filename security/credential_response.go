@@ -6,7 +6,7 @@
 package security
 
 import (
-	securityv1 "github.com/origadmin/contrib/api/gen/go/config/security/v1"
+	configv1 "github.com/origadmin/contrib/security/api/gen/go/config/v1"
 )
 
 // CredentialResponse represents a credential structure intended for
@@ -17,7 +17,7 @@ type CredentialResponse interface {
 
 	// Payload returns the payload of the credential.
 	// This should ideally return a structured type or a proto.Message.
-	Payload() *securityv1.Payload
+	Payload() *configv1.Payload
 
 	// GetMeta returns the metadata associated with the credential response
 	// as a standard Go map[string][]string, for easy consumption.
@@ -25,5 +25,5 @@ type CredentialResponse interface {
 
 	// Response returns the canonical Protobuf representation of the credential response.
 	// This allows direct access to the underlying protobuf message for serialization.
-	Response() *securityv1.CredentialResponse
+	Response() *configv1.CredentialResponse
 }

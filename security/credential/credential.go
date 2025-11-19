@@ -10,11 +10,11 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 
-	apikeyv1 "github.com/origadmin/contrib/api/gen/go/config/security/authn/apikey/v1"
-	oidcv1 "github.com/origadmin/contrib/api/gen/go/config/security/authn/oidc/v1"
-	securityv1 "github.com/origadmin/contrib/api/gen/go/config/security/v1"
-	securityInterfaces "github.com/origadmin/contrib/security/security" // Updated import path
-	"github.com/origadmin/contrib/security/meta"                        // Updated import path
+	securityifaces "github.com/origadmin/contrib/security" // Updated import path
+	apikeyv1 "github.com/origadmin/contrib/security/api/gen/go/config/authn/apikey/v1"
+	oidcv1 "github.com/origadmin/contrib/security/api/gen/go/config/authn/oidc/v1"
+	securityv1 "github.com/origadmin/contrib/security/api/gen/go/config/v1"
+	"github.com/origadmin/contrib/security/meta" // Updated import path
 )
 
 // credential is the concrete implementation of the security.Credential interface.
@@ -33,7 +33,7 @@ func NewCredential(
 	rawCredential string,
 	payload proto.Message,
 	meta map[string][]string, // Receives Go-idiomatic metadata
-) (securityInterfaces.Credential, error) { // Use securityInterfaces.Credential
+) (securityifaces.Credential, error) { // Use securityifaces.Credential
 	// Convert payload to Any type
 	var anyPayload *anypb.Any
 	if payload != nil {
@@ -91,7 +91,7 @@ func (c *credential) Source() *securityv1.CredentialSource {
 	}
 }
 
-func PayloadBearerCredential(cred securityInterfaces.Credential) (*securityv1.BearerCredential, error) { // Use securityInterfaces.Credential
+func PayloadBearerCredential(cred securityifaces.Credential) (*securityv1.BearerCredential, error) { // Use securityifaces.Credential
 	if cred.Type() != "jwt" {
 		return nil, fmt.Errorf("credential type is not jwt")
 	}
@@ -103,7 +103,7 @@ func PayloadBearerCredential(cred securityInterfaces.Credential) (*securityv1.Be
 	return &bearer, nil
 }
 
-func PayloadOIDCCredential(cred securityInterfaces.Credential) (*oidcv1.OidcCredential, error) { // Use securityInterfaces.Credential
+func PayloadOIDCCredential(cred securityifaces.Credential) (*oidcv1.OidcCredential, error) { // Use securityifaces.Credential
 	if cred.Type() != "oidc" {
 		return nil, fmt.Errorf("credential type is not oidc")
 	}
@@ -115,7 +115,7 @@ func PayloadOIDCCredential(cred securityInterfaces.Credential) (*oidcv1.OidcCred
 	return &oidc, nil
 }
 
-func PayloadAPIKeyCredential(cred securityInterfaces.Credential) (*apikeyv1.KeyCredential, error) { // Use securityInterfaces.Credential
+func PayloadAPIKeyCredential(cred securityifaces.Credential) (*apikeyv1.KeyCredential, error) { // Use securityifaces.Credential
 	if cred.Type() != "api_key" {
 		return nil, fmt.Errorf("credential type is not api_key")
 	}

@@ -6,8 +6,8 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	securityInterfaces "github.com/origadmin/contrib/security" // Updated import path
-	securityv1 "github.com/origadmin/contrib/api/gen/go/config/security/v1"
+	securityifaces "github.com/origadmin/contrib/security" // Updated import path
+	securityv1 "github.com/origadmin/contrib/security/api/gen/go/config/v1"
 	"github.com/origadmin/runtime/context"
 )
 
@@ -20,19 +20,19 @@ type principalKey struct{}
 
 // FromContext extracts the Principal from the given context.
 // It returns the Principal and a boolean indicating if it was found.
-func FromContext(ctx context.Context) (securityInterfaces.Principal, bool) { // Use securityInterfaces.Principal
-	p, ok := ctx.Value(principalKey{}).(securityInterfaces.Principal)
+func FromContext(ctx context.Context) (securityifaces.Principal, bool) { // Use securityifaces.Principal
+	p, ok := ctx.Value(principalKey{}).(securityifaces.Principal)
 	return p, ok
 }
 
 // WithContext returns a new context with the given Principal attached.
 // It is used to inject the Principal into the context for downstream business logic.
-func WithContext(ctx context.Context, p securityInterfaces.Principal) context.Context { // Use securityInterfaces.Principal
+func WithContext(ctx context.Context, p securityifaces.Principal) context.Context { // Use securityifaces.Principal
 	return context.WithValue(ctx, principalKey{}, p)
 }
 
 // EncodePrincipal encodes a security.Principal into a base64-encoded Protobuf string.
-func EncodePrincipal(p securityInterfaces.Principal) (string, error) { // Use securityInterfaces.Principal
+func EncodePrincipal(p securityifaces.Principal) (string, error) { // Use securityifaces.Principal
 	if p == nil {
 		return "", nil
 	}
@@ -44,7 +44,7 @@ func EncodePrincipal(p securityInterfaces.Principal) (string, error) { // Use se
 }
 
 // DecodePrincipal decodes a base64-encoded Protobuf string into a security.Principal.
-func DecodePrincipal(encoded string) (securityInterfaces.Principal, error) { // Use securityInterfaces.Principal
+func DecodePrincipal(encoded string) (securityifaces.Principal, error) { // Use securityifaces.Principal
 	if encoded == "" {
 		return nil, nil
 	}
