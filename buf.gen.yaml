@@ -1,0 +1,35 @@
+version: v2
+
+managed:
+  enabled: true
+#  override:
+#    - file_option: go_package_prefix
+#      module: buf.build/origadmin/runtime
+#      value: github.com/origadmin/toolkits/runtime/proto/gen/go
+
+  #  override:
+  #    - file_option: go_package
+  #      value: internal/config/v1;config
+  #  inputs:
+  #    - directory: proto
+  #
+plugins:
+  - local: protoc-gen-go
+    out: ./api/gen/go
+    opt: paths=source_relative
+  - local: protoc-gen-go-grpc
+    out: ./api/gen/go
+    opt: paths=source_relative
+  - local: protoc-gen-go-http
+    out: ./api/gen/go
+    opt: paths=source_relative
+  - local: protoc-gen-validate
+    out: ./api/gen/go
+    opt:
+      - paths=source_relative
+      - lang=go
+  - local: protoc-gen-go-errors
+    out: ./api/gen/go
+    opt: paths=source_relative
+
+clean: true

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package greeter.v1;
 
-import "config/v1/cors.proto";
+import "config/middleware/cors/v1/cors.proto";
 import "google/api/annotations.proto";
 
 option go_package = "github.com/origadmin/contrib/examples/helloword/services/greeter/v1;greeter";
@@ -10,12 +10,12 @@ option go_package = "github.com/origadmin/contrib/examples/helloword/services/gr
 // The greeting service definition.
 service GreeterService {
   // Sends a greeting
-  rpc SayHello (SayHelloRequest) returns (SayHelloResponse)  {
+  rpc SayHello(SayHelloRequest) returns (SayHelloResponse) {
     option (google.api.http) = {
-      get: "/helloworld/{name}",
-      additional_bindings {
-        post: "/say_hello",
-        body: "*",
+      get: "/helloworld/{name}"
+      additional_bindings: {
+        post: "/say_hello"
+        body: "*"
       }
     };
   }

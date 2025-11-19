@@ -3,7 +3,7 @@ syntax = "proto3";
 package contrib.api.config.security.v1;
 
 // Import the new AuthNConfig
-import "config/security/authn/v1/authenticator.proto"; // Updated import to authn.proto which now contains AuthNConfig
+import "config/security/authn/v1/authenticator.proto";
 import "config/security/authz/v1/authorizer.proto";
 import "config/security/transport/v1/tls.proto";
 import "gnostic/openapi/v3/annotations.proto";
@@ -44,5 +44,5 @@ message AuthorizerConfigs {
 message TransportSecurityConfigs {
   optional string default = 1 [json_name = "default"];
   optional string active = 2 [json_name = "active"];
-  repeated contrib.api.config.security.transport.v1.TLSConfig configs = 3 [json_name = "configs"];
+  repeated runtime.api.config.security.transport.v1.TLSConfig configs = 3 [json_name = "configs"];
 }
