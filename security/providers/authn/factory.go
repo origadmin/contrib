@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"sync"
 
-	securityv1 "github.com/origadmin/contrib/security/api/gen/go/config/v1"
+	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 	"github.com/origadmin/runtime/interfaces/options"
 	// No need to import securityifaces here, as Provider and Factory are defined in this package.
 )
 
 var (
-	mu        sync.RWMutex
+	mu         sync.RWMutex
 	blueprints = make(map[string]Blueprint)
 )
 

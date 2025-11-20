@@ -5,7 +5,7 @@
 package authz
 
 import (
-	authzv1 "github.com/origadmin/contrib/security/api/gen/go/config/authz/v1"
+	authzv1 "github.com/origadmin/contrib/api/gen/go/security/authz/v1"
 	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/contrib/security" // Import the security package for Authorizer
 )

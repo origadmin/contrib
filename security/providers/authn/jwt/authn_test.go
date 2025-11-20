@@ -13,9 +13,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	jwtv1 "github.com/origadmin/contrib/security/api/gen/go/config/authn/jwt/v1"
-	authnv1 "github.com/origadmin/contrib/security/api/gen/go/config/authn/v1"
-	securityv1 "github.com/origadmin/contrib/security/api/gen/go/config/v1"
+	jwtv1 "github.com/origadmin/contrib/api/gen/go/security/authn/jwt/v1"
+	authnv1 "github.com/origadmin/contrib/api/gen/go/security/authn/v1"
+	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 	"github.com/origadmin/runtime/interfaces/options"
 
 	authnFactory "github.com/origadmin/contrib/security/authn"

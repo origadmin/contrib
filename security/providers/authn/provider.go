@@ -5,7 +5,7 @@
 package authn
 
 import (
-	authnv1 "github.com/origadmin/contrib/security/api/gen/go/config/authn/v1"
+	authnv1 "github.com/origadmin/contrib/api/gen/go/security/authn/v1"
 	"github.com/origadmin/runtime/interfaces/options"
 	securityifaces "github.com/origadmin/contrib/security/security" // Updated import path
 )

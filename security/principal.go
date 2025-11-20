@@ -5,7 +5,7 @@ import (
 
 	"google.golang.org/protobuf/types/known/structpb"
 
-	configv1 "github.com/origadmin/contrib/security/api/gen/go/config/v1"
+	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 )
 
 // Principal represents the identity of the entity making a request.
@@ -22,7 +22,7 @@ type Principal interface {
 	// GetClaims returns the custom claims associated with the principal.
 	GetClaims() Claims
 	// Export converts the Principal to its Protobuf representation.
-	Export() *configv1.Principal
+	Export() *securityv1.Principal
 }
 
 // Claims represents a set of custom claims associated with a Principal.

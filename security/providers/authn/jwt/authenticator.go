@@ -15,8 +15,8 @@ import (
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 	"google.golang.org/protobuf/types/known/structpb"
 
-	authnv1 "github.com/origadmin/contrib/security/api/gen/go/config/authn/v1"
-	securityv1 "github.com/origadmin/contrib/security/api/gen/go/config/v1"
+	authnv1 "github.com/origadmin/contrib/api/gen/go/security/authn/v1"
+	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/runtime/log"
 

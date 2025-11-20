@@ -7,8 +7,8 @@ package jwt
 import (
 	"strings"
 
-	authnFactory "github.com/origadmin/contrib/security/authn"      // Updated import path
-	securityv1 "github.com/origadmin/contrib/security/api/gen/go/config/v1"
+	authnFactory "github.com/origadmin/contrib/security/authn" // Updated import path
+	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 	securityifaces "github.com/origadmin/contrib/security/security" // Updated import path
 )
 

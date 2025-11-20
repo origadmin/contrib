@@ -8,7 +8,7 @@ package security
 import (
 	"google.golang.org/protobuf/proto" // Import proto for proto.Message
 
-	configv1 "github.com/origadmin/contrib/security/api/gen/go/config/v1"
+	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 )
 
 // Credential represents a credential, either received from a request or newly issued.
@@ -32,5 +32,5 @@ type Credential interface {
 
 	// Source returns the canonical Protobuf representation of the credential.
 	// This is essential for transmitting the credential data, for example, in a CredentialResponse.
-	Source() *configv1.CredentialSource
+	Source() *securityv1.CredentialSource
 }

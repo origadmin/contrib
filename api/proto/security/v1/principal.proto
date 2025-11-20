@@ -6,7 +6,7 @@ import "gnostic/openapi/v3/annotations.proto";
 import "google/protobuf/struct.proto";
 import "validate/validate.proto";
 
-option go_package = "github.com/origadmin/contrib/api/gen/go/security/v1;configv1";
+option go_package = "github.com/origadmin/contrib/api/gen/go/security/v1;securityv1";
 
 // Principal represents the authenticated identity of a user or service.
 // It serves as a standardized data transfer object for security context,

@@ -11,7 +11,7 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 
 	"github.com/origadmin/runtime/interfaces/security"
-	securityv1 "github.com/origadmin/contrib/security/api/gen/go/config/v1"
+	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 )
 
 // mockPrincipal implements security.Principal for testing purposes.

@@ -11,9 +11,9 @@ import (
 	"google.golang.org/protobuf/types/known/anypb"
 
 	securityifaces "github.com/origadmin/contrib/security" // Updated import path
-	apikeyv1 "github.com/origadmin/contrib/security/api/gen/go/config/authn/apikey/v1"
-	oidcv1 "github.com/origadmin/contrib/security/api/gen/go/config/authn/oidc/v1"
-	securityv1 "github.com/origadmin/contrib/security/api/gen/go/config/v1"
+	apikeyv1 "github.com/origadmin/contrib/api/gen/go/security/authn/apikey/v1"
+	oidcv1 "github.com/origadmin/contrib/api/gen/go/security/authn/oidc/v1"
+	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 	"github.com/origadmin/contrib/security/meta" // Updated import path
 )
 

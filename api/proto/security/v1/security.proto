@@ -8,7 +8,7 @@ import "security/authz/v1/authorizer.proto";
 import "config/transport/tls/v1/tls.proto";
 import "gnostic/openapi/v3/annotations.proto";
 
-option go_package = "github.com/origadmin/contrib/api/gen/go/security/v1;configv1";
+option go_package = "github.com/origadmin/contrib/api/gen/go/security/v1;securityv1";
 
 // Security defines the top-level configuration for all security-related components.
 message Security {

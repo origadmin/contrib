@@ -14,7 +14,7 @@ import (
 
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 
-	jwtv1 "github.com/origadmin/contrib/security/api/gen/go/config/authn/jwt/v1"
+	jwtv1 "github.com/origadmin/contrib/api/gen/go/security/authn/jwt/v1"
 	"github.com/origadmin/runtime/extension/optionutil"
 	"github.com/origadmin/runtime/interfaces/options"
 	securityToken "github.com/origadmin/contrib/security/token" // Updated import path

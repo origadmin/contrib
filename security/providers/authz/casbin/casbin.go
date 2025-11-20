@@ -12,7 +12,7 @@ import (
 	"github.com/origadmin/runtime/log"
 
 	"github.com/origadmin/runtime/context"
-	configv1 "github.com/origadmin/runtime/gen/go/config/v1"
+	securityv1 "github.com/origadmin/runtime/gen/go/config/v1"
 	"github.com/origadmin/runtime/interfaces/security"
 )
 
@@ -66,7 +66,7 @@ func (auth *Authorizer) ApplyDefaults() error {
 	return nil
 }
 
-func (auth *Authorizer) WithConfig(config *configv1.AuthZConfig_CasbinConfig) error {
+func (auth *Authorizer) WithConfig(config *securityv1.AuthZConfig_CasbinConfig) error {
 	var err error
 	if config.ModelFile != "" {
 		auth.model, err = model.NewModelFromFile(config.ModelFile)
@@ -74,7 +74,7 @@ func (auth *Authorizer) WithConfig(config *configv1.AuthZConfig_CasbinConfig) er
 	return err
 }
 
-func NewAuthorizer(cfg *configv1.Security, ss ...Setting) (security.Authorizer, error) {
+func NewAuthorizer(cfg *securityv1.Security, ss ...Setting) (security.Authorizer, error) {
 	config := cfg.GetAuthz().GetCasbin()
 	if config == nil {
 		return nil, errors.New("authorizer casbin config is empty")

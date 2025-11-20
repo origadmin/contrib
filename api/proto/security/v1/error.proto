@@ -4,7 +4,7 @@ package contrib.api.security.v1;
 
 import "errors/errors.proto";
 
-option go_package = "github.com/origadmin/contrib/api/gen/go/security/v1;configv1";
+option go_package = "github.com/origadmin/contrib/api/gen/go/security/v1;securityv1";
 
 // SecurityErrorReason defines the application's specific security error codes.
 // These codes supplement the common error codes and provide more specific details
