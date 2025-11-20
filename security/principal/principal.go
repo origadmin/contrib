@@ -6,8 +6,8 @@ import (
 
 	"google.golang.org/protobuf/types/known/structpb"
 
-	"github.com/origadmin/contrib/security"
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
+	"github.com/origadmin/contrib/security"
 )
 
 // --- concretePrincipal Implementation ---
@@ -43,47 +43,22 @@ type defaultClaims struct {
 	data map[string]*structpb.Value
 }
 
+// Get retrieves a claim by key and returns it as a native Go type (any).
+// It handles all data types including scalars, lists, and nested objects.
 func (c *defaultClaims) Get(key string) (any, bool) {
 	claimValue, ok := c.data[key]
-	if !ok || claimValue == nil {
+	if !ok {
 		return nil, false
 	}
-
-	switch k := claimValue.Kind.(type) {
-	case *structpb.Value_StringValue:
-		return k.StringValue, true
-	case *structpb.Value_NumberValue:
-		return k.NumberValue, true
-	case *structpb.Value_BoolValue:
-		return k.BoolValue, true
-	case *structpb.Value_StructValue:
-		return k.StructValue.AsMap(), true
-	case *structpb.Value_ListValue:
-		list := make([]any, len(k.ListValue.Values))
-		for i, val := range k.ListValue.Values {
-			switch innerKind := val.Kind.(type) {
-			case *structpb.Value_StringValue:
-				list[i] = innerKind.StringValue
-			case *structpb.Value_NumberValue:
-				list[i] = innerKind.NumberValue
-			case *structpb.Value_BoolValue:
-				list[i] = innerKind.BoolValue
-			case *structpb.Value_StructValue:
-				list[i] = innerKind.StructValue.AsMap()
-			case *structpb.Value_ListValue:
-				list[i] = val
-			case *structpb.Value_NullValue:
-				list[i] = nil
-			default:
-				list[i] = nil
-			}
-		}
-		return list, true
-	case *structpb.Value_NullValue:
-		return nil, true
-	default:
-		return nil, false
-	}
+	// The AsInterface method recursively converts the structpb.Value to a native Go type.
+	// This replaces the large manual switch statement, simplifying the logic immensely.
+	// - structpb.StringValue -> string
+	// - structpb.NumberValue -> float64
+	// - structpb.BoolValue   -> bool
+	// - structpb.NullValue   -> nil
+	// - structpb.StructValue -> map[string]any
+	// - structpb.ListValue   -> []any
+	return claimValue.AsInterface(), true
 }
 
 func (c *defaultClaims) GetString(key string) (string, bool) {

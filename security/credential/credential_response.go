@@ -2,12 +2,13 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
+// Package credential provides interfaces and implementations for credential management.
 package credential
 
 import (
-	securityifaces "github.com/origadmin/contrib/security" // Updated import path
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
-	"github.com/origadmin/contrib/security/meta" // Updated import path
+	securityifaces "github.com/origadmin/contrib/security" // Updated import path
+	"github.com/origadmin/contrib/security/meta"           // Updated import path
 )
 
 // credentialResponse is the internal implementation of the security.CredentialResponse interface.

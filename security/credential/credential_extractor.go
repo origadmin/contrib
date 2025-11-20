@@ -2,6 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
+// Package credential provides interfaces and implementations for credential management.
 package credential
 
 import (
@@ -12,9 +13,9 @@ import (
 
 	"github.com/go-kratos/kratos/v2/transport" // Added missing import
 
-	securityifaces "github.com/origadmin/contrib/security" // Updated import path
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
-	"github.com/origadmin/runtime/errors" // This import needs to be handled carefully
+	securityifaces "github.com/origadmin/contrib/security" // Updated import path
+	"github.com/origadmin/runtime/errors"                  // This import needs to be handled carefully
 )
 
 const (
@@ -27,7 +28,7 @@ const (
 type HeaderCredentialExtractor struct{}
 
 // NewHeaderCredentialExtractor creates a new instance of HeaderCredentialExtractor.
-func NewHeaderCredentialExtractor() securityifaces.CredentialExtractor { // Use securityifaces.CredentialExtractor
+func NewHeaderCredentialExtractor() *HeaderCredentialExtractor { // Use securityifaces.CredentialExtractor
 	return &HeaderCredentialExtractor{}
 }
 
@@ -115,10 +116,12 @@ func ExtractFromTransport(tr transport.Transporter) (securityifaces.Credential, 
 		credentialType = scheme
 	}
 
-	// Extract all headers as metadata
+	// Extract all headers as metadata.
+	// The transport.Header interface does not support range directly.
+	// We iterate through the keys and get the values for each key.
 	metaMap := make(map[string][]string)
-	for k, v := range tr.RequestHeader() {
-		metaMap[k] = v
+	for _, k := range tr.RequestHeader().Keys() {
+		metaMap[k] = tr.RequestHeader().Values(k)
 	}
 
 	return NewCredential(credentialType, authHeader, payload, metaMap)

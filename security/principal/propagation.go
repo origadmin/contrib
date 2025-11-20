@@ -6,8 +6,8 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	securityifaces "github.com/origadmin/contrib/security" // Updated import path
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
+	securityifaces "github.com/origadmin/contrib/security" // Updated import path
 	"github.com/origadmin/runtime/context"
 )
 

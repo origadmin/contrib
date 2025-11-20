@@ -6,8 +6,8 @@ import (
 
 	"google.golang.org/grpc/metadata"
 
-	"github.com/origadmin/contrib/security"
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
+	"github.com/origadmin/contrib/security"
 	metadataifaces "github.com/origadmin/runtime/interfaces/metadata" // Updated path
 )
 
