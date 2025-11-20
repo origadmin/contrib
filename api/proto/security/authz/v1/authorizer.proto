@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package contrib.api.security.authz.v1;
+
+import "security/authz/casbin/v1/config.proto"; // Updated import
+import "gnostic/openapi/v3/annotations.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/origadmin/contrib/api/gen/go/security/authz/v1;authzv1";
+
+// Authorizer defines the configuration for a single authorization mechanism.
+message Authorizer {
+  // Unique name for this authorization configuration instance.
+  string name = 1 [
+    json_name = "name",
+    (gnostic.openapi.v3.property) = {description: "Unique name for this authorizer instance."}
+  ];
+
+  // The type of authorization mechanism.
+  // This string MUST match one of the keys of the configuration fields below
+  // (e.g., "casbin") or a registered custom authorization mechanism.
+  // It acts as a discriminator.
+  string type = 2 [
+    json_name = "type",
+    (gnostic.openapi.v3.property) = {description: "The type of authorization mechanism, e.g., 'casbin', 'opa'."}
+  ];
+
+  // --- Built-in Authorizer Configurations ---
+
+  // Configuration for a Casbin authorizer.
+  // Must be present if 'type' is "casbin".
+  optional contrib.api.security.authz.casbin.v1.Config casbin = 10 [
+    json_name = "casbin",
+    (gnostic.openapi.v3.property) = {description: "Configuration for a Casbin authorizer."}
+  ];
+
+  // --- Custom Authorizer Configuration ---
+
+  // For custom types, the 'type' field will contain the custom name,
+  // and this 'customize' field will hold its configuration.
+  optional google.protobuf.Struct customize = 100 [
+    json_name = "customize",
+    (gnostic.openapi.v3.property) = {description: "Configuration for a custom authorizer."}
+  ];
+}

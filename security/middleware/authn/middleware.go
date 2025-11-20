@@ -11,7 +11,6 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 
-	authnv1 "github.com/origadmin/contrib/security/api/gen/go/config/authn/v1"
 	securityv1 "github.com/origadmin/contrib/security/api/gen/go/config/v1"
 	"github.com/origadmin/runtime/interfaces/options"
 
@@ -24,14 +23,14 @@ import (
 // AuthNMiddleware is a Kratos middleware for authentication.
 type AuthNMiddleware struct {
 	provider authnFactory.Provider
-	opts     []options.Option
 }
 
 // NewAuthNMiddleware creates a new authentication middleware.
 func NewAuthNMiddleware(provider authnFactory.Provider, opts ...options.Option) *AuthNMiddleware {
+	// The 'opts' parameter is kept for future extensibility or other generic options,
+	// but it's no longer needed for passing security configuration.
 	return &AuthNMiddleware{
 		provider: provider,
-		opts:     opts,
 	}
 }
 
@@ -42,6 +41,13 @@ func (m *AuthNMiddleware) Server() middleware.Middleware {
 			// 1. Check if Principal already exists in context (e.g., from a previous middleware or test)
 			if _, ok := securityPrincipal.FromContext(ctx); ok {
 				return handler(ctx, req) // Already authenticated, proceed
+			}
+
+			// Ask the provider if this operation should be skipped.
+			if tr, ok := transport.FromServerContext(ctx); ok {
+				if m.provider.ShouldSkip(tr.Operation()) {
+					return handler(ctx, req) // Skip authentication
+				}
 			}
 
 			// 2. Extract credential from transport context

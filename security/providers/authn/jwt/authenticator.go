@@ -139,8 +139,12 @@ type Authenticator struct {
 }
 
 // NewProvider creates a new JWT Provider from the given configuration and options.
-func NewProvider(cfg *authnv1.Authenticator, opts ...options.Option) (authnFactory.Provider, error) {
-	jwtCfg := cfg.GetJwt()
+func NewProvider(cfg *securityv1.Security, opts ...options.Option) (authnFactory.Provider, error) {
+	if cfg == nil || cfg.GetAuthn() == nil {
+		return nil, securityv1.ErrorCredentialsInvalid("security or authn configuration is missing")
+	}
+
+	jwtCfg := cfg.GetAuthn().GetJwt()
 	if jwtCfg == nil {
 		return nil, securityv1.ErrorCredentialsInvalid("JWT configuration is missing")
 	}
@@ -171,11 +175,7 @@ func NewProvider(cfg *authnv1.Authenticator, opts ...options.Option) (authnFacto
 		skipAudienceCheck:    len(o.audience) == 0,
 	}
 
-	return newProvider(auth), nil
-}
-
-func init() {
-	authnFactory.Register("jwt", NewProvider)
+	return newProvider(auth, cfg), nil // 将 cfg 传递给 newProvider
 }
 
 // Authenticate validates the provided credential and returns a Principal if successful.

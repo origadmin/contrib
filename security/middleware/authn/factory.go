@@ -8,45 +8,54 @@ import (
 	"fmt"
 
 	kratosMiddleware "github.com/go-kratos/kratos/v2/middleware"
+	"google.golang.org/protobuf/types/known/wrapperspb"
 
-	authnv1 "github.com/origadmin/contrib/security/api/gen/go/config/authn/v1"
-	runtimeMiddleware "github.com/origadmin/runtime/middleware"
+	"github.com/origadmin/contrib/security/authn"
+	middlewarev1 "github.com/origadmin/runtime/api/gen/go/config/middleware/v1"
 	"github.com/origadmin/runtime/interfaces/options"
-	authnFactory "github.com/origadmin/contrib/security/authn"
+	runtimeMiddleware "github.com/origadmin/runtime/middleware"
 )
 
-// authnMiddlewareFactory implements the runtime/middleware.Factory interface for authentication middleware.
-type authnMiddlewareFactory struct {
-	provider authnFactory.Provider
+// Factory implements the runtime/middleware.Factory interface for authentication middleware.
+// It is responsible for creating authentication middleware instances.
+// It relies on an external authn.Provider to handle the actual authentication logic.
+type Factory struct {
+	provider authn.Provider
+}
+
+// NewFactory creates a new middleware factory.
+// The provider is injected to decouple the factory from the specific authentication mechanism.
+func NewFactory(mgr *authn.Manager) (runtimeMiddleware.Factory, error) {
+	if mgr == nil {
+		return nil, fmt.Errorf("authn manager cannot be nil")
+	}
+	provider, ok := mgr.GetProvider()
+	if !ok {
+		return nil, fmt.Errorf("authn provider not configured in manager")
+	}
+	return &Factory{provider: provider}, nil
 }
 
 // NewMiddlewareClient creates a new client-side authentication middleware.
-func (f *authnMiddlewareFactory) NewMiddlewareClient(cfg *authnv1.Authenticator, opts ...options.Option) (runtimeMiddleware.KMiddleware, bool) {
+func (f *Factory) NewMiddlewareClient(cfg *middlewarev1.Middleware, opts ...options.Option) (runtimeMiddleware.KMiddleware, bool) {
+	// Check if the middleware is explicitly disabled in the generic middleware configuration.
+	// Assuming 'middlewarev1.Middleware' has an 'Enabled' field, potentially a *wrapperspb.BoolValue.
+	if cfg != nil && cfg.GetEnabled() != nil && !cfg.GetEnabled().GetValue() {
+		return nil, false // Middleware is disabled
+	}
 	// For client-side, we typically just need the AuthNMiddleware instance to propagate principal.
 	return NewAuthNMiddleware(f.provider, opts...).Client(), true
 }
 
 // NewMiddlewareServer creates a new server-side authentication middleware.
-func (f *authnMiddlewareFactory) NewMiddlewareServer(cfg *authnv1.Authenticator, opts ...options.Option) (runtimeMiddleware.KMiddleware, bool) {
+func (f *Factory) NewMiddlewareServer(cfg *middlewarev1.Middleware, opts ...options.Option) (runtimeMiddleware.KMiddleware, bool) {
+	// Check if the middleware is explicitly disabled in the generic middleware configuration.
+	// Assuming 'middlewarev1.Middleware' has an 'Enabled' field, potentially a *wrapperspb.BoolValue.
+	if cfg != nil && cfg.GetEnabled() != nil && !cfg.GetEnabled().GetValue() {
+		return nil, false // Middleware is disabled
+	}
 	return NewAuthNMiddleware(f.provider, opts...).Server(), true
 }
 
-func init() {
-	// This init() block is problematic because it tries to register a factory that needs a provider,
-	// but the provider is created much later in the application lifecycle.
-	// The correct way is for the application's main builder to:
-	// 1. Create the authnFactory.Provider instances.
-	// 2. Create an instance of authnMiddlewareFactory, injecting the provider.
-	// 3. Register that specific authnMiddlewareFactory instance with runtimeMiddleware.Register.
-	//
-	// For now, we'll leave this as a conceptual placeholder and assume the application builder
-	// handles the registration with the correct provider injection.
-	//
-	// runtimeMiddleware.Register(runtimeMiddleware.AuthN, &authnMiddlewareFactory{})
-}
-
-// RegisterAuthNMiddlewareFactory is a helper function for the application builder to register
-// the authentication middleware factory with the necessary provider.
-func RegisterAuthNMiddlewareFactory(provider authnFactory.Provider) {
-	runtimeMiddleware.Register(runtimeMiddleware.AuthN, &authnMiddlewareFactory{provider: provider})
-}
+// Ensure Factory implements the Factory interface at compile time.
+var _ runtimeMiddleware.Factory = (*Factory)(nil)
