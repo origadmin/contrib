@@ -19,18 +19,68 @@ import (
 	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/runtime/log"
 
+	securityifaces "github.com/origadmin/contrib/security"
 	authnFactory "github.com/origadmin/contrib/security/authn"
+	"github.com/origadmin/contrib/security/authn/cache"
 	securityCredential "github.com/origadmin/contrib/security/credential"
 	securityPrincipal "github.com/origadmin/contrib/security/principal"
-	securityifaces "github.com/origadmin/contrib/security/security"
-	securityToken "github.com/origadmin/contrib/security/token" // Assuming token is also moved
 )
 
 const (
+	// Name is the name of the jwt authenticator provider.
+	Name = "jwt"
+
 	defaultIssuer          = "origadmin"
 	defaultAccessTokenTTL  = 2 * time.Hour
 	defaultRefreshTokenTTL = 7 * 24 * time.Hour
 )
+
+// blueprint implements the authn.Blueprint interface.
+type blueprint struct{}
+
+// NewProvider creates a new JWT Provider from the given configuration and options.
+func (b *blueprint) NewProvider(cfg *securityv1.Security, opts ...options.Option) (authnFactory.Provider, error) {
+	if cfg == nil || cfg.GetAuthn() == nil {
+		return nil, securityv1.ErrorCredentialsInvalid("security or authn configuration is missing")
+	}
+
+	jwtCfg := cfg.GetAuthn().GetConfigs()
+	if jwtCfg == nil {
+	if jwtCfg == nil || len(jwtCfg) == 0 {
+	}
+	o := FromOptions(opts...)
+	if err := o.Apply(jwtCfg); err != nil {
+		return nil, err
+	}
+
+	clock := o.clock
+	if clock == nil {
+		clock = time.Now
+	}
+	generateID := o.generateID
+	if generateID == nil {
+		generateID = uniuri.New
+	}
+
+	auth := &Authenticator{
+		keyFunc:              o.keyFunc,
+		signingMethod:        o.signingMethod,
+		issuer:               o.issuer,
+		audience:             o.audience,
+		accessTokenLifetime:  o.accessTokenLifetime,
+		refreshTokenLifetime: o.refreshTokenLifetime,
+		cache:                o.cache,
+		generateID:           generateID,
+		clock:                clock,
+		skipAudienceCheck:    len(o.audience) == 0,
+	}
+
+	return newProvider(auth, cfg), nil // 将 cfg 传递给 newProvider
+}
+
+func init() {
+	authnFactory.Register(Name, &blueprint{})
+}
 
 // Claims represents the JWT claims, including standard claims and custom ones.
 type Claims struct {
@@ -131,50 +181,10 @@ type Authenticator struct {
 	audience             []string
 	accessTokenLifetime  time.Duration
 	refreshTokenLifetime time.Duration
-	cache                securityToken.CacheStorage
+	cache                cache.CacheStorage
 	generateID           func() string
 	clock                func() time.Time
 	skipAudienceCheck    bool
-}
-
-// NewProvider creates a new JWT Provider from the given configuration and options.
-func NewProvider(cfg *securityv1.Security, opts ...options.Option) (authnFactory.Provider, error) {
-	if cfg == nil || cfg.GetAuthn() == nil {
-		return nil, securityv1.ErrorCredentialsInvalid("security or authn configuration is missing")
-	}
-
-	jwtCfg := cfg.GetAuthn().GetJwt()
-	if jwtCfg == nil {
-		return nil, securityv1.ErrorCredentialsInvalid("JWT configuration is missing")
-	}
-	o := FromOptions(opts...)
-	if err := o.Apply(jwtCfg); err != nil {
-		return nil, err
-	}
-
-	clock := o.clock
-	if clock == nil {
-		clock = time.Now
-	}
-	generateID := o.generateID
-	if generateID == nil {
-		generateID = uniuri.New
-	}
-
-	auth := &Authenticator{
-		keyFunc:              o.keyFunc,
-		signingMethod:        o.signingMethod,
-		issuer:               o.issuer,
-		audience:             o.audience,
-		accessTokenLifetime:  o.accessTokenLifetime,
-		refreshTokenLifetime: o.refreshTokenLifetime,
-		cache:                o.cache,
-		generateID:           generateID,
-		clock:                clock,
-		skipAudienceCheck:    len(o.audience) == 0,
-	}
-
-	return newProvider(auth, cfg), nil // 将 cfg 传递给 newProvider
 }
 
 // Authenticate validates the provided credential and returns a Principal if successful.

@@ -26,6 +26,7 @@ func (p *concretePrincipal) GetRoles() []string         { return p.roles }
 func (p *concretePrincipal) GetPermissions() []string   { return p.permissions }
 func (p *concretePrincipal) GetScopes() map[string]bool { return p.scopes }
 func (p *concretePrincipal) GetClaims() security.Claims { return p.claims } // Use security.Claims
+
 func (p *concretePrincipal) Export() *securityv1.Principal {
 	return &securityv1.Principal{
 		Id:          p.GetID(),
