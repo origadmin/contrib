@@ -10,7 +10,7 @@ import (
 	kratoshttp "github.com/go-kratos/kratos/v2/transport/http"
 	"google.golang.org/grpc/metadata"
 
-	"github.com/origadmin/contrib/security" // Import the security package for the Request interface
+	securityifaces "github.com/origadmin/contrib/security" // Import the security package for the Request interface
 )
 
 // valueSource defines the common interface for extracting key-value pairs from different sources.
@@ -93,7 +93,7 @@ func (t transportHeaderSource) GetAll() map[string][]string {
 	return all
 }
 
-// serverRequest implements security.Request by wrapping a valueSource
+// serverRequest implements securityifaces.Request by wrapping a valueSource
 // and providing context-specific information like Kind, Operation, Method, and RouteTemplate.
 type serverRequest struct {
 	kind          string
@@ -148,19 +148,9 @@ func (c *serverRequest) GetAll() map[string][]string {
 	return nil
 }
 
-// newHTTPHeaderSource creates an httpHeaderSource from http.Request.
-func newHTTPHeaderSource(r *http.Request) *httpHeaderSource {
-	return &httpHeaderSource{Header: r.Header}
-}
-
-// newGRPCMetadataSource creates a grpcMetadataSource from metadata.MD.
-func newGRPCMetadataSource(md metadata.MD) *grpcMetadataSource {
-	return &grpcMetadataSource{MD: md}
-}
-
-// NewFromHTTPRequest creates a security.Request from a standard http.Request.
+// NewFromHTTPRequest creates a securityifaces.Request from a standard http.Request.
 // This is useful when the full Kratos transport context is not available or needed.
-func NewFromHTTPRequest(r *http.Request) security.Request {
+func NewFromHTTPRequest(r *http.Request) securityifaces.Request {
 	return &serverRequest{
 		kind:          "http",
 		operation:     r.URL.Path, // Use the request URL path as the operation
@@ -170,9 +160,9 @@ func NewFromHTTPRequest(r *http.Request) security.Request {
 	}
 }
 
-// NewFromGRPCMetadata creates a security.Request from gRPC metadata and a full method name.
+// NewFromGRPCMetadata creates a securityifaces.Request from gRPC metadata and a full method name.
 // This is useful for gRPC requests when the full Kratos transport context is not available or needed.
-func NewFromGRPCMetadata(md metadata.MD, fullMethodName string) security.Request {
+func NewFromGRPCMetadata(md metadata.MD, fullMethodName string) securityifaces.Request {
 	return &serverRequest{
 		kind:          "grpc",
 		operation:     fullMethodName,
@@ -182,8 +172,8 @@ func NewFromGRPCMetadata(md metadata.MD, fullMethodName string) security.Request
 	}
 }
 
-// NewFromServerContext extracts a Request from the server context.
-func NewFromServerContext(ctx context.Context) (security.Request, error) {
+// NewFromServerContext extracts a securityifaces.Request from the server context.
+func NewFromServerContext(ctx context.Context) (securityifaces.Request, error) {
 	tr, ok := transport.FromServerContext(ctx)
 	if !ok {
 		return nil, kratoserrors.New(500, "TRANSPORT_CONTEXT_MISSING", "transport context is missing")

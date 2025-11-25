@@ -1,8 +1,6 @@
 package security
 
 import (
-	"context"
-
 	"google.golang.org/protobuf/types/known/structpb"
 
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
@@ -48,18 +46,4 @@ type Claims interface {
 	UnmarshalValue(key string, target any) error
 	// Export returns the raw claims data as a map of structpb.Value.
 	Export() map[string]*structpb.Value
-}
-
-type principalContextKey struct{}
-
-// FromContext extracts a Principal from the context.
-// It returns the Principal and a boolean indicating if it was found.
-func FromContext(ctx context.Context) (Principal, bool) {
-	p, ok := ctx.Value(principalContextKey{}).(Principal)
-	return p, ok
-}
-
-// NewContext creates a new context with the given Principal.
-func NewContext(ctx context.Context, p Principal) context.Context {
-	return context.WithValue(ctx, principalContextKey{}, p)
 }

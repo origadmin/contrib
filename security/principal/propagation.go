@@ -8,7 +8,6 @@ import (
 
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 	securityifaces "github.com/origadmin/contrib/security" // Updated import path
-	"github.com/origadmin/runtime/context"
 )
 
 const (
@@ -16,23 +15,8 @@ const (
 	MetadataKey = "x-principal-proto"
 )
 
-type principalKey struct{}
-
-// FromContext extracts the Principal from the given context.
-// It returns the Principal and a boolean indicating if it was found.
-func FromContext(ctx context.Context) (securityifaces.Principal, bool) { // Use securityifaces.Principal
-	p, ok := ctx.Value(principalKey{}).(securityifaces.Principal)
-	return p, ok
-}
-
-// WithContext returns a new context with the given Principal attached.
-// It is used to inject the Principal into the context for downstream business logic.
-func WithContext(ctx context.Context, p securityifaces.Principal) context.Context { // Use securityifaces.Principal
-	return context.WithValue(ctx, principalKey{}, p)
-}
-
-// EncodePrincipal encodes a security.Principal into a base64-encoded Protobuf string.
-func EncodePrincipal(p securityifaces.Principal) (string, error) { // Use securityifaces.Principal
+// EncodePrincipal encodes a securityifaces.Principal into a base64-encoded Protobuf string.
+func EncodePrincipal(p securityifaces.Principal) (string, error) {
 	if p == nil {
 		return "", nil
 	}
@@ -43,8 +27,8 @@ func EncodePrincipal(p securityifaces.Principal) (string, error) { // Use securi
 	return base64.StdEncoding.EncodeToString(data), nil
 }
 
-// DecodePrincipal decodes a base64-encoded Protobuf string into a security.Principal.
-func DecodePrincipal(encoded string) (securityifaces.Principal, error) { // Use securityifaces.Principal
+// DecodePrincipal decodes a base64-encoded Protobuf string into a securityifaces.Principal.
+func DecodePrincipal(encoded string) (securityifaces.Principal, error) {
 	if encoded == "" {
 		return nil, nil
 	}
@@ -56,5 +40,6 @@ func DecodePrincipal(encoded string) (securityifaces.Principal, error) { // Use 
 	if err := proto.Unmarshal(data, protoP); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal proto.Principal: %w", err)
 	}
+	// FromProto is in the same package (principal), so no need for explicit package qualifier
 	return FromProto(protoP)
 }

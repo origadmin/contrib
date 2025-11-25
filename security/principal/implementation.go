@@ -7,25 +7,25 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
-	"github.com/origadmin/contrib/security"
+	securityifaces "github.com/origadmin/contrib/security" // Alias to avoid conflict with this package name
 )
 
 // --- concretePrincipal Implementation ---
 
-// concretePrincipal is a concrete implementation of the security.Principal interface.
+// concretePrincipal is a concrete implementation of the securityifaces.Principal interface.
 type concretePrincipal struct {
 	id          string
 	roles       []string
 	permissions []string
 	scopes      map[string]bool
-	claims      security.Claims // Use security.Claims
+	claims      securityifaces.Claims // Use securityifaces.Claims
 }
 
 func (p *concretePrincipal) GetID() string              { return p.id }
 func (p *concretePrincipal) GetRoles() []string         { return p.roles }
 func (p *concretePrincipal) GetPermissions() []string   { return p.permissions }
 func (p *concretePrincipal) GetScopes() map[string]bool { return p.scopes }
-func (p *concretePrincipal) GetClaims() security.Claims { return p.claims } // Use security.Claims
+func (p *concretePrincipal) GetClaims() securityifaces.Claims { return p.claims } // Use securityifaces.Claims
 
 func (p *concretePrincipal) Export() *securityv1.Principal {
 	return &securityv1.Principal{
@@ -39,7 +39,7 @@ func (p *concretePrincipal) Export() *securityv1.Principal {
 
 // --- defaultClaims Implementation ---
 
-// defaultClaims is a concrete implementation of the security.Claims interface.
+// defaultClaims is a concrete implementation of the securityifaces.Claims interface.
 type defaultClaims struct {
 	data map[string]*structpb.Value
 }
@@ -225,7 +225,7 @@ func convertToGoValueToStructpbValue(value any) (*structpb.Value, error) {
 // NewClaims is a factory function that creates a standard Claims object from a raw map.
 // It validates and normalizes the data, converting Go native types into structpb.Value protobuf messages.
 // Custom encoders can be provided to handle specific types or override default conversion logic.
-func NewClaims(rawData map[string]any, encoders ...ClaimEncoder) (security.Claims, error) { // Use security.Claims
+func NewClaims(rawData map[string]any, encoders ...ClaimEncoder) (securityifaces.Claims, error) { // Use securityifaces.Claims
 	claimsData := make(map[string]*structpb.Value)
 
 	if rawData == nil {
@@ -259,8 +259,8 @@ func NewClaims(rawData map[string]any, encoders ...ClaimEncoder) (security.Claim
 	return &defaultClaims{data: claimsData}, nil
 }
 
-// New creates a new security.Principal instance.
-func New(id string, roles, permissions []string, scopes map[string]bool, claims security.Claims) security.Principal { // Use security.Principal and security.Claims
+// New creates a new securityifaces.Principal instance.
+func New(id string, roles, permissions []string, scopes map[string]bool, claims securityifaces.Claims) securityifaces.Principal { // Use securityifaces.Principal and securityifaces.Claims
 	if scopes == nil {
 		scopes = make(map[string]bool)
 	}
@@ -276,8 +276,8 @@ func New(id string, roles, permissions []string, scopes map[string]bool, claims 
 	}
 }
 
-// FromProto converts a *securityv1.Principal Protobuf message to a security.Principal.
-func FromProto(protoP *securityv1.Principal) (security.Principal, error) { // Use security.Principal
+// FromProto converts a *securityv1.Principal Protobuf message to a securityifaces.Principal.
+func FromProto(protoP *securityv1.Principal) (securityifaces.Principal, error) { // Use securityifaces.Principal
 	if protoP == nil {
 		return nil, nil
 	}
