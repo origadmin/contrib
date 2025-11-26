@@ -51,17 +51,4 @@ func (p *provider) CredentialRevoker() (securityCredential.Revoker, bool) {
 	return p.auth, true
 }
 
-// ShouldSkip implements the authn.Provider interface.
-// It checks if a given operation (e.g., gRPC method or HTTP path) should bypass authentication.
-func (p *provider) ShouldSkip(req security.Request) bool {
-	if p.skipPaths == nil {
-		return false
-	}
-	// Get the operation/path from the request
-	operation := req.GetOperation()
-	// Direct check first for exact matches
-	if p.skipPaths[operation] {
-		return true
-	}
-	return false
-}
+

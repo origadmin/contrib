@@ -21,15 +21,51 @@ import (
 
 // AuthNMiddleware is a Kratos middleware for authentication.
 type AuthNMiddleware struct {
-	provider authnFactory.Provider
+	provider     authnFactory.Provider
+	skipChecker  func(security.Request) bool
 }
 
-// NewAuthNMiddleware creates a new authentication middleware.
-func NewAuthNMiddleware(provider authnFactory.Provider, opts ...options.Option) *AuthNMiddleware {
+// NewAuthNMiddleware creates a new authentication middleware with required skip checker.
+// The skipChecker function determines whether authentication should be skipped for a given request.
+func NewAuthNMiddleware(provider authnFactory.Provider, skipChecker func(security.Request) bool, opts ...options.Option) *AuthNMiddleware {
 	// The 'opts' parameter is kept for future extensibility or other generic options,
 	// but it's no longer needed for passing security configuration.
 	return &AuthNMiddleware{
-		provider: provider,
+		provider:    provider,
+		skipChecker: skipChecker,
+	}
+}
+
+// SkipChecker is a function type for determining whether to skip authentication.
+type SkipChecker func(security.Request) bool
+
+// PathSkipChecker creates a skip checker that skips authentication for specified paths.
+func PathSkipChecker(skipPaths map[string]bool) SkipChecker {
+	return func(req security.Request) bool {
+		if skipPaths == nil {
+			return false
+		}
+		operation := req.GetOperation()
+		return skipPaths[operation]
+	}
+}
+
+// NoOpSkipChecker creates a skip checker that never skips authentication.
+func NoOpSkipChecker() SkipChecker {
+	return func(req security.Request) bool {
+		return false
+	}
+}
+
+// CompositeSkipChecker creates a skip checker that combines multiple checkers with OR logic.
+func CompositeSkipChecker(checkers ...SkipChecker) SkipChecker {
+	return func(req security.Request) bool {
+		for _, checker := range checkers {
+			if checker(req) {
+				return true
+			}
+		}
+		return false
 	}
 }
 
@@ -45,7 +81,7 @@ func (m *AuthNMiddleware) Server() middleware.Middleware {
 			if err != nil {
 				return nil, err
 			}
-			if m.provider.ShouldSkip(securityReq) {
+			if m.skipChecker(securityReq) {
 				return handler(ctx, req)
 			}
 

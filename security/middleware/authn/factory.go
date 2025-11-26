@@ -7,9 +7,6 @@ package authn
 import (
 	"fmt"
 
-	kratosMiddleware "github.com/go-kratos/kratos/v2/middleware"
-	"google.golang.org/protobuf/types/known/wrapperspb"
-
 	"github.com/origadmin/contrib/security/authn"
 	middlewarev1 "github.com/origadmin/runtime/api/gen/go/config/middleware/v1"
 	"github.com/origadmin/runtime/interfaces/options"
@@ -44,7 +41,8 @@ func (f *Factory) NewMiddlewareClient(cfg *middlewarev1.Middleware, opts ...opti
 		return nil, false // Middleware is disabled
 	}
 	// For client-side, we typically just need the AuthNMiddleware instance to propagate principal.
-	return NewAuthNMiddleware(f.provider, opts...).Client(), true
+	// Use NoOpSkipChecker for client-side as authentication is typically handled on server
+	return NewAuthNMiddleware(f.provider, NoOpSkipChecker(), opts...).Client(), true
 }
 
 // NewMiddlewareServer creates a new server-side authentication middleware.
@@ -54,7 +52,8 @@ func (f *Factory) NewMiddlewareServer(cfg *middlewarev1.Middleware, opts ...opti
 	if cfg != nil && cfg.GetEnabled() != nil && !cfg.GetEnabled().GetValue() {
 		return nil, false // Middleware is disabled
 	}
-	return NewAuthNMiddleware(f.provider, opts...).Server(), true
+	// For server-side, use NoOpSkipChecker by default. Skip logic should be configured by the user.
+	return NewAuthNMiddleware(f.provider, NoOpSkipChecker(), opts...).Server(), true
 }
 
 // Ensure Factory implements the Factory interface at compile time.

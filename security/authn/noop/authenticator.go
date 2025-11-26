@@ -49,9 +49,7 @@ type noopProvider struct {
 	auth *authenticator
 }
 
-func (p *noopProvider) ShouldSkip(request security.Request) bool {
-	return false
-}
+
 
 func (p *noopProvider) Authenticator() (authn.Authenticator, bool) {
 	return p.auth, true
