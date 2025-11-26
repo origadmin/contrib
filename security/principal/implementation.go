@@ -301,3 +301,7 @@ func EmptyPrincipal(id string) securityifaces.Principal {
 		},
 	}
 }
+
+func Anonymous() securityifaces.Principal {
+	return EmptyPrincipal("anonymous")
+}

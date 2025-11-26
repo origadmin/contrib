@@ -10,48 +10,42 @@ import (
 	"github.com/origadmin/contrib/security/credential"
 	"github.com/origadmin/contrib/security/principal"
 	"github.com/origadmin/runtime/interfaces/options"
+	"github.com/origadmin/toolkits/errors"
 )
 
 func init() {
-	authn.Register("noop", &NoopFactory{})
+	authn.Register("noop", &noop{})
 }
 
 type authenticator struct{}
 
+func (a authenticator) CreateCredential(ctx context.Context, p security.Principal) (security.CredentialResponse, error) {
+	return nil, errors.New("noop authenticator does not support credential creation")
+
+}
+
+func (a authenticator) Revoke(ctx context.Context, cred security.Credential) error {
+	return errors.New("noop authenticator does not support credential revocation")
+}
+
 func (a authenticator) Authenticate(ctx context.Context, cred security.Credential) (security.Principal, error) {
-	return principal.EmptyPrincipal(""), nil
+	return principal.Anonymous(), nil
 }
 
 func (a authenticator) Supports(cred security.Credential) bool {
-	//TODO implement me
-	panic("implement me")
+	return false
 }
 
-type NoopFactory struct{}
+type noop struct{}
 
-func (f *NoopFactory) NewAuthenticator(cfg *authnv1.Authenticator, opts ...options.Option) (authn.Provider, error) {
-	o := FromOptions(opts...)
-	err := o.Apply(cfg)
-	if err != nil {
-		return nil, err
-	}
-	return &noopProvider{
-		auth: &authenticator{},
-	}, nil
+func (f *noop) NewAuthenticator(cfg *authnv1.Authenticator, opts ...options.Option) (authn.Authenticator, error) {
+	//o := FromOptions(opts...)
+	//err := o.Apply(cfg)
+	//if err != nil {
+	//	return nil, err
+	//}
+	return &authenticator{}, nil
 }
 
-type noopProvider struct {
-	auth *authenticator
-}
-
-func (p *noopProvider) Authenticator() (authn.Authenticator, bool) {
-	return p.auth, true
-}
-
-func (p *noopProvider) CredentialCreator() (credential.Creator, bool) {
-	return nil, false
-}
-
-func (p *noopProvider) CredentialRevoker() (credential.Revoker, bool) {
-	return nil, false
-}
+var _ credential.Revoker = &authenticator{}
+var _ credential.Creator = &authenticator{}
