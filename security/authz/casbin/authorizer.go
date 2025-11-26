@@ -7,6 +7,7 @@ package casbin
 import (
 	"context"
 	"fmt"
+	"strings" // Add this import for strings.Split
 
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
@@ -35,20 +36,31 @@ type Authorizer struct {
 	policy       persist.Adapter
 	enforcer     *casbin.SyncedEnforcer
 	wildcardItem string
+	hasDomain    bool // Indicates if the Casbin model supports domains.
 }
 
 // Authorized checks if a principal is authorized to perform an action on a resource within a specific domain.
 func (auth *Authorizer) Authorized(ctx context.Context, principal security.Principal, spec authz.RuleSpec) (bool, error) {
 	log.Debugf("Authorizing user with principal: %+v", principal)
-	domain := spec.Domain
-	if len(domain) == 0 {
-		log.Debugf("Domain is empty, using wildcard item: %s", auth.wildcardItem)
-		domain = auth.wildcardItem
-	}
 
 	var err error
 	var allowed bool
-	if allowed, err = auth.enforcer.Enforce(principal.GetID(), spec.Resource, spec.Action, domain); err != nil {
+
+	if auth.hasDomain {
+		// If the model supports domains, use the domain from the spec.
+		domain := spec.Domain
+		if len(domain) == 0 {
+			log.Debugf("Domain is empty, using wildcard item: %s", auth.wildcardItem)
+			domain = auth.wildcardItem
+		}
+		allowed, err = auth.enforcer.Enforce(principal.GetID(), spec.Resource, spec.Action, domain)
+	} else {
+		// If the model does not support domains, call Enforce without the domain argument.
+		// It's crucial not to pass a domain argument if the model is not configured for it.
+		allowed, err = auth.enforcer.Enforce(principal.GetID(), spec.Resource, spec.Action)
+	}
+
+	if err != nil {
 		log.Errorf("Authorization failed with error: %v", err)
 		return false, err
 	} else if allowed {
@@ -98,6 +110,21 @@ func NewAuthorizer(cfg *authzv1.Authorizer, opts ...options.Option) (authz.Autho
 			return nil, fmt.Errorf("failed to load default casbin model: %w", err)
 		}
 		auth.model = m
+	}
+
+	// Determine if the model has a domain.
+	// A common heuristic for domain-enabled models in Casbin is the presence of a 'g' section
+	// with three parameters (e.g., `g = r.sub, p.sub, r.dom`).
+	// We will check the 'g' section definition in the model.
+	if gAssertion, ok := auth.model["g"]["g"]; ok { // gAssertion is *model.Assertion
+		// Access the Value field of the Assertion to get the string definition.
+		gDef := gAssertion.Value
+		// Split the definition by comma to count parameters.
+		params := strings.Split(gDef, ",")
+		// If there are exactly 3 parameters, we assume it's a domain-enabled model.
+		if len(params) == 3 {
+			auth.hasDomain = true
+		}
 	}
 
 	// Set policy adapter

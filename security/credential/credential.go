@@ -17,6 +17,11 @@ import (
 	"github.com/origadmin/contrib/security/request"
 )
 
+const (
+	// BearerCredentialType represents the type for bearer tokens (e.g., JWT).
+	BearerCredentialType = "jwt"
+)
+
 // credential is the concrete implementation of the security.Credential interface.
 // It stores credential data in a Go-idiomatic way.
 type credential struct {
