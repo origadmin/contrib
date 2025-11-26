@@ -16,7 +16,7 @@ type provider struct {
 }
 
 // newProvider creates a new JWT provider.
-func newProvider(auth *Authenticator, cfg *authnv1.Authenticator) authnFactory.Provider { // Use authnFactory.Provider
+func newProvider(auth *Authenticator, cfg *authnv1.Authenticator) *provider {
 	p := &provider{
 		auth: auth,
 	}

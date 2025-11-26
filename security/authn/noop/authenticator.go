@@ -47,5 +47,10 @@ func (f *noop) NewAuthenticator(cfg *authnv1.Authenticator, opts ...options.Opti
 	return &authenticator{}, nil
 }
 
+// NewAuthenticator creates a new JWT Provider from the given configuration and options.
+func NewAuthenticator(cfg *authnv1.Authenticator, opts ...options.Option) (authn.Authenticator, error) {
+	return &authenticator{}, nil
+}
+
 var _ credential.Revoker = &authenticator{}
 var _ credential.Creator = &authenticator{}
