@@ -6,7 +6,6 @@ package authn
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
@@ -14,8 +13,10 @@ import (
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 	"github.com/origadmin/contrib/security"
 	authnFactory "github.com/origadmin/contrib/security/authn"
-	securityPrincipal "github.com/origadmin/contrib/security/principal"
 	securityCredential "github.com/origadmin/contrib/security/credential"
+	securityPrincipal "github.com/origadmin/contrib/security/principal"
+	"github.com/origadmin/contrib/security/request"
+	"github.com/origadmin/runtime/interfaces/options"
 )
 
 // AuthNMiddleware is a Kratos middleware for authentication.
@@ -40,12 +41,12 @@ func (m *AuthNMiddleware) Server() middleware.Middleware {
 			if _, ok := securityPrincipal.FromContext(ctx); ok {
 				return handler(ctx, req) // Already authenticated, proceed
 			}
-
-			// Ask the provider if this operation should be skipped.
-			if tr, ok := transport.FromServerContext(ctx); ok {
-				if m.provider.ShouldSkip(tr.Operation()) {
-					return handler(ctx, req) // Skip authentication
-				}
+			securityReq, err := request.NewFromServerContext(ctx)
+			if err != nil {
+				return nil, err
+			}
+			if m.provider.ShouldSkip(securityReq) {
+				return handler(ctx, req)
 			}
 
 			// 2. Extract credential from transport context
@@ -78,7 +79,7 @@ func (m *AuthNMiddleware) Server() middleware.Middleware {
 			}
 
 			// 4. Inject Principal into context
-			ctx = securityPrincipal.WithContext(ctx, principal)
+			ctx = securityPrincipal.NewContext(ctx, principal)
 
 			return handler(ctx, req)
 		}

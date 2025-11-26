@@ -19,28 +19,28 @@ import (
 )
 
 const (
-	CacheAccess  = "security:token:access"
-	CacheRefresh = "security:token:refresh"
+	AccessKey  = "security:token:access"
+	RefreshKey = "security:token:refresh"
 )
 
-type StorageOption = func(*tokenCacheStorage)
+type StorageOption = func(*cacheStorage)
 
 func WithCache(c storageiface.Cache) StorageOption {
-	return func(o *tokenCacheStorage) {
+	return func(o *cacheStorage) {
 		o.c = c
 	}
 }
 
-// tokenCacheStorage is the implementation of CacheStorage interface
-type tokenCacheStorage struct {
+// cacheStorage is the implementation of Cache interface
+type cacheStorage struct {
 	c storageiface.Cache
 }
 
-func (obj *tokenCacheStorage) Store(ctx context.Context, tokenStr string, duration time.Duration) error {
+func (obj *cacheStorage) Store(ctx context.Context, tokenStr string, duration time.Duration) error {
 	return obj.c.Set(ctx, tokenStr, "", duration)
 }
 
-func (obj *tokenCacheStorage) Exist(ctx context.Context, tokenStr string) (bool, error) {
+func (obj *cacheStorage) Exist(ctx context.Context, tokenStr string) (bool, error) {
 	ok, err := obj.c.Exists(ctx, tokenStr)
 	switch {
 	case ok:
@@ -50,17 +50,17 @@ func (obj *tokenCacheStorage) Exist(ctx context.Context, tokenStr string) (bool,
 	}
 }
 
-func (obj *tokenCacheStorage) Remove(ctx context.Context, tokenStr string) error {
+func (obj *cacheStorage) Remove(ctx context.Context, tokenStr string) error {
 	return obj.c.Delete(ctx, tokenStr)
 }
 
-func (obj *tokenCacheStorage) Close(ctx context.Context) error {
+func (obj *cacheStorage) Close(ctx context.Context) error {
 	return obj.c.Close(ctx)
 }
 
-// New creates a new CacheStorage instance
-func New(ss ...StorageOption) CacheStorage { // Use securityToken.CacheStorage
-	service := configure.New[tokenCacheStorage](ss)
+// New creates a new Cache instance
+func New(ss ...StorageOption) Cache { // Use securityToken.Cache
+	service := configure.New[cacheStorage](ss)
 	if service.c == nil {
 		defaultCacheConfig := &cachev1.CacheConfig{
 			Driver: cache.DefaultDriver,

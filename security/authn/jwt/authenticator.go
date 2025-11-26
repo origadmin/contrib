@@ -13,15 +13,15 @@ import (
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 	"google.golang.org/protobuf/types/known/structpb"
 
+	authnv1 "github.com/origadmin/contrib/api/gen/go/security/authn/v1"
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
-	"github.com/origadmin/runtime/interfaces/options"
-	"github.com/origadmin/runtime/log"
-
-	authnFactory "github.com/origadmin/contrib/security/authn"
 	"github.com/origadmin/contrib/security"
+	authnFactory "github.com/origadmin/contrib/security/authn"
+	securitycache "github.com/origadmin/contrib/security/authn/cache"
 	securityCredential "github.com/origadmin/contrib/security/credential"
 	securityPrincipal "github.com/origadmin/contrib/security/principal"
-	securityToken "github.com/origadmin/contrib/security/token" // Assuming token is also moved
+	"github.com/origadmin/runtime/interfaces/options"
+	"github.com/origadmin/runtime/log"
 )
 
 const (
@@ -36,6 +36,11 @@ type Claims struct {
 	Roles       []string        `json:"roles,omitempty"`
 	Permissions []string        `json:"permissions,omitempty"`
 	Scopes      map[string]bool `json:"scopes,omitempty"`
+}
+
+func (c *Claims) UnmarshalValue(key string, target any) error {
+	// TODO: Implement the UnmarshalValue method for Claims.
+	return nil
 }
 
 func (c *Claims) Get(key string) (interface{}, bool) {
@@ -96,9 +101,9 @@ func (c *Claims) GetStringSlice(key string) ([]string, bool) {
 	return nil, false
 }
 
-func (c *Claims) GetMap(key string) (map[string]string, bool) {
+func (c *Claims) GetMap(key string) (map[string]any, bool) {
 	if val, ok := c.Get(key); ok {
-		if m, ok := val.(map[string]string); ok {
+		if m, ok := val.(map[string]any); ok {
 			return m, true
 		}
 	}
@@ -129,19 +134,15 @@ type Authenticator struct {
 	audience             []string
 	accessTokenLifetime  time.Duration
 	refreshTokenLifetime time.Duration
-	cache                securitycache.CacheStorage
+	cache                securitycache.Cache
 	generateID           func() string
 	clock                func() time.Time
 	skipAudienceCheck    bool
 }
 
 // NewProvider creates a new JWT Provider from the given configuration and options.
-func NewProvider(cfg *securityv1.Security, opts ...options.Option) (authnFactory.Provider, error) {
-	if cfg == nil || cfg.GetAuthn() == nil {
-		return nil, securityv1.ErrorCredentialsInvalid("security or authn configuration is missing")
-	}
-
-	jwtCfg := cfg.GetAuthn().GetJwt()
+func NewProvider(cfg *authnv1.Authenticator, opts ...options.Option) (authnFactory.Provider, error) {
+	jwtCfg := cfg.GetJwt()
 	if jwtCfg == nil {
 		return nil, securityv1.ErrorCredentialsInvalid("JWT configuration is missing")
 	}
@@ -172,7 +173,7 @@ func NewProvider(cfg *securityv1.Security, opts ...options.Option) (authnFactory
 		skipAudienceCheck:    len(o.audience) == 0,
 	}
 
-	return newProvider(auth, cfg), nil // 将 cfg 传递给 newProvider
+	return newProvider(auth, cfg), nil
 }
 
 // Authenticate validates the provided credential and returns a Principal if successful.
@@ -293,11 +294,11 @@ func (a *Authenticator) Revoke(ctx context.Context, cred security.Credential) er
 
 	var bc securityv1.BearerCredential
 	if err := cred.ParsedPayload(&bc); err != nil {
-		return nil, securityv1.ErrorBearerTokenInvalid("failed to parse bearer credential for revocation: %v", err)
+		return securityv1.ErrorBearerTokenInvalid("failed to parse bearer credential for revocation: %v", err)
 	}
 	tokenStr := bc.GetToken()
 	if tokenStr == "" {
-		return nil, securityv1.ErrorTokenMissing("token is empty for revocation")
+		return securityv1.ErrorTokenMissing("token is empty for revocation")
 	}
 
 	// For revocation, we only need the claims, and we can ignore if the token is already expired.

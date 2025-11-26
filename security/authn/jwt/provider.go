@@ -3,11 +3,9 @@
 package jwt
 
 import (
-	"strings"
-
+	authnv1 "github.com/origadmin/contrib/api/gen/go/security/authn/v1"
 	authnFactory "github.com/origadmin/contrib/security/authn"
 	securityCredential "github.com/origadmin/contrib/security/credential"
-	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 )
 
 // provider implements the authn.Provider interface for the JWT component.
@@ -19,7 +17,7 @@ type provider struct {
 }
 
 // newProvider creates a new JWT provider.
-func newProvider(auth *Authenticator, cfg *securityv1.Security) authnFactory.Provider { // Use authnFactory.Provider
+func newProvider(auth *Authenticator, cfg *authnv1.Authenticator) authnFactory.Provider { // Use authnFactory.Provider
 	p := &provider{
 		auth:      auth,
 		skipPaths: make(map[string]bool),

@@ -273,7 +273,7 @@ var File_security_v1_security_proto protoreflect.FileDescriptor
 
 const file_security_v1_security_proto_rawDesc = "" +
 	"\n" +
-	"\x1asecurity/v1/security.proto\x12\x17contrib.api.security.v1\x1a%security/authn/v1/authenticator.proto\x1a\"security/authz/v1/authorizer.proto\x1a!config/transport/tls/v1/tls.proto\x1a$gnostic/openapi/v3/annotations.proto\"\x8e\x03\n" +
+	"\x1asecurity/v1/security.proto\x12\x17contrib.api.security.v1\x1a!config/transport/tls/v1/tls.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1dsecurity/authn/v1/authn.proto\x1a\x1dsecurity/authz/v1/authz.proto\"\x8e\x03\n" +
 	"\bSecurity\x12q\n" +
 	"\x05authn\x18\x01 \x01(\v2-.contrib.api.security.v1.AuthenticatorConfigsB,\xbaG)\x92\x02&List of authentication configurations.R\x05authn\x12m\n" +
 	"\x05authz\x18\x02 \x01(\v2*.contrib.api.security.v1.AuthorizerConfigsB+\xbaG(\x92\x02%List of authorization configurations.R\x05authz\x12\x9f\x01\n" +

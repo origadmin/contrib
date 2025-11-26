@@ -12,15 +12,16 @@ import (
 
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 
-	jwtv1 "github.com/origadmin/contrib/api/gen/go/security/authn/jwt/v1"
 	"github.com/origadmin/runtime/extension/optionutil"
+
+	jwtv1 "github.com/origadmin/contrib/api/gen/go/security/authn/jwt/v1"
+	securitycache "github.com/origadmin/contrib/security/authn/cache" // Updated import path
 	"github.com/origadmin/runtime/interfaces/options"
-	securityToken "github.com/origadmin/contrib/security/token" // Updated import path
 )
 
 // Option holds the configuration options for the JWT authenticator.
 type Option struct {
-	cache                securityToken.CacheStorage // Use securityToken.CacheStorage
+	cache                securitycache.Cache
 	signingMethod        jwtv5.SigningMethod
 	keyFunc              jwtv5.Keyfunc
 	accessTokenLifetime  time.Duration

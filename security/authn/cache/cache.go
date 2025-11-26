@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-// CacheStorage is the interface for caching the Authenticator token.
-type CacheStorage interface {
+// Cache is the interface for caching the Authenticator token.
+type Cache interface {
 	// Store stores the token with a specific expiration time
 	Store(context.Context, string, time.Duration) error
 	// Exist checks if the token exists

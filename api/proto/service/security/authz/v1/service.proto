@@ -1,12 +1,12 @@
 syntax = "proto3";
 
-package contrib.api.service.authz.v1;
+package contrib.api.service.security.authz.v1;
 
-import "security/authz/v1/authz.proto"; // 修正 import 路径
-import "security/v1/principal.proto";   // 修正 import 路径
 import "google/api/annotations.proto";
+import "security/authz/v1/authz.proto";
+import "security/v1/principal.proto";
 
-option go_package = "github.com/origadmin/contrib/api/gen/go/service/authz/v1;authzv1";
+option go_package = "github.com/origadmin/contrib/api/gen/go/service/security/authz/v1;authzv1";
 
 // AuthorizerService provides endpoints for performing authorization checks.
 service AuthorizerService {
@@ -56,7 +56,7 @@ message AuthorizedRequest {
   // The principal performing the action.
   contrib.api.security.v1.Principal principal = 1;
   // The rule specification to be checked.
-  security.authz.v1.RuleSpec spec = 2; // 修正 RuleSpec 的引用
+  contrib.api.security.authz.v1.RuleSpec spec = 2;
 }
 
 message AuthorizedResponse {
@@ -69,12 +69,12 @@ message FilterAuthorizedRequest {
   // The principal performing the action.
   contrib.api.security.v1.Principal principal = 1;
   // A list of rule specifications to be checked.
-  repeated security.authz.v1.RuleSpec specs = 2; // 修正 RuleSpec 的引用
+  repeated contrib.api.security.authz.v1.RuleSpec specs = 2;
 }
 
 message FilterAuthorizedResponse {
   // A list containing only the rule specifications that the principal is authorized for.
-  repeated security.authz.v1.RuleSpec specs = 1; // 修正 RuleSpec 的引用
+  repeated contrib.api.security.authz.v1.RuleSpec specs = 1;
 }
 
 // --- Messages for FilterAuthorizedResources ---
@@ -82,7 +82,7 @@ message FilterAuthorizedResourcesRequest {
   // The principal performing the action.
   contrib.api.security.v1.Principal principal = 1;
   // A template for the authorization check. The 'resource' field will be ignored.
-  security.authz.v1.RuleSpec spec_template = 2; // 修正 RuleSpec 的引用
+  contrib.api.security.authz.v1.RuleSpec spec_template = 2;
   // The list of resources to check.
   repeated string resources = 3;
 }
@@ -97,7 +97,7 @@ message FilterAuthorizedActionsRequest {
   // The principal performing the action.
   contrib.api.security.v1.Principal principal = 1;
   // A template for the authorization check. The 'action' field will be ignored.
-  security.authz.v1.RuleSpec spec_template = 2; // 修正 RuleSpec 的引用
+  contrib.api.security.authz.v1.RuleSpec spec_template = 2;
   // The list of actions to check.
   repeated string actions = 3;
 }
@@ -112,7 +112,7 @@ message FilterAuthorizedDomainsRequest {
   // The principal performing the action.
   contrib.api.security.v1.Principal principal = 1;
   // A template for the authorization check. The 'domain' field will be ignored.
-  security.authz.v1.RuleSpec spec_template = 2; // 修正 RuleSpec 的引用
+  contrib.api.security.authz.v1.RuleSpec spec_template = 2;
   // The list of domains to check.
   repeated string domains = 3;
 }
