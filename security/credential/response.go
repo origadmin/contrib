@@ -11,9 +11,9 @@ import (
 	"github.com/origadmin/contrib/security/meta"           // Updated import path
 )
 
-// credentialResponse is the internal implementation of the security.CredentialResponse interface.
+// response is the internal implementation of the security.CredentialResponse interface.
 // It stores credential response data in a Go-idiomatic way.
-type credentialResponse struct {
+type response struct {
 	crType  string
 	payload *securityv1.Payload
 	meta    map[string][]string // Directly store Go-idiomatic metadata
@@ -25,8 +25,8 @@ func NewCredentialResponse(
 	crType string,
 	payload *securityv1.Payload,
 	meta map[string][]string,
-) securityifaces.CredentialResponse { // Use securityifaces.CredentialResponse
-	return &credentialResponse{
+) securityifaces.CredentialResponse {
+	return &response{
 		crType:  crType,
 		payload: payload,
 		meta:    meta,
@@ -34,24 +34,24 @@ func NewCredentialResponse(
 }
 
 // Payload returns the payload of the credential.
-func (c *credentialResponse) Payload() *securityv1.Payload {
+func (c *response) Payload() *securityv1.Payload {
 	return c.payload
 }
 
 // GetType returns the type of the credential.
-func (c *credentialResponse) GetType() string {
+func (c *response) GetType() string {
 	return c.crType
 }
 
 // GetMeta returns the metadata associated with the credential response
 // as a standard Go map[string][]string, for easy consumption.
-func (c *credentialResponse) GetMeta() map[string][]string {
+func (c *response) GetMeta() map[string][]string {
 	return c.meta
 }
 
 // Response converts the CredentialResponse to its protobuf representation.
 // This method performs the conversion from Go-idiomatic internal storage to Protobuf format.
-func (c *credentialResponse) Response() *securityv1.CredentialResponse {
+func (c *response) Response() *securityv1.CredentialResponse {
 	// Convert Go-idiomatic metadata to Protobuf MetaValue map only when Response() is called.
 	// Use the ToProto method on the meta.Meta type.
 	protoMeta := meta.Meta(c.meta).ToProto()

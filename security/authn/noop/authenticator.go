@@ -53,11 +53,11 @@ func (p *noopProvider) Authenticator() (authn.Authenticator, bool) {
 	return p.auth, true
 }
 
-func (p *noopProvider) CredentialCreator() (credential.CredentialCreator, bool) {
+func (p *noopProvider) CredentialCreator() (credential.Creator, bool) {
 	return nil, false
 }
 
-func (p *noopProvider) CredentialRevoker() (credential.CredentialRevoker, bool) {
+func (p *noopProvider) CredentialRevoker() (credential.Revoker, bool) {
 	return nil, false
 }
 

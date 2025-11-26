@@ -11,8 +11,8 @@ import (
 	"github.com/origadmin/contrib/security"
 )
 
-// CredentialCreator defines the contract for issuing new credentials.
-type CredentialCreator interface {
+// Creator defines the contract for issuing new credentials.
+type Creator interface {
 	// CreateCredential issues a new credential for the given principal and returns
 	// a standard, serializable Credential.
 	CreateCredential(ctx context.Context, p security.Principal) (security.CredentialResponse, error)

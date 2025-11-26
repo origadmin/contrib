@@ -5,13 +5,11 @@ package jwt
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"time"
 
 	"github.com/dchest/uniuri"
 	jwtv5 "github.com/golang-jwt/jwt/v5"
-	"google.golang.org/protobuf/types/known/structpb"
 
 	authnv1 "github.com/origadmin/contrib/api/gen/go/security/authn/v1"
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
@@ -29,102 +27,6 @@ const (
 	defaultAccessTokenTTL  = 2 * time.Hour
 	defaultRefreshTokenTTL = 7 * 24 * time.Hour
 )
-
-// Claims represents the JWT claims, including standard claims and custom ones.
-type Claims struct {
-	jwtv5.RegisteredClaims
-	Roles       []string        `json:"roles,omitempty"`
-	Permissions []string        `json:"permissions,omitempty"`
-	Scopes      map[string]bool `json:"scopes,omitempty"`
-}
-
-func (c *Claims) UnmarshalValue(key string, target any) error {
-	// TODO: Implement the UnmarshalValue method for Claims.
-	return nil
-}
-
-func (c *Claims) Get(key string) (interface{}, bool) {
-	switch key {
-	case "roles":
-		return c.Roles, true
-	case "permissions":
-		return c.Permissions, true
-	case "scopes":
-		return c.Scopes, true
-	default:
-		return nil, false
-	}
-}
-
-func (c *Claims) GetString(key string) (string, bool) {
-	if val, ok := c.Get(key); ok {
-		if str, ok := val.(string); ok {
-			return str, true
-		}
-	}
-	return "", false
-}
-
-func (c *Claims) GetInt64(key string) (int64, bool) {
-	if val, ok := c.Get(key); ok {
-		if i, ok := val.(int64); ok {
-			return i, true
-		}
-	}
-	return 0, false
-}
-
-func (c *Claims) GetFloat64(key string) (float64, bool) {
-	if val, ok := c.Get(key); ok {
-		if f, ok := val.(float64); ok {
-			return f, true
-		}
-	}
-	return 0, false
-}
-
-func (c *Claims) GetBool(key string) (bool, bool) {
-	if val, ok := c.Get(key); ok {
-		if b, ok := val.(bool); ok {
-			return b, true
-		}
-	}
-	return false, false
-}
-
-func (c *Claims) GetStringSlice(key string) ([]string, bool) {
-	if val, ok := c.Get(key); ok {
-		if s, ok := val.([]string); ok {
-			return s, true
-		}
-	}
-	return nil, false
-}
-
-func (c *Claims) GetMap(key string) (map[string]any, bool) {
-	if val, ok := c.Get(key); ok {
-		if m, ok := val.(map[string]any); ok {
-			return m, true
-		}
-	}
-	return nil, false
-}
-
-func (c *Claims) Export() map[string]*structpb.Value {
-	data, err := json.Marshal(c)
-	if err != nil {
-		return nil
-	}
-	var m map[string]interface{}
-	if err := json.Unmarshal(data, &m); err != nil {
-		return nil
-	}
-	st, err := structpb.NewStruct(m)
-	if err != nil {
-		return nil
-	}
-	return st.GetFields()
-}
 
 // Authenticator implements the security interfaces for JWT.
 type Authenticator struct {
@@ -400,8 +302,8 @@ func mapJWTError(err error) error {
 
 // Interface compliance checks.
 var (
-	_ authnFactory.Authenticator           = (*Authenticator)(nil)
-	_ securityCredential.CredentialCreator = (*Authenticator)(nil)
-	_ securityCredential.CredentialRevoker = (*Authenticator)(nil)
-	_ security.Claims                      = (*Claims)(nil)
+	_ authnFactory.Authenticator = (*Authenticator)(nil)
+	_ securityCredential.Creator = (*Authenticator)(nil)
+	_ securityCredential.Revoker = (*Authenticator)(nil)
+	_ security.Claims            = (*Claims)(nil)
 )

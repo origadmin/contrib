@@ -19,9 +19,9 @@ type Provider interface {
 	// Authenticator returns the Authenticator capability, if supported.
 	Authenticator() (Authenticator, bool)
 	// CredentialCreator returns the CredentialCreator capability, if supported.
-	CredentialCreator() (credential.CredentialCreator, bool)
+	CredentialCreator() (credential.Creator, bool)
 	// CredentialRevoker returns the CredentialRevoker capability, if supported.
-	CredentialRevoker() (credential.CredentialRevoker, bool)
+	CredentialRevoker() (credential.Revoker, bool)
 	// ShouldSkip returns true if the authenticator should skip the authentication process.
 	ShouldSkip(security.Request) bool
 }

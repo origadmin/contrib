@@ -19,9 +19,9 @@ type Provider interface {
 	// Authenticator returns the Authenticator capability, if supported.
 	Authenticator() (authn.Authenticator, bool)
 	// CredentialCreator returns the CredentialCreator capability, if supported.
-	CredentialCreator() (credential.CredentialCreator, bool)
+	CredentialCreator() (credential.Creator, bool)
 	// CredentialRevoker returns the CredentialRevoker capability, if supported.
-	CredentialRevoker() (credential.CredentialRevoker, bool)
+	CredentialRevoker() (credential.Revoker, bool)
 }
 
 // Factory is a function type that creates a Provider instance.

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/goexts/generic/maps"
 	"google.golang.org/protobuf/types/known/structpb"
 
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
@@ -21,10 +22,10 @@ type concretePrincipal struct {
 	claims      securityifaces.Claims // Use securityifaces.Claims
 }
 
-func (p *concretePrincipal) GetID() string              { return p.id }
-func (p *concretePrincipal) GetRoles() []string         { return p.roles }
-func (p *concretePrincipal) GetPermissions() []string   { return p.permissions }
-func (p *concretePrincipal) GetScopes() map[string]bool { return p.scopes }
+func (p *concretePrincipal) GetID() string                    { return p.id }
+func (p *concretePrincipal) GetRoles() []string               { return p.roles }
+func (p *concretePrincipal) GetPermissions() []string         { return p.permissions }
+func (p *concretePrincipal) GetScopes() map[string]bool       { return p.scopes }
 func (p *concretePrincipal) GetClaims() securityifaces.Claims { return p.claims } // Use securityifaces.Claims
 
 func (p *concretePrincipal) Export() *securityv1.Principal {
@@ -277,15 +278,12 @@ func New(id string, roles, permissions []string, scopes map[string]bool, claims 
 }
 
 // FromProto converts a *securityv1.Principal Protobuf message to a securityifaces.Principal.
-func FromProto(protoP *securityv1.Principal) (securityifaces.Principal, error) { // Use securityifaces.Principal
+func FromProto(protoP *securityv1.Principal) (securityifaces.Principal, error) {
 	if protoP == nil {
 		return nil, nil
 	}
 
-	claimsData := make(map[string]*structpb.Value)
-	for key, claimValue := range protoP.GetClaims() {
-		claimsData[key] = claimValue
-	}
+	claimsData := maps.Clone(protoP.GetClaims())
 
 	claims := &defaultClaims{data: claimsData}
 

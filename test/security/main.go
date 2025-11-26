@@ -13,8 +13,8 @@ import (
 	v1 "github.com/origadmin/runtime/examples/protos/security/api/v1"
 	exampleSecurity "github.com/origadmin/runtime/examples/security/internal/security"
 	"github.com/origadmin/runtime/examples/security/internal/service"
+
 	"github.com/origadmin/runtime/interfaces/options"
-	"github.com/origadmin/contrib/middleware"
 )
 
 // go:generate go run github.com/google/wire/cmd/wire

@@ -12,10 +12,9 @@ import (
 
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 
-	"github.com/origadmin/runtime/extension/optionutil"
-
 	jwtv1 "github.com/origadmin/contrib/api/gen/go/security/authn/jwt/v1"
 	securitycache "github.com/origadmin/contrib/security/authn/cache" // Updated import path
+	"github.com/origadmin/runtime/extensions/optionutil"
 	"github.com/origadmin/runtime/interfaces/options"
 )
 
@@ -193,7 +192,7 @@ func WithExtraClaims(extras map[string]string) options.Option {
 }
 
 // WithCache returns an options.Option that sets token cache.
-func WithCache(cache securityToken.CacheStorage) options.Option { // Use securityToken.CacheStorage
+func WithCache(cache securitycache.Cache) options.Option {
 	return optionutil.Update(func(o *Option) {
 		o.cache = cache
 	})
