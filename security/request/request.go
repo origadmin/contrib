@@ -10,97 +10,17 @@ import (
 	kratoshttp "github.com/go-kratos/kratos/v2/transport/http"
 	"google.golang.org/grpc/metadata"
 
-	"github.com/origadmin/contrib/security" // Import the security package for the Request interface
+	"github.com/origadmin/contrib/security"
 )
 
-// valueSource defines the common interface for extracting key-value pairs from different sources.
-type valueSource interface {
-	Get(key string) string
-	Values(key string) []string
-	GetAll() map[string][]string
-}
-
-// httpHeaderSource adapts an http.Header to the valueSource interface.
-type httpHeaderSource struct {
-	Header http.Header
-}
-
-// Values returns the values associated with the given key from the HTTP header.
-func (p httpHeaderSource) Values(key string) []string {
-	return p.Header[key]
-}
-
-// Get returns the first value associated with the given key from the HTTP header.
-func (p httpHeaderSource) Get(key string) string {
-	return p.Header.Get(key)
-}
-
-// GetAll returns all key-value pairs from the HTTP header.
-func (p httpHeaderSource) GetAll() map[string][]string {
-	return p.Header
-}
-
-// grpcMetadataSource adapts a grpc.Metadata to the valueSource interface.
-type grpcMetadataSource struct {
-	MD metadata.MD
-}
-
-// Values returns the values associated with the given key from the gRPC metadata.
-func (p grpcMetadataSource) Values(key string) []string {
-	return p.MD.Get(key)
-}
-
-// Get returns the first value associated with the given key from the gRPC metadata.
-func (p grpcMetadataSource) Get(key string) string {
-	values := p.MD.Get(key)
-	if len(values) > 0 {
-		return values[0]
-	}
-	return ""
-}
-
-// GetAll returns all key-value pairs from the gRPC metadata.
-func (p grpcMetadataSource) GetAll() map[string][]string {
-	return p.MD
-}
-
-// transportHeaderSource adapts a kratos transport.Header to the valueSource interface.
-// This can be used as a generic source for headers/metadata from Kratos transport.
-type transportHeaderSource struct {
-	Header transport.Header
-}
-
-// Get returns the first value associated with the given key from the transport header.
-func (t transportHeaderSource) Get(key string) string {
-	return t.Header.Get(key)
-}
-
-// Values returns the values associated with the given key from the transport header.
-func (t transportHeaderSource) Values(key string) []string {
-	return t.Header.Values(key)
-}
-
-// GetAll returns all key-value pairs from the transport header.
-func (t transportHeaderSource) GetAll() map[string][]string {
-	all := make(map[string][]string)      // Initialize map without a specific capacity for now
-	for _, key := range t.Header.Keys() { // Use Keys() method to get all keys
-		values := t.Header.Values(key) // Use Values(key) method to get corresponding values
-		// Create a copy of the slice to prevent external modifications to the underlying slice
-		vCopy := make([]string, len(values))
-		copy(vCopy, values)
-		all[key] = vCopy
-	}
-	return all
-}
-
-// serverRequest implements security.Request by wrapping a valueSource
+// serverRequest implements security.Request by wrapping Metadata
 // and providing context-specific information like Kind, Operation, Method, and RouteTemplate.
 type serverRequest struct {
 	kind          string
 	operation     string
 	method        string
 	routeTemplate string
-	delegate      valueSource
+	metadata      Metadata
 }
 
 // Kind returns the type of the request as a string (e.g., "grpc", "http").
@@ -124,28 +44,19 @@ func (c *serverRequest) GetRouteTemplate() string {
 	return c.routeTemplate
 }
 
-// Get returns the first value associated with the given key from the delegate valueSource.
+// Get returns the first value associated with the given key from the metadata.
 func (c *serverRequest) Get(key string) string {
-	if c.delegate != nil {
-		return c.delegate.Get(key)
-	}
-	return ""
+	return c.metadata.Get(key)
 }
 
-// Values returns the values associated with the given key from the delegate valueSource.
+// Values returns the values associated with the given key from the metadata.
 func (c *serverRequest) Values(key string) []string {
-	if c.delegate != nil {
-		return c.delegate.Values(key)
-	}
-	return nil
+	return c.metadata.Values(key)
 }
 
-// GetAll returns all key-value pairs from the delegate valueSource.
+// GetAll returns all key-value pairs from the metadata.
 func (c *serverRequest) GetAll() map[string][]string {
-	if c.delegate != nil {
-		return c.delegate.GetAll()
-	}
-	return nil
+	return c.metadata.GetAll()
 }
 
 // NewFromHTTPRequest creates a security.Request from a standard http.Request.
@@ -156,7 +67,7 @@ func NewFromHTTPRequest(r *http.Request) security.Request {
 		operation:     r.URL.Path, // Use the request URL path as the operation
 		method:        r.Method,
 		routeTemplate: "", // Route template cannot be determined from a raw http.Request
-		delegate:      httpHeaderSource{Header: r.Header},
+		metadata:      FromHTTP(r.Header),
 	}
 }
 
@@ -168,7 +79,7 @@ func NewFromGRPCMetadata(md metadata.MD, fullMethodName string) security.Request
 		operation:     fullMethodName,
 		method:        "", // Not applicable for raw gRPC metadata
 		routeTemplate: "", // Not applicable for raw gRPC metadata
-		delegate:      grpcMetadataSource{MD: md},
+		metadata:      FromGRPC(md),
 	}
 }
 
@@ -184,7 +95,7 @@ func NewFromServerContext(ctx context.Context) (security.Request, error) {
 		operation     = tr.Operation()
 		method        string
 		routeTemplate string
-		delegate      valueSource
+		meta          Metadata
 		err           error
 	)
 
@@ -193,7 +104,7 @@ func NewFromServerContext(ctx context.Context) (security.Request, error) {
 		kind = "http"
 		if ht, ok := tr.(kratoshttp.Transporter); ok {
 			req := ht.Request()
-			delegate = httpHeaderSource{Header: req.Header}
+			meta = FromHTTP(req.Header)
 			method = req.Method
 			// Kratos HTTP transport does not directly expose the matched route template
 			// via the transport.Transporter interface or kratoshttp.Transporter.
@@ -205,7 +116,7 @@ func NewFromServerContext(ctx context.Context) (security.Request, error) {
 	case transport.KindGRPC:
 		kind = "grpc"
 		if md, ok := metadata.FromIncomingContext(ctx); ok {
-			delegate = grpcMetadataSource{MD: md}
+			meta = FromGRPC(md)
 			// For gRPC, method and routeTemplate are typically derived from the operation
 			// or are not directly applicable in the same way as HTTP.
 		} else {
@@ -224,6 +135,6 @@ func NewFromServerContext(ctx context.Context) (security.Request, error) {
 		operation:     operation,
 		method:        method,
 		routeTemplate: routeTemplate,
-		delegate:      delegate,
+		metadata:      meta,
 	}, nil
 }

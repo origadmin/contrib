@@ -13,8 +13,8 @@ import (
 	apikeyv1 "github.com/origadmin/contrib/api/gen/go/security/authn/apikey/v1"
 	oidcv1 "github.com/origadmin/contrib/api/gen/go/security/authn/oidc/v1"
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
-	securityifaces "github.com/origadmin/contrib/security" // Updated import path
-	"github.com/origadmin/contrib/security/meta"           // Updated import path
+	securityifaces "github.com/origadmin/contrib/security"
+	"github.com/origadmin/contrib/security/request"
 )
 
 // credential is the concrete implementation of the security.Credential interface.
@@ -80,8 +80,8 @@ func (c *credential) GetMeta() map[string][]string {
 // This method performs the conversion from Go-idiomatic internal storage to Protobuf format.
 func (c *credential) Source() *securityv1.CredentialSource {
 	// Convert Go-idiomatic metadata to Protobuf MetaValue map only when Source() is called.
-	// Use the ToProto method on the meta.Meta type.
-	protoMeta := meta.Meta(c.meta).ToProto()
+	// Use the ToProto method on the request.Metadata type.
+	protoMeta := request.Metadata(c.meta).ToProto()
 
 	return &securityv1.CredentialSource{
 		Type:     c.credentialType,

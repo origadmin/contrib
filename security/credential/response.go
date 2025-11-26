@@ -8,7 +8,7 @@ package credential
 import (
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 	securityifaces "github.com/origadmin/contrib/security" // Updated import path
-	"github.com/origadmin/contrib/security/meta"           // Updated import path
+	"github.com/origadmin/contrib/security/request"        // Updated import path
 )
 
 // response is the internal implementation of the security.CredentialResponse interface.
@@ -53,8 +53,8 @@ func (c *response) GetMeta() map[string][]string {
 // This method performs the conversion from Go-idiomatic internal storage to Protobuf format.
 func (c *response) Response() *securityv1.CredentialResponse {
 	// Convert Go-idiomatic metadata to Protobuf MetaValue map only when Response() is called.
-	// Use the ToProto method on the meta.Meta type.
-	protoMeta := meta.Meta(c.meta).ToProto()
+	// Use the ToProto method on the request.Metadata type.
+	protoMeta := request.Metadata(c.meta).ToProto()
 
 	return &securityv1.CredentialResponse{
 		Type:     c.crType,
