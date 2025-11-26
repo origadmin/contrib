@@ -1,4 +1,5 @@
-/* * Copyright (c) 2024 OrigAdmin. All rights reserved. */
+/* * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
 
 package casbin
 
@@ -12,6 +13,7 @@ import (
 
 	casbinv1 "github.com/origadmin/contrib/api/gen/go/security/authz/casbin/v1"
 	authzv1 "github.com/origadmin/contrib/api/gen/go/security/authz/v1"
+	"github.com/origadmin/contrib/security/authz/casbin/adapter"
 	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/runtime/log"
 
@@ -54,7 +56,7 @@ func (auth *Authorizer) Authorized(ctx context.Context, principal security.Princ
 
 func (auth *Authorizer) ApplyDefaults() error {
 	if auth.policy == nil {
-		auth.policy = NewAdapter()
+		auth.policy = adapter.NewMemory()
 	}
 	if auth.wildcardItem == "" {
 		auth.wildcardItem = "*"

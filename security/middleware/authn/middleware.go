@@ -18,19 +18,19 @@ import (
 	"github.com/origadmin/runtime/middleware"
 )
 
-// authnMiddleware is a Kratos middleware for authentication.
-type authnMiddleware struct {
+// Middleware is a Kratos middleware for authentication.
+type Middleware struct {
 	Authenticator authn.Authenticator
 	SkipChecker   func(security.Request) bool
 }
 
 // NewAuthNMiddleware creates a new authentication middleware with required skip checker.
 // The skipChecker function determines whether authentication should be skipped for a given request.
-func NewAuthNMiddleware(n authn.Authenticator, opts ...options.Option) *authnMiddleware {
+func NewAuthNMiddleware(n authn.Authenticator, opts ...options.Option) *Middleware {
 	o := FromOptions(opts)
 	// The 'opts' parameter is kept for future extensibility or other generic options,
 	// but it's no longer needed for passing security configuration.
-	a := &authnMiddleware{
+	a := &Middleware{
 		Authenticator: n,
 		SkipChecker:   o.SkipChecker,
 	}
@@ -74,7 +74,7 @@ func CompositeSkipChecker(checkers ...SkipChecker) SkipChecker {
 }
 
 // Server implements the Kratos middleware.
-func (m *authnMiddleware) Server() middleware.KMiddleware {
+func (m *Middleware) Server() middleware.KMiddleware {
 	return func(handler middleware.KHandler) middleware.KHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			// 1. Check if Principal already exists in context (e.g., from a previous middleware or test)
@@ -122,7 +122,7 @@ func (m *authnMiddleware) Server() middleware.KMiddleware {
 }
 
 // Client implements the Kratos middleware (optional, for client-side authentication propagation)
-func (m *authnMiddleware) Client() middleware.KMiddleware {
+func (m *Middleware) Client() middleware.KMiddleware {
 	return func(handler middleware.KHandler) middleware.KHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			// Example: Propagate Principal from context to client request metadata
