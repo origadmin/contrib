@@ -289,3 +289,15 @@ func FromProto(protoP *securityv1.Principal) (securityifaces.Principal, error) {
 
 	return New(protoP.GetId(), protoP.GetRoles(), protoP.GetPermissions(), protoP.GetScopes(), claims), nil
 }
+
+func EmptyPrincipal(id string) securityifaces.Principal {
+	return &concretePrincipal{
+		id:          id,
+		roles:       make([]string, 0),
+		permissions: make([]string, 0),
+		scopes:      make(map[string]bool),
+		claims: &defaultClaims{
+			data: make(map[string]*structpb.Value),
+		},
+	}
+}

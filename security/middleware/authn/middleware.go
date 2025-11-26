@@ -21,8 +21,8 @@ import (
 
 // AuthNMiddleware is a Kratos middleware for authentication.
 type AuthNMiddleware struct {
-	provider     authnFactory.Provider
-	skipChecker  func(security.Request) bool
+	provider    authnFactory.Provider
+	skipChecker func(security.Request) bool
 }
 
 // NewAuthNMiddleware creates a new authentication middleware with required skip checker.
@@ -95,7 +95,7 @@ func (m *AuthNMiddleware) Server() middleware.Middleware {
 					// Log the error but don't necessarily return it as an API error yet,
 					// as some endpoints might be public.
 					// The Authenticate call below will return the appropriate API error.
-					cred = securityCredential.NewEmptyCredential() // Provide an empty credential to Authenticate
+					cred = securityCredential.NewEmptyCredential()
 				}
 			} else {
 				// No transport context, create an empty credential

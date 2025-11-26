@@ -2,7 +2,7 @@
  * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
-// Package token provides token caching functionality for security module
+// Package cache provides token caching functionality for security module
 package cache
 
 import (

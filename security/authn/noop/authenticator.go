@@ -8,7 +8,7 @@ import (
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authn"
 	"github.com/origadmin/contrib/security/credential"
-	"github.com/origadmin/runtime/extensions/optionutil"
+	"github.com/origadmin/contrib/security/principal"
 	"github.com/origadmin/runtime/interfaces/options"
 )
 
@@ -16,13 +16,10 @@ func init() {
 	authn.Register("noop", &NoopFactory{})
 }
 
-type authenticator struct {
-	o *Options
-}
+type authenticator struct{}
 
 func (a authenticator) Authenticate(ctx context.Context, cred security.Credential) (security.Principal, error) {
-	//TODO implement me
-	panic("implement me")
+	return principal.EmptyPrincipal(""), nil
 }
 
 func (a authenticator) Supports(cred security.Credential) bool {
@@ -39,17 +36,13 @@ func (f *NoopFactory) NewProvider(cfg *authnv1.Authenticator, opts ...options.Op
 		return nil, err
 	}
 	return &noopProvider{
-		auth: &authenticator{
-			o: o,
-		},
+		auth: &authenticator{},
 	}, nil
 }
 
 type noopProvider struct {
 	auth *authenticator
 }
-
-
 
 func (p *noopProvider) Authenticator() (authn.Authenticator, bool) {
 	return p.auth, true
@@ -61,8 +54,4 @@ func (p *noopProvider) CredentialCreator() (credential.Creator, bool) {
 
 func (p *noopProvider) CredentialRevoker() (credential.Revoker, bool) {
 	return nil, false
-}
-
-func FromOptions(opts ...options.Option) *Options {
-	return optionutil.NewT[Options](opts...)
 }

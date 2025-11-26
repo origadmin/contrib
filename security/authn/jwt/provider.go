@@ -4,7 +4,6 @@ package jwt
 
 import (
 	authnv1 "github.com/origadmin/contrib/api/gen/go/security/authn/v1"
-	"github.com/origadmin/contrib/security"
 	authnFactory "github.com/origadmin/contrib/security/authn"
 	securityCredential "github.com/origadmin/contrib/security/credential"
 )
@@ -13,15 +12,13 @@ import (
 // It holds the central authenticator instance and the security configuration
 // to determine skip logic.
 type provider struct {
-	auth      *Authenticator
-	skipPaths map[string]bool // Pre-processed skip paths for quick lookup
+	auth *Authenticator
 }
 
 // newProvider creates a new JWT provider.
 func newProvider(auth *Authenticator, cfg *authnv1.Authenticator) authnFactory.Provider { // Use authnFactory.Provider
 	p := &provider{
-		auth:      auth,
-		skipPaths: make(map[string]bool),
+		auth: auth,
 	}
 
 	// TODO: Add skip_paths configuration when available in protobuf
@@ -50,5 +47,3 @@ func (p *provider) CredentialRevoker() (securityCredential.Revoker, bool) {
 	// The JWT Authenticator struct implements Revoker.
 	return p.auth, true
 }
-
-
