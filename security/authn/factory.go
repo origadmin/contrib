@@ -13,14 +13,6 @@ import (
 	"github.com/origadmin/runtime/interfaces/options"
 )
 
-// FactoryFunc is a function type that creates a Provider instance.
-type FactoryFunc func(config *authnv1.Authenticator, opts ...options.Option) (Authenticator, error)
-
-var (
-	mu               sync.RWMutex
-	defaultFactories = make(map[string]Factory)
-)
-
 // Factory is an interface for a provider factory that can create a Provider
 // instance when given a runtime configuration. It's a stateless object
 // intended to be registered at init time.
@@ -28,6 +20,18 @@ type Factory interface {
 	// NewAuthenticator creates a new Provider instance using the provided configuration.
 	NewAuthenticator(cfg *authnv1.Authenticator, opts ...options.Option) (Authenticator, error)
 }
+
+// FactoryFunc is a function type that creates a Provider instance.
+type FactoryFunc func(config *authnv1.Authenticator, opts ...options.Option) (Authenticator, error)
+
+func (f FactoryFunc) NewAuthenticator(cfg *authnv1.Authenticator, opts ...options.Option) (Authenticator, error) {
+	return f(cfg, opts...)
+}
+
+var (
+	mu               sync.RWMutex
+	defaultFactories = make(map[string]Factory)
+)
 
 // Register registers a new authenticator provider blueprint.
 // This function is intended to be called from the init() function of each provider implementation.

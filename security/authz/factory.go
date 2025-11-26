@@ -12,14 +12,22 @@ import (
 	"github.com/origadmin/runtime/interfaces/options"
 )
 
-// Provider is an interface for a security component that can provide authorization capabilities.
-type Provider interface {
-	// Authorizer returns the Authorizer capability, if supported.
-	Authorizer() (Authorizer, bool)
+const (
+	DefaultAuthorizer = "casbin"
+	Noop              = "noop"
+	Casbin            = "casbin"
+)
+
+// FactoryFunc is a function type that creates a Provider instance.
+type FactoryFunc func(config *authzv1.Authorizer, opts ...options.Option) (Authorizer, error)
+
+func (f FactoryFunc) NewAuthorizer(config *authzv1.Authorizer, opts ...options.Option) (Authorizer, error) {
+	return f(config, opts...)
 }
 
-// Factory is a function type that creates a Provider instance.
-type Factory func(config *authzv1.Authorizer, opts ...options.Option) (Provider, error)
+type Factory interface {
+	NewAuthorizer(config *authzv1.Authorizer, opts ...options.Option) (Authorizer, error)
+}
 
 var (
 	mu               sync.RWMutex
@@ -41,12 +49,12 @@ func Register(name string, factory Factory) {
 // It looks up the appropriate factory using the type specified in the config and invokes it.
 // The returned Provider instance is NOT stored globally; it is the caller's responsibility
 // to manage its lifecycle and inject it where needed.
-func New(cfg *authzv1.Authorizer, opts ...options.Option) (Provider, error) {
+func New(cfg *authzv1.Authorizer, opts ...options.Option) (Authorizer, error) {
 	mu.RLock()
 	defer mu.RUnlock()
 	factory, ok := defaultFactories[cfg.GetType()]
 	if !ok {
 		return nil, fmt.Errorf("authorizer factory %q not found", cfg.GetType())
 	}
-	return factory(cfg, opts...)
+	return factory.NewAuthorizer(cfg, opts...)
 }

@@ -14,7 +14,7 @@ import (
 	authnv1 "github.com/origadmin/contrib/api/gen/go/security/authn/v1"
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 	"github.com/origadmin/contrib/security"
-	authnFactory "github.com/origadmin/contrib/security/authn"
+	"github.com/origadmin/contrib/security/authn"
 	securitycache "github.com/origadmin/contrib/security/authn/cache"
 	securityCredential "github.com/origadmin/contrib/security/credential"
 	securityPrincipal "github.com/origadmin/contrib/security/principal"
@@ -27,6 +27,10 @@ const (
 	defaultAccessTokenTTL  = 2 * time.Hour
 	defaultRefreshTokenTTL = 7 * 24 * time.Hour
 )
+
+func init() {
+	authn.Register("jwt", authn.FactoryFunc(NewAuthenticator))
+}
 
 // Authenticator implements the security interfaces for JWT.
 type Authenticator struct {
@@ -43,7 +47,7 @@ type Authenticator struct {
 }
 
 // NewAuthenticator creates a new JWT Provider from the given configuration and options.
-func NewAuthenticator(cfg *authnv1.Authenticator, opts ...options.Option) (authnFactory.Authenticator, error) {
+func NewAuthenticator(cfg *authnv1.Authenticator, opts ...options.Option) (authn.Authenticator, error) {
 	jwtCfg := cfg.GetJwt()
 	if jwtCfg == nil {
 		return nil, securityv1.ErrorCredentialsInvalid("JWT configuration is missing")
@@ -302,7 +306,7 @@ func mapJWTError(err error) error {
 
 // Interface compliance checks.
 var (
-	_ authnFactory.Authenticator = (*Authenticator)(nil)
+	_ authn.Authenticator        = (*Authenticator)(nil)
 	_ securityCredential.Creator = (*Authenticator)(nil)
 	_ securityCredential.Revoker = (*Authenticator)(nil)
 	_ security.Claims            = (*Claims)(nil)

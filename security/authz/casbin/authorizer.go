@@ -12,11 +12,16 @@ import (
 
 	casbinv1 "github.com/origadmin/contrib/api/gen/go/security/authz/casbin/v1"
 	authzv1 "github.com/origadmin/contrib/api/gen/go/security/authz/v1"
+	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/runtime/log"
 
 	"github.com/origadmin/contrib/security"
-	authzFactory "github.com/origadmin/contrib/security/authz"
+	"github.com/origadmin/contrib/security/authz"
 )
+
+func init() {
+	authz.Register(authz.Casbin, authz.FactoryFunc(NewAuthorizer))
+}
 
 // Authorizer is a struct that implements the Authorizer interface.
 type Authorizer struct {
@@ -26,7 +31,7 @@ type Authorizer struct {
 	wildcardItem string
 }
 
-func (auth *Authorizer) Authorized(ctx context.Context, principal security.Principal, spec authzFactory.RuleSpec) (bool, error) {
+func (auth *Authorizer) Authorized(ctx context.Context, principal security.Principal, spec authz.RuleSpec) (bool, error) {
 	log.Debugf("Authorizing user with principal: %+v", principal)
 	domain := spec.Domain
 	if len(domain) == 0 {
@@ -77,7 +82,7 @@ func (auth *Authorizer) WithConfig(config *casbinv1.Config) error {
 	return err
 }
 
-func NewAuthorizer(cfg *authzv1.Authorizer, ss ...Setting) (authzFactory.Authorizer, error) {
+func NewAuthorizer(cfg *authzv1.Authorizer, opts ...options.Option) (authz.Authorizer, error) {
 	config := cfg.GetCasbin()
 	if config == nil {
 		return nil, errors.New("authorizer casbin config is empty")
