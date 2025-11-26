@@ -18,10 +18,6 @@ import (
 	"github.com/origadmin/runtime/middleware"
 )
 
-func init() {
-	middleware.RegisterFactory("authn", &factory{})
-}
-
 // authnMiddleware is a Kratos middleware for authentication.
 type authnMiddleware struct {
 	Authenticator authn.Authenticator

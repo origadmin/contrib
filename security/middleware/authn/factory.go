@@ -17,6 +17,10 @@ const (
 	MiddlewareName = "authn"
 )
 
+func init() {
+	runtimeMiddleware.RegisterFactory("authn", &factory{})
+}
+
 // factory implements the runtime/middleware.Factory interface for authentication middleware.
 // It is responsible for creating authentication middleware instances.
 // It relies on an external authn.Provider to handle the actual authentication logic.
@@ -42,7 +46,12 @@ func (f *factory) NewMiddlewareClient(cfg *middlewarev1.Middleware, opts ...opti
 	if !cfg.GetEnabled() && cfg.GetName() != MiddlewareName {
 		return nil, false
 	}
-	return NewAuthNMiddleware(f.provider, opts...).Client(), true
+	o := FromOptions(opts)
+	provider := f.provider
+	if o.Authenticator != nil {
+		provider = o.Authenticator
+	}
+	return NewAuthNMiddleware(provider, opts...).Client(), true
 }
 
 // NewMiddlewareServer creates a new server-side authentication middleware.
@@ -50,7 +59,12 @@ func (f *factory) NewMiddlewareServer(cfg *middlewarev1.Middleware, opts ...opti
 	if !cfg.GetEnabled() && cfg.GetName() != MiddlewareName {
 		return nil, false
 	}
-	return NewAuthNMiddleware(f.provider, opts...).Server(), true
+	o := FromOptions(opts)
+	provider := f.provider
+	if o.Authenticator != nil {
+		provider = o.Authenticator
+	}
+	return NewAuthNMiddleware(provider, opts...).Server(), true
 }
 
 // Ensure factory implements the factory interface at compile time.

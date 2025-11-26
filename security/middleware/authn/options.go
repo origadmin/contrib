@@ -2,12 +2,20 @@
 package authn
 
 import (
+	"github.com/origadmin/contrib/security/authn"
 	"github.com/origadmin/runtime/extensions/optionutil"
 	"github.com/origadmin/runtime/interfaces/options"
 )
 
 type Options struct {
-	SkipChecker SkipChecker
+	Authenticator authn.Authenticator
+	SkipChecker   SkipChecker
+}
+
+func WithAuthenticator(authenticator authn.Authenticator) options.Option {
+	return optionutil.Update(func(o *Options) {
+		o.Authenticator = authenticator
+	})
 }
 
 func WithSkipChecker(skipChecker SkipChecker) options.Option {

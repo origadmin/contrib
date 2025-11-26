@@ -48,7 +48,7 @@ func init() {
 	// For now, we'll leave this as a conceptual placeholder and assume the application builder
 	// handles the registration with the correct provider injection.
 	//
-	runtimeMiddleware.RegisterFactory(MiddlewareName, &factory{})
+	//runtimeMiddleware.RegisterFactory(MiddlewareName, &factory{})
 }
 
 // RegisterAuthZMiddlewareFactory is a helper function for the application builder to register
