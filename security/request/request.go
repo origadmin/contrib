@@ -10,7 +10,7 @@ import (
 	kratoshttp "github.com/go-kratos/kratos/v2/transport/http"
 	"google.golang.org/grpc/metadata"
 
-	securityifaces "github.com/origadmin/contrib/security" // Import the security package for the Request interface
+	"github.com/origadmin/contrib/security" // Import the security package for the Request interface
 )
 
 // valueSource defines the common interface for extracting key-value pairs from different sources.
@@ -93,7 +93,7 @@ func (t transportHeaderSource) GetAll() map[string][]string {
 	return all
 }
 
-// serverRequest implements securityifaces.Request by wrapping a valueSource
+// serverRequest implements security.Request by wrapping a valueSource
 // and providing context-specific information like Kind, Operation, Method, and RouteTemplate.
 type serverRequest struct {
 	kind          string
@@ -148,39 +148,39 @@ func (c *serverRequest) GetAll() map[string][]string {
 	return nil
 }
 
-// NewFromHTTPRequest creates a securityifaces.Request from a standard http.Request.
+// NewFromHTTPRequest creates a security.Request from a standard http.Request.
 // This is useful when the full Kratos transport context is not available or needed.
-func NewFromHTTPRequest(r *http.Request) securityifaces.Request {
+func NewFromHTTPRequest(r *http.Request) security.Request {
 	return &serverRequest{
 		kind:          "http",
 		operation:     r.URL.Path, // Use the request URL path as the operation
 		method:        r.Method,
 		routeTemplate: "", // Route template cannot be determined from a raw http.Request
-		delegate:      newHTTPHeaderSource(r),
+		delegate:      httpHeaderSource{Header: r.Header},
 	}
 }
 
-// NewFromGRPCMetadata creates a securityifaces.Request from gRPC metadata and a full method name.
+// NewFromGRPCMetadata creates a security.Request from gRPC metadata and a full method name.
 // This is useful for gRPC requests when the full Kratos transport context is not available or needed.
-func NewFromGRPCMetadata(md metadata.MD, fullMethodName string) securityifaces.Request {
+func NewFromGRPCMetadata(md metadata.MD, fullMethodName string) security.Request {
 	return &serverRequest{
 		kind:          "grpc",
 		operation:     fullMethodName,
 		method:        "", // Not applicable for raw gRPC metadata
 		routeTemplate: "", // Not applicable for raw gRPC metadata
-		delegate:      newGRPCMetadataSource(md),
+		delegate:      grpcMetadataSource{MD: md},
 	}
 }
 
-// NewFromServerContext extracts a securityifaces.Request from the server context.
-func NewFromServerContext(ctx context.Context) (securityifaces.Request, error) {
+// NewFromServerContext extracts a security.Request from the server context.
+func NewFromServerContext(ctx context.Context) (security.Request, error) {
 	tr, ok := transport.FromServerContext(ctx)
 	if !ok {
 		return nil, kratoserrors.New(500, "TRANSPORT_CONTEXT_MISSING", "transport context is missing")
 	}
 
 	var (
-		kind          = string(tr.Kind())
+		kind          string
 		operation     = tr.Operation()
 		method        string
 		routeTemplate string
@@ -190,9 +190,10 @@ func NewFromServerContext(ctx context.Context) (securityifaces.Request, error) {
 
 	switch tr.Kind() {
 	case transport.KindHTTP:
+		kind = "http"
 		if ht, ok := tr.(kratoshttp.Transporter); ok {
 			req := ht.Request()
-			delegate = newHTTPHeaderSource(req)
+			delegate = httpHeaderSource{Header: req.Header}
 			method = req.Method
 			// Kratos HTTP transport does not directly expose the matched route template
 			// via the transport.Transporter interface or kratoshttp.Transporter.
@@ -202,8 +203,9 @@ func NewFromServerContext(ctx context.Context) (securityifaces.Request, error) {
 			err = kratoserrors.New(500, "INVALID_HTTP_TRANSPORT", "invalid HTTP transport type")
 		}
 	case transport.KindGRPC:
+		kind = "grpc"
 		if md, ok := metadata.FromIncomingContext(ctx); ok {
-			delegate = newGRPCMetadataSource(md)
+			delegate = grpcMetadataSource{MD: md}
 			// For gRPC, method and routeTemplate are typically derived from the operation
 			// or are not directly applicable in the same way as HTTP.
 		} else {

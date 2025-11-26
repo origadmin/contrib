@@ -16,7 +16,8 @@ import (
 	"github.com/origadmin/runtime/interfaces/options"
 
 	authzFactory "github.com/origadmin/contrib/security/authz"
-	"github.com/origadmin/contrib/security" // Import the security package for Principal
+	"github.com/origadmin/contrib/security"
+	securityPrincipal "github.com/origadmin/contrib/security/principal"
 )
 
 // AuthZMiddleware is a Kratos middleware for authorization.
@@ -39,7 +40,7 @@ func (m *AuthZMiddleware) Server() middleware.Middleware {
 	return func(handler middleware.Handler) middleware.Handler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			// 1. Get Principal from context
-			p, ok := security.FromContext(ctx)
+			p, ok := securityPrincipal.FromContext(ctx)
 			if !ok {
 				// If no principal, it means authentication failed or was skipped.
 				// Depending on policy, this might be an unauthenticated access.
@@ -68,7 +69,12 @@ func (m *AuthZMiddleware) Server() middleware.Middleware {
 			}
 
 			// 4. Perform authorization check
-			authorized, authzErr := authorizer.Authorize(ctx, p, resource, action)
+			ruleSpec := authzFactory.RuleSpec{
+				Resource: resource,
+				Action:   action,
+				// Domain and Attributes can be added as needed
+			}
+			authorized, authzErr := authorizer.Authorized(ctx, p, ruleSpec)
 			if authzErr != nil {
 				return nil, securityv1.ErrorPermissionDenied("authorization check failed: %v", authzErr)
 			}

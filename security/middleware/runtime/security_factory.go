@@ -8,7 +8,7 @@ package runtime
 import (
 	"fmt"
 
-	authzv1 "github.com/origadmin/contrib/api/gen/go/security/authz/v1"
+	"github.com/origadmin/contrib/security"
 	authzFactory "github.com/origadmin/contrib/security/authz"
 	authzMiddleware "github.com/origadmin/contrib/security/middleware/authz"
 	middlewarev1 "github.com/origadmin/runtime/api/gen/go/config/middleware/v1"
@@ -53,25 +53,20 @@ func (d *dummyAuthzProvider) Authorizer() (authzFactory.Authorizer, bool) {
 	return &dummyAuthorizer{defaultPolicy: d.defaultPolicy}, true
 }
 
-// Authenticator returns an Authenticator instance.
-func (d *dummyAuthzProvider) Authenticator() (authzFactory.Authenticator, bool) {
-	return nil, false // Not implemented for authz middleware
-}
-
 // dummyAuthorizer is a placeholder for authzFactory.Authorizer.
 type dummyAuthorizer struct {
 	defaultPolicy string
 }
 
-// Authorize performs an authorization check.
-func (d *dummyAuthorizer) Authorize(ctx authzv1.Context, principal authzFactory.Principal, resource, action string) (bool, error) {
+// Authorized performs an authorization check using the correct authz.Authorizer interface.
+func (d *dummyAuthorizer) Authorized(ctx context.Context, principal security.Principal, spec authzFactory.RuleSpec) (bool, error) {
 	// Simple authorization logic for demonstration.
 	// In a real application, this would involve checking roles, permissions, etc.
 	if d.defaultPolicy == "allow" {
-		log.Infof("dummyAuthorizer: allowing access for principal %s to resource %s, action %s", principal.GetID(), resource, action)
+		log.Infof("dummyAuthorizer: allowing access for principal %s to resource %s, action %s", principal.GetID(), spec.Resource, spec.Action)
 		return true, nil
 	}
-	log.Warnf("dummyAuthorizer: denying access for principal %s to resource %s, action %s (default policy: %s)", principal.GetID(), resource, action, d.defaultPolicy)
+	log.Warnf("dummyAuthorizer: denying access for principal %s to resource %s, action %s (default policy: %s)", principal.GetID(), spec.Resource, spec.Action, d.defaultPolicy)
 	return false, fmt.Errorf("access denied by default policy: %s", d.defaultPolicy)
 }
 

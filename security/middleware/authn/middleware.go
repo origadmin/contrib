@@ -12,9 +12,7 @@ import (
 	"github.com/go-kratos/kratos/v2/transport"
 
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
-	"github.com/origadmin/runtime/interfaces/options"
-
-	securityifaces "github.com/origadmin/contrib/security/security"
+	"github.com/origadmin/contrib/security"
 	authnFactory "github.com/origadmin/contrib/security/authn"
 	securityPrincipal "github.com/origadmin/contrib/security/principal"
 	securityCredential "github.com/origadmin/contrib/security/credential"
@@ -51,7 +49,7 @@ func (m *AuthNMiddleware) Server() middleware.Middleware {
 			}
 
 			// 2. Extract credential from transport context
-			var cred securityifaces.Credential
+			var cred security.Credential
 			if tr, ok := transport.FromServerContext(ctx); ok {
 				// Assuming securityCredential.ExtractFromTransport can handle various transport types
 				// and return a security.Credential object.

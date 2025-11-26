@@ -20,9 +20,9 @@ import (
 	"github.com/origadmin/runtime/log"
 
 	authnFactory "github.com/origadmin/contrib/security/authn"
+	"github.com/origadmin/contrib/security"
 	securityCredential "github.com/origadmin/contrib/security/credential"
 	securityPrincipal "github.com/origadmin/contrib/security/principal"
-	securityifaces "github.com/origadmin/contrib/security/security"
 	securityToken "github.com/origadmin/contrib/security/token" // Assuming token is also moved
 )
 
@@ -178,7 +178,7 @@ func NewProvider(cfg *securityv1.Security, opts ...options.Option) (authnFactory
 }
 
 // Authenticate validates the provided credential and returns a Principal if successful.
-func (a *Authenticator) Authenticate(ctx context.Context, cred securityifaces.Credential) (securityifaces.Principal, error) {
+func (a *Authenticator) Authenticate(ctx context.Context, cred security.Credential) (security.Principal, error) {
 	if !a.Supports(cred) {
 		return nil, securityv1.ErrorCredentialsInvalid("unsupported credential type: %s", cred.Type())
 	}
@@ -227,12 +227,12 @@ func (a *Authenticator) Authenticate(ctx context.Context, cred securityifaces.Cr
 }
 
 // Supports returns true if this authenticator can handle the given credential.
-func (a *Authenticator) Supports(cred securityifaces.Credential) bool {
+func (a *Authenticator) Supports(cred security.Credential) bool {
 	return cred.Type() == "jwt"
 }
 
 // CreateCredential issues a new credential for the given principal.
-func (a *Authenticator) CreateCredential(ctx context.Context, p securityifaces.Principal) (securityifaces.CredentialResponse, error) {
+func (a *Authenticator) CreateCredential(ctx context.Context, p security.Principal) (security.CredentialResponse, error) {
 	now := a.clock()
 	accessTokenID := a.generateID()
 
@@ -284,7 +284,7 @@ func (a *Authenticator) CreateCredential(ctx context.Context, p securityifaces.P
 }
 
 // Revoke invalidates the given credential.
-func (a *Authenticator) Revoke(ctx context.Context, cred securityifaces.Credential) error {
+func (a *Authenticator) Revoke(ctx context.Context, cred security.Credential) error {
 	if a.cache == nil {
 		return securityv1.ErrorSigningMethodUnsupported("cache is not configured for token revocation")
 	}
@@ -401,8 +401,8 @@ func mapJWTError(err error) error {
 
 // Interface compliance checks.
 var (
-	_ securityifaces.Authenticator     = (*Authenticator)(nil)
-	_ securityifaces.CredentialCreator = (*Authenticator)(nil)
-	_ securityifaces.CredentialRevoker = (*Authenticator)(nil)
-	_ securityifaces.Claims            = (*Claims)(nil)
+	_ authnFactory.Authenticator     = (*Authenticator)(nil)
+	_ securityCredential.CredentialCreator = (*Authenticator)(nil)
+	_ securityCredential.CredentialRevoker = (*Authenticator)(nil)
+	_ security.Claims            = (*Claims)(nil)
 )

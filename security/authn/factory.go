@@ -9,6 +9,7 @@ import (
 	"sync"
 
 	authnv1 "github.com/origadmin/contrib/api/gen/go/security/authn/v1"
+	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/credential"
 	"github.com/origadmin/runtime/interfaces/options"
 )
@@ -21,6 +22,8 @@ type Provider interface {
 	CredentialCreator() (credential.CredentialCreator, bool)
 	// CredentialRevoker returns the CredentialRevoker capability, if supported.
 	CredentialRevoker() (credential.CredentialRevoker, bool)
+	// ShouldSkip returns true if the authenticator should skip the authentication process.
+	ShouldSkip(security.Request) bool
 }
 
 // FactoryFunc is a function type that creates a Provider instance.

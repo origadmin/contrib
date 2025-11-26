@@ -1,8 +1,6 @@
-/*
- * Copyright (c) 2024 OrigAdmin. All rights reserved.
- */
+/* * Copyright (c) 2024 OrigAdmin. All rights reserved. */
 
-// Package jwt implements the functions, types, and interfaces for the module.
+// Package jwt implements the functions, types, and interfaces for module.
 package jwt
 
 import (
@@ -15,14 +13,14 @@ import (
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 
 	jwtv1 "github.com/origadmin/contrib/api/gen/go/security/authn/jwt/v1"
-	"github.com/origadmin/contrib/security/authn/cache"
 	"github.com/origadmin/runtime/extension/optionutil"
 	"github.com/origadmin/runtime/interfaces/options"
+	securityToken "github.com/origadmin/contrib/security/token" // Updated import path
 )
 
 // Option holds the configuration options for the JWT authenticator.
 type Option struct {
-	cache                cache.CacheStorage
+	cache                securityToken.CacheStorage // Use securityToken.CacheStorage
 	signingMethod        jwtv5.SigningMethod
 	keyFunc              jwtv5.Keyfunc
 	accessTokenLifetime  time.Duration
@@ -102,7 +100,7 @@ func configureKeys(cfg *jwtv1.Config) (jwtv5.SigningMethod, jwtv5.Keyfunc, error
 		}
 		privKey, err := parseRSAPrivateKey(keyData)
 		if err != nil {
-			// If private key parsing fails, assume we only have the public key for verification.
+			// If private key parsing fails, assume we only have public key for verification.
 			return method, func(t *jwtv5.Token) (interface{}, error) { return pubKey, nil }, nil
 		}
 		// Return private key for signing, public key for verification.
@@ -193,49 +191,49 @@ func WithExtraClaims(extras map[string]string) options.Option {
 	})
 }
 
-// WithCache returns an options.Option that sets the token cache.
-func WithCache(c cache.CacheStorage) options.Option {
+// WithCache returns an options.Option that sets token cache.
+func WithCache(cache securityToken.CacheStorage) options.Option { // Use securityToken.CacheStorage
 	return optionutil.Update(func(o *Option) {
-		o.cache = c
+		o.cache = cache
 	})
 }
 
-// WithSigningMethod returns an options.Option that sets the JWT signing method.
+// WithSigningMethod returns an options.Option that sets JWT signing method.
 func WithSigningMethod(signingMethod jwtv5.SigningMethod) options.Option {
 	return optionutil.Update(func(o *Option) {
 		o.signingMethod = signingMethod
 	})
 }
 
-// WithKeyFunc returns an options.Option that sets the key function.
+// WithKeyFunc returns an options.Option that sets key function.
 func WithKeyFunc(keyFunc func(token *jwtv5.Token) (any, error)) options.Option {
 	return optionutil.Update(func(o *Option) {
 		o.keyFunc = keyFunc
 	})
 }
 
-// WithAccessTokenLifetime returns an options.Option that sets the access token expiration.
+// WithAccessTokenLifetime returns an options.Option that sets access token expiration.
 func WithAccessTokenLifetime(d time.Duration) options.Option {
 	return optionutil.Update(func(o *Option) {
 		o.accessTokenLifetime = d
 	})
 }
 
-// WithRefreshTokenLifetime returns an options.Option that sets the refresh token expiration.
+// WithRefreshTokenLifetime returns an options.Option that sets refresh token expiration.
 func WithRefreshTokenLifetime(d time.Duration) options.Option {
 	return optionutil.Update(func(o *Option) {
 		o.refreshTokenLifetime = d
 	})
 }
 
-// WithIssuer returns an options.Option that sets the JWT issuer.
+// WithIssuer returns an options.Option that sets JWT issuer.
 func WithIssuer(issuer string) options.Option {
 	return optionutil.Update(func(o *Option) {
 		o.issuer = issuer
 	})
 }
 
-// WithAudience returns an options.Option that sets the JWT audience.
+// WithAudience returns an options.Option that sets JWT audience.
 func WithAudience(audience []string) options.Option {
 	return optionutil.Update(func(o *Option) {
 		o.audience = audience

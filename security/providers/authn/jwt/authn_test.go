@@ -19,7 +19,7 @@ import (
 	"github.com/origadmin/runtime/interfaces/options"
 
 	authnFactory "github.com/origadmin/contrib/security/authn"
-	securityifaces "github.com/origadmin/contrib/security/security"
+	"github.com/origadmin/contrib/security"
 	securityCredential "github.com/origadmin/contrib/security/credential"
 	securityPrincipal "github.com/origadmin/contrib/security/principal"
 	securityToken "github.com/origadmin/contrib/security/token" // Assuming token is also moved

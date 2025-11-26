@@ -7,9 +7,8 @@ package jwt
 import (
 	"strings"
 
-	authnFactory "github.com/origadmin/contrib/security/authn" // Updated import path
+	authnFactory "github.com/origadmin/contrib/security/authn"
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
-	securityifaces "github.com/origadmin/contrib/security/security" // Updated import path
 )
 
 // provider implements the authn.Provider interface for the JWT component.
@@ -37,18 +36,18 @@ func newProvider(auth *Authenticator, cfg *securityv1.Security) authnFactory.Pro
 }
 
 // Authenticator returns the Authenticator capability.
-func (p *provider) Authenticator() (securityifaces.Authenticator, bool) { // Use securityifaces.Authenticator
+func (p *provider) Authenticator() (authnFactory.Authenticator, bool) {
 	return p.auth, true
 }
 
 // CredentialCreator returns the CredentialCreator capability.
-func (p *provider) CredentialCreator() (securityifaces.CredentialCreator, bool) { // Use securityifaces.CredentialCreator
+func (p *provider) CredentialCreator() (securityCredential.CredentialCreator, bool) {
 	// The JWT Authenticator struct implements CredentialCreator.
 	return p.auth, true
 }
 
 // CredentialRevoker returns the CredentialRevoker capability.
-func (p *provider) CredentialRevoker() (securityifaces.CredentialRevoker, bool) { // Use securityifaces.CredentialRevoker
+func (p *provider) CredentialRevoker() (securityCredential.CredentialRevoker, bool) {
 	// The JWT Authenticator struct implements CredentialRevoker.
 	return p.auth, true
 }
