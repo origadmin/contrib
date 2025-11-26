@@ -7,33 +7,41 @@ package authn
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/v2/middleware"
 	"github.com/go-kratos/kratos/v2/transport"
 
-	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 	"github.com/origadmin/contrib/security"
-	authnFactory "github.com/origadmin/contrib/security/authn"
+	"github.com/origadmin/contrib/security/authn"
 	securityCredential "github.com/origadmin/contrib/security/credential"
 	securityPrincipal "github.com/origadmin/contrib/security/principal"
 	"github.com/origadmin/contrib/security/request"
 	"github.com/origadmin/runtime/interfaces/options"
+	"github.com/origadmin/runtime/middleware"
 )
 
-// AuthNMiddleware is a Kratos middleware for authentication.
-type AuthNMiddleware struct {
-	provider    authnFactory.Provider
-	skipChecker func(security.Request) bool
+func init() {
+	middleware.RegisterFactory("authn", &factory{})
+}
+
+// authnMiddleware is a Kratos middleware for authentication.
+type authnMiddleware struct {
+	Authenticator authn.Authenticator
+	SkipChecker   func(security.Request) bool
 }
 
 // NewAuthNMiddleware creates a new authentication middleware with required skip checker.
 // The skipChecker function determines whether authentication should be skipped for a given request.
-func NewAuthNMiddleware(provider authnFactory.Provider, skipChecker func(security.Request) bool, opts ...options.Option) *AuthNMiddleware {
+func NewAuthNMiddleware(n authn.Authenticator, opts ...options.Option) *authnMiddleware {
+	o := FromOptions(opts)
 	// The 'opts' parameter is kept for future extensibility or other generic options,
 	// but it's no longer needed for passing security configuration.
-	return &AuthNMiddleware{
-		provider:    provider,
-		skipChecker: skipChecker,
+	a := &authnMiddleware{
+		Authenticator: n,
+		SkipChecker:   o.SkipChecker,
 	}
+	if a.SkipChecker == nil {
+		a.SkipChecker = NoOpSkipChecker()
+	}
+	return a
 }
 
 // SkipChecker is a function type for determining whether to skip authentication.
@@ -70,8 +78,8 @@ func CompositeSkipChecker(checkers ...SkipChecker) SkipChecker {
 }
 
 // Server implements the Kratos middleware.
-func (m *AuthNMiddleware) Server() middleware.Middleware {
-	return func(handler middleware.Handler) middleware.Handler {
+func (m *authnMiddleware) Server() middleware.KMiddleware {
+	return func(handler middleware.KHandler) middleware.KHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			// 1. Check if Principal already exists in context (e.g., from a previous middleware or test)
 			if _, ok := securityPrincipal.FromContext(ctx); ok {
@@ -81,7 +89,7 @@ func (m *AuthNMiddleware) Server() middleware.Middleware {
 			if err != nil {
 				return nil, err
 			}
-			if m.skipChecker(securityReq) {
+			if m.SkipChecker(securityReq) {
 				return handler(ctx, req)
 			}
 
@@ -103,12 +111,7 @@ func (m *AuthNMiddleware) Server() middleware.Middleware {
 			}
 
 			// 3. Authenticate the credential
-			authenticator, ok := m.provider.Authenticator()
-			if !ok {
-				return nil, securityv1.ErrorSigningMethodUnsupported("authentication provider does not support Authenticator interface")
-			}
-
-			principal, authErr := authenticator.Authenticate(ctx, cred)
+			principal, authErr := m.Authenticator.Authenticate(ctx, cred)
 			if authErr != nil {
 				// Authentication failed, return the specific API error
 				return nil, authErr
@@ -123,8 +126,8 @@ func (m *AuthNMiddleware) Server() middleware.Middleware {
 }
 
 // Client implements the Kratos middleware (optional, for client-side authentication propagation)
-func (m *AuthNMiddleware) Client() middleware.Middleware {
-	return func(handler middleware.Handler) middleware.Handler {
+func (m *authnMiddleware) Client() middleware.KMiddleware {
+	return func(handler middleware.KHandler) middleware.KHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			// Example: Propagate Principal from context to client request metadata
 			if p, ok := securityPrincipal.FromContext(ctx); ok {
