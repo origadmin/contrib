@@ -4,11 +4,11 @@ package noop
 import (
 	"context"
 
-	"github.com/origadmin/contrib/security"
 	authnv1 "github.com/origadmin/contrib/api/gen/go/security/authn/v1"
+	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authn"
-	"github.com/origadmin/runtime/extension/optionutil"
 	"github.com/origadmin/contrib/security/credential"
+	"github.com/origadmin/runtime/extensions/optionutil"
 	"github.com/origadmin/runtime/interfaces/options"
 )
 
@@ -47,6 +47,10 @@ func (f *NoopFactory) NewProvider(cfg *authnv1.Authenticator, opts ...options.Op
 
 type noopProvider struct {
 	auth *authenticator
+}
+
+func (p *noopProvider) ShouldSkip(request security.Request) bool {
+	return false
 }
 
 func (p *noopProvider) Authenticator() (authn.Authenticator, bool) {

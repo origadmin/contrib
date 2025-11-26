@@ -9,11 +9,13 @@ import (
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	"github.com/casbin/casbin/v2/persist"
+
+	casbinv1 "github.com/origadmin/contrib/api/gen/go/security/authz/casbin/v1"
+	authzv1 "github.com/origadmin/contrib/api/gen/go/security/authz/v1"
 	"github.com/origadmin/runtime/log"
 
 	"github.com/origadmin/contrib/security"
 	authzFactory "github.com/origadmin/contrib/security/authz"
-	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 )
 
 // Authorizer is a struct that implements the Authorizer interface.
@@ -67,15 +69,15 @@ func (auth *Authorizer) ApplyDefaults() error {
 	return nil
 }
 
-func (auth *Authorizer) WithConfig(config *securityv1.CasbinAuthorizer) error {
+func (auth *Authorizer) WithConfig(config *casbinv1.Config) error {
 	var err error
-	if config.ModelFile != "" {
-		auth.model, err = model.NewModelFromFile(config.ModelFile)
+	if config.GetModelPath() != "" {
+		auth.model, err = model.NewModelFromFile(config.GetModelPath())
 	}
 	return err
 }
 
-func NewAuthorizer(cfg *securityv1.Authorizer, ss ...Setting) (authzFactory.Authorizer, error) {
+func NewAuthorizer(cfg *authzv1.Authorizer, ss ...Setting) (authzFactory.Authorizer, error) {
 	config := cfg.GetCasbin()
 	if config == nil {
 		return nil, errors.New("authorizer casbin config is empty")
@@ -86,5 +88,5 @@ func NewAuthorizer(cfg *securityv1.Authorizer, ss ...Setting) (authzFactory.Auth
 	if err != nil {
 		return nil, err
 	}
-	return settings.ApplyErrorDefaults(auth, ss)
+	return auth, nil
 }
