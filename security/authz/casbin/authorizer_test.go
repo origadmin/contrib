@@ -84,7 +84,7 @@ m = r.sub == p.sub && r.obj == p.obj && r.act == p.act && r.dom == p.dom
 `
 
 	t.Run("should create authorizer with default model and memory adapter if no config or options provided", func(t *testing.T) {
-		cfg := &authzv1.Authorizer{} // Empty config
+		cfg := &authzv1.Authorizer{Casbin: &casbinv1.Config{}} // Provide an empty Casbin config
 		auth, err := casbin.NewAuthorizer(cfg)
 		require.NoError(t, err)
 		assert.NotNil(t, auth)
@@ -144,8 +144,7 @@ m = r.sub == p.sub && r.obj == p.obj && r.act == p.act && r.dom == p.dom
 	})
 
 	t.Run("should load model from WithStringModel option", func(t *testing.T) {
-		cfg := &authzv1.Authorizer{} // Empty config
-
+		cfg := &authzv1.Authorizer{Casbin: &casbinv1.Config{}} // Provide an empty Casbin config
 		auth, err := casbin.NewAuthorizer(cfg, casbin.WithStringModel(testModel))
 		require.NoError(t, err)
 		assert.NotNil(t, auth)
@@ -158,7 +157,7 @@ m = r.sub == p.sub && r.obj == p.obj && r.act == p.act && r.dom == p.dom
 
 	t.Run("should use custom policy adapter from WithPolicyAdapter option", func(t *testing.T) {
 		mockAdapter := &MockAdapter{}
-		cfg := &authzv1.Authorizer{} // Empty config
+		cfg := &authzv1.Authorizer{Casbin: &casbinv1.Config{}} // Provide an empty Casbin config
 
 		auth, err := casbin.NewAuthorizer(cfg, casbin.WithPolicyAdapter(mockAdapter))
 		require.NoError(t, err)
@@ -169,18 +168,17 @@ m = r.sub == p.sub && r.obj == p.obj && r.act == p.act && r.dom == p.dom
 		// A more direct test would involve reflection or exposing the adapter.
 	})
 
-	t.Run("should return error if casbin config is empty", func(t *testing.T) {
+	t.Run("should create authorizer with defaults when casbin config is nil", func(t *testing.T) {
 		cfg := &authzv1.Authorizer{
 			Casbin: nil, // Explicitly nil casbin config
 		}
 		auth, err := casbin.NewAuthorizer(cfg)
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), "authorizer casbin config is empty")
-		assert.Nil(t, auth)
+		require.NoError(t, err) // Expect no error, as it should use defaults
+		assert.NotNil(t, auth)
 	})
 
 	t.Run("should panic if WithFileModel option points to non-existent file", func(t *testing.T) {
-		cfg := &authzv1.Authorizer{} // Empty config
+		cfg := &authzv1.Authorizer{Casbin: &casbinv1.Config{}} // Provide an empty Casbin config
 		nonExistentPath := filepath.Join(t.TempDir(), "non_existent_model.conf")
 
 		assert.Panics(t, func() {
@@ -189,7 +187,7 @@ m = r.sub == p.sub && r.obj == p.obj && r.act == p.act && r.dom == p.dom
 	})
 
 	t.Run("should panic if WithStringModel option has invalid model string", func(t *testing.T) {
-		cfg := &authzv1.Authorizer{}          // Empty config
+		cfg := &authzv1.Authorizer{Casbin: &casbinv1.Config{}} // Provide an empty Casbin config
 		invalidModel := `[request_definition` // Incomplete model
 
 		assert.Panics(t, func() {

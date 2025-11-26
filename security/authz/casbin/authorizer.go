@@ -6,20 +6,23 @@ package casbin
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	"github.com/casbin/casbin/v2/persist"
 
+	casbinv1 "github.com/origadmin/contrib/api/gen/go/security/authz/casbin/v1"
 	authzv1 "github.com/origadmin/contrib/api/gen/go/security/authz/v1"
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authz"
 	"github.com/origadmin/contrib/security/authz/casbin/adapter"
-	internalmodel "github.com/origadmin/contrib/security/authz/casbin/internal/model"
 	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/runtime/log"
+)
+
+const (
+	DefaultWildcardItem = "*"
 )
 
 func init() {
@@ -63,44 +66,56 @@ func (auth *Authorizer) Authorized(ctx context.Context, principal security.Princ
 // 2. If not set by options, settings from the configuration file (`cfg`) are used.
 // 3. If still not set, sensible defaults are applied (e.g., in-memory adapter, default model).
 func NewAuthorizer(cfg *authzv1.Authorizer, opts ...options.Option) (authz.Authorizer, error) {
-	config := cfg.GetCasbin()
-	if config == nil {
-		return nil, errors.New("authorizer casbin config is empty")
+	// Ensure casbinConfig is never nil to avoid early exit and allow options/defaults to apply.
+	var casbinConfig *casbinv1.Config
+	if cfg != nil {
+		casbinConfig = cfg.GetCasbin()
+	}
+	if casbinConfig == nil {
+		casbinConfig = &casbinv1.Config{} // Provide an empty config if none is given
 	}
 
 	auth := &Authorizer{
-		wildcardItem: "*", // Set a default wildcard item.
+		wildcardItem: DefaultWildcardItem,
 	}
 
-	// Create an AuthorizerContext to apply options.
-	o := FromOptions(opts)
+	// 1. Apply programmatic options (highest priority)
+	configuredOptions := FromOptions(opts) // This creates an Options struct with values from 'opts'
 
-	// If a model path is provided in the config and no model has been set by options, load it.
-	if o.model == nil && config.GetModelPath() != "" {
-		m, err := model.NewModelFromFile(config.GetModelPath())
+	// Set model
+	switch {
+	case configuredOptions.Model != nil:
+		auth.model = configuredOptions.Model
+	case casbinConfig.GetModelPath() != "":
+		m, err := model.NewModelFromFile(casbinConfig.GetModelPath())
 		if err != nil {
-			return nil, fmt.Errorf("failed to load model from file %s: %w", config.GetModelPath(), err)
+			return nil, fmt.Errorf("failed to load model from config file %s: %w", casbinConfig.GetModelPath(), err)
 		}
-		o.model = m
-	}
-
-	// If no model is configured (neither by options nor by config), use the default model.
-	if o.model == nil {
-		m, err := model.NewModelFromString(internalmodel.DefaultRestfullWithRoleModel)
+		auth.model = m
+	default:
+		m, err := model.NewModelFromString(DefaultModel())
 		if err != nil {
-			// This should not happen with the default model, but it's good practice to handle it.
 			return nil, fmt.Errorf("failed to load default casbin model: %w", err)
 		}
-		o.model = m
+		auth.model = m
 	}
 
-	// If no policy adapter is configured, use the default in-memory adapter.
-	if o.policy == nil {
-		o.policy = adapter.NewMemory()
+	// Set policy adapter
+	if configuredOptions.Policy != nil {
+		auth.policy = configuredOptions.Policy
+	} else { // Apply default policy adapter
+		auth.policy = adapter.NewMemory()
+	}
+
+	// Set wildcard item
+	if configuredOptions.WildcardItem != "" {
+		auth.wildcardItem = configuredOptions.WildcardItem
+	} else { // Apply default wildcard item
+		auth.wildcardItem = "*"
 	}
 
 	// Create the enforcer.
-	enforcer, err := casbin.NewSyncedEnforcer(o.model, o.policy)
+	enforcer, err := casbin.NewSyncedEnforcer(auth.model, auth.policy)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create casbin enforcer: %w", err)
 	}
