@@ -6,10 +6,10 @@ import (
 	"github.com/origadmin/contrib/security"
 )
 
-// PermissionQuerier defines the interface for querying permissions in batches.
+// FilterQuerier defines the interface for querying permissions in batches.
 // Its primary consumer is API endpoints that need to perform bulk permission checks,
 // for example, to filter a list of items based on the user's access rights.
-type PermissionQuerier interface {
+type FilterQuerier interface {
 	// FilterAuthorized is the generic and powerful core method of this interface.
 	// It filters a list of RuleSpecs and returns the subset for which the principal is authorized.
 	// It is useful for complex, non-standard batch filtering scenarios.
