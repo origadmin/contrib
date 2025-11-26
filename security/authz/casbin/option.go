@@ -8,10 +8,15 @@ import (
 
 	"github.com/origadmin/contrib/security/authz/casbin/internal/model"
 	"github.com/origadmin/contrib/security/authz/casbin/internal/policy"
+	"github.com/origadmin/runtime/extensions/optionutil"
+	"github.com/origadmin/runtime/interfaces/options"
 )
 
-// Setting is a function type for setting the Authenticator.
-type Setting = func(*Authorizer)
+type Options struct {
+	model    casbinmodel.Model
+	policy   persist.Adapter
+	wildcard string
+}
 
 func DefaultModel() string {
 	return model.DefaultRestfullWithRoleModel
@@ -21,32 +26,36 @@ func DefaultPolicy() []byte {
 	return policy.MustPolicy("keymatch_with_rbac_in_domain.csv")
 }
 
-func WithModel(model casbinmodel.Model) Setting {
-	return func(s *Authorizer) {
+func WithModel(model casbinmodel.Model) options.Option {
+	return optionutil.Update(func(s *Options) {
 		s.model = model
-	}
+	})
 }
 
-func WithStringModel(str string) Setting {
-	return func(s *Authorizer) {
+func WithStringModel(str string) options.Option {
+	return optionutil.Update(func(s *Options) {
 		s.model, _ = casbinmodel.NewModelFromString(str)
-	}
+	})
 }
 
-func WithFileModel(path string) Setting {
-	return func(s *Authorizer) {
+func WithFileModel(path string) options.Option {
+	return optionutil.Update(func(s *Options) {
 		s.model, _ = casbinmodel.NewModelFromFile(path)
-	}
+	})
 }
 
-func WithNameModel(name string) Setting {
-	return func(s *Authorizer) {
+func WithNameModel(name string) options.Option {
+	return optionutil.Update(func(s *Options) {
 		s.model, _ = casbinmodel.NewModelFromString(model.MustModel(name))
-	}
+	})
 }
 
-func WithPolicyAdapter(policy persist.Adapter) Setting {
-	return func(s *Authorizer) {
+func WithPolicyAdapter(policy persist.Adapter) options.Option {
+	return optionutil.Update(func(s *Options) {
 		s.policy = policy
-	}
+	})
+}
+
+func FromOptions(opts []options.Option) *Options {
+	return optionutil.NewT[Options](opts...)
 }

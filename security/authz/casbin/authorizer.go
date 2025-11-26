@@ -1,4 +1,5 @@
-/* * Copyright (c) 2024 OrigAdmin. All rights reserved.
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
  */
 
 package casbin
@@ -6,19 +7,19 @@ package casbin
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
 	"github.com/casbin/casbin/v2/persist"
 
-	casbinv1 "github.com/origadmin/contrib/api/gen/go/security/authz/casbin/v1"
 	authzv1 "github.com/origadmin/contrib/api/gen/go/security/authz/v1"
-	"github.com/origadmin/contrib/security/authz/casbin/adapter"
-	"github.com/origadmin/runtime/interfaces/options"
-	"github.com/origadmin/runtime/log"
-
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authz"
+	"github.com/origadmin/contrib/security/authz/casbin/adapter"
+	internalmodel "github.com/origadmin/contrib/security/authz/casbin/internal/model"
+	"github.com/origadmin/runtime/interfaces/options"
+	"github.com/origadmin/runtime/log"
 )
 
 func init() {
@@ -33,6 +34,7 @@ type Authorizer struct {
 	wildcardItem string
 }
 
+// Authorized checks if a principal is authorized to perform an action on a resource within a specific domain.
 func (auth *Authorizer) Authorized(ctx context.Context, principal security.Principal, spec authz.RuleSpec) (bool, error) {
 	log.Debugf("Authorizing user with principal: %+v", principal)
 	domain := spec.Domain
@@ -54,46 +56,55 @@ func (auth *Authorizer) Authorized(ctx context.Context, principal security.Princ
 	return false, nil
 }
 
-func (auth *Authorizer) ApplyDefaults() error {
-	if auth.policy == nil {
-		auth.policy = adapter.NewMemory()
-	}
-	if auth.wildcardItem == "" {
-		auth.wildcardItem = "*"
-	}
-	if auth.model == nil {
-		auth.model, _ = model.NewModelFromString(DefaultModel())
-		//if err != nil {
-		//	return err
-		//}
-	}
-	if auth.enforcer == nil {
-		auth.enforcer, _ = casbin.NewSyncedEnforcer(auth.model, auth.policy)
-		//if err!= nil {
-		//	return err
-		//}
-	}
-	return nil
-}
-
-func (auth *Authorizer) WithConfig(config *casbinv1.Config) error {
-	var err error
-	if config.GetModelPath() != "" {
-		auth.model, err = model.NewModelFromFile(config.GetModelPath())
-	}
-	return err
-}
-
+// NewAuthorizer creates a new Authorizer instance.
+// It initializes the authorizer based on the provided configuration and options.
+// The initialization follows a clear priority:
+// 1. Programmatic options (`opts`) are applied first.
+// 2. If not set by options, settings from the configuration file (`cfg`) are used.
+// 3. If still not set, sensible defaults are applied (e.g., in-memory adapter, default model).
 func NewAuthorizer(cfg *authzv1.Authorizer, opts ...options.Option) (authz.Authorizer, error) {
 	config := cfg.GetCasbin()
 	if config == nil {
 		return nil, errors.New("authorizer casbin config is empty")
 	}
-	var err error
-	auth := &Authorizer{}
-	err = auth.WithConfig(config)
-	if err != nil {
-		return nil, err
+
+	auth := &Authorizer{
+		wildcardItem: "*", // Set a default wildcard item.
 	}
+
+	// Create an AuthorizerContext to apply options.
+	o := FromOptions(opts)
+
+	// If a model path is provided in the config and no model has been set by options, load it.
+	if o.model == nil && config.GetModelPath() != "" {
+		m, err := model.NewModelFromFile(config.GetModelPath())
+		if err != nil {
+			return nil, fmt.Errorf("failed to load model from file %s: %w", config.GetModelPath(), err)
+		}
+		o.model = m
+	}
+
+	// If no model is configured (neither by options nor by config), use the default model.
+	if o.model == nil {
+		m, err := model.NewModelFromString(internalmodel.DefaultRestfullWithRoleModel)
+		if err != nil {
+			// This should not happen with the default model, but it's good practice to handle it.
+			return nil, fmt.Errorf("failed to load default casbin model: %w", err)
+		}
+		o.model = m
+	}
+
+	// If no policy adapter is configured, use the default in-memory adapter.
+	if o.policy == nil {
+		o.policy = adapter.NewMemory()
+	}
+
+	// Create the enforcer.
+	enforcer, err := casbin.NewSyncedEnforcer(o.model, o.policy)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create casbin enforcer: %w", err)
+	}
+	auth.enforcer = enforcer
+
 	return auth, nil
 }
