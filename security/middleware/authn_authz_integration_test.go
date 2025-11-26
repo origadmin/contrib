@@ -188,7 +188,7 @@ func TestStandaloneFlow(t *testing.T) {
 			token:     "invalid-token",
 			operation: "/admin.Service/GetData",
 			expectErr: true,
-			errCheck:  securityv1.IsCredentialsInvalid,
+			errCheck:  securityv1.IsTokenInvalid,
 		},
 		{
 			name:        "Successful Authn, Failed Authz",
