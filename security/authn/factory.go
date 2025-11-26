@@ -13,18 +13,8 @@ import (
 	"github.com/origadmin/runtime/interfaces/options"
 )
 
-// Provider is an interface for a security component that can provide various authentication-related capabilities.
-type Provider interface {
-	// Authenticator returns the Authenticator capability, if supported.
-	Authenticator() (Authenticator, bool)
-	// CredentialCreator returns the CredentialCreator capability, if supported.
-	CredentialCreator() (credential.Creator, bool)
-	// CredentialRevoker returns the CredentialRevoker capability, if supported.
-	CredentialRevoker() (credential.Revoker, bool)
-}
-
 // FactoryFunc is a function type that creates a Provider instance.
-type FactoryFunc func(config *authnv1.Authenticator, opts ...options.Option) (Provider, error)
+type FactoryFunc func(config *authnv1.Authenticator, opts ...options.Option) (Authenticator, error)
 
 var (
 	mu               sync.RWMutex
@@ -35,8 +25,8 @@ var (
 // instance when given a runtime configuration. It's a stateless object
 // intended to be registered at init time.
 type Factory interface {
-	// NewProvider creates a new Provider instance using the provided configuration.
-	NewProvider(cfg *authnv1.Authenticator, opts ...options.Option) (Provider, error)
+	// NewAuthenticator creates a new Provider instance using the provided configuration.
+	NewAuthenticator(cfg *authnv1.Authenticator, opts ...options.Option) (Authenticator, error)
 }
 
 // Register registers a new authenticator provider blueprint.
@@ -54,12 +44,42 @@ func Register(name string, factory Factory) {
 // It looks up the appropriate factory using the type specified in the config and invokes it.
 // The returned Provider instance is NOT stored globally; it is the caller's responsibility
 // to manage its lifecycle and inject it where needed.
-func New(cfg *authnv1.Authenticator, opts ...options.Option) (Provider, error) {
+func New(cfg *authnv1.Authenticator, opts ...options.Option) (Authenticator, error) {
 	mu.RLock()
 	defer mu.RUnlock()
 	factory, ok := defaultFactories[cfg.GetType()]
 	if !ok {
 		return nil, fmt.Errorf("authenticator factory %q not found", cfg.GetType())
 	}
-	return factory.NewProvider(cfg, opts...)
+	return factory.NewAuthenticator(cfg, opts...)
+}
+
+// NewCredentialCreator is a convenience helper that creates a provider instance
+// and directly returns its CredentialCreator capability.
+// It returns an error if the specified provider does not support the CredentialCreator interface.
+func NewCredentialCreator(cfg *authnv1.Authenticator, opts ...options.Option) (credential.Creator, error) {
+	authn, err := New(cfg, opts...)
+	if err != nil {
+		return nil, err
+	}
+	creator, ok := authn.(credential.Creator)
+	if !ok {
+		return nil, fmt.Errorf("authn %q does not support the CredentialCreator capability", cfg.GetType())
+	}
+	return creator, nil
+}
+
+// NewCredentialRevoker is a convenience helper that creates a provider instance
+// and directly returns its CredentialRevoker capability.
+// It returns an error if the specified provider does not support the CredentialRevoker interface.
+func NewCredentialRevoker(cfg *authnv1.Authenticator, opts ...options.Option) (credential.Revoker, error) {
+	authn, err := New(cfg, opts...)
+	if err != nil {
+		return nil, err
+	}
+	revoker, ok := authn.(credential.Revoker)
+	if !ok {
+		return nil, fmt.Errorf("authn %q does not support the CredentialRevoker capability", cfg.GetType())
+	}
+	return revoker, nil
 }

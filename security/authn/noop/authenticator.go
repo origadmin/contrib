@@ -29,7 +29,7 @@ func (a authenticator) Supports(cred security.Credential) bool {
 
 type NoopFactory struct{}
 
-func (f *NoopFactory) NewProvider(cfg *authnv1.Authenticator, opts ...options.Option) (authn.Provider, error) {
+func (f *NoopFactory) NewAuthenticator(cfg *authnv1.Authenticator, opts ...options.Option) (authn.Provider, error) {
 	o := FromOptions(opts...)
 	err := o.Apply(cfg)
 	if err != nil {
