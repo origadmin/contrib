@@ -42,8 +42,8 @@ type Authenticator struct {
 	skipAudienceCheck    bool
 }
 
-// NewProvider creates a new JWT Provider from the given configuration and options.
-func NewProvider(cfg *authnv1.Authenticator, opts ...options.Option) (authnFactory.Provider, error) {
+// NewAuthenticator creates a new JWT Provider from the given configuration and options.
+func NewAuthenticator(cfg *authnv1.Authenticator, opts ...options.Option) (authnFactory.Authenticator, error) {
 	jwtCfg := cfg.GetJwt()
 	if jwtCfg == nil {
 		return nil, securityv1.ErrorCredentialsInvalid("JWT configuration is missing")
@@ -75,7 +75,7 @@ func NewProvider(cfg *authnv1.Authenticator, opts ...options.Option) (authnFacto
 		skipAudienceCheck:    len(o.audience) == 0,
 	}
 
-	return newProvider(auth, cfg), nil
+	return auth, nil
 }
 
 // Authenticate validates the provided credential and returns a Principal if successful.
