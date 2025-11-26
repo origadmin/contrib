@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1" // Import securityv1
+	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authz"
 	"github.com/origadmin/contrib/security/principal"
@@ -50,58 +50,51 @@ func (m mockHeaderCarrier) Values(key string) []string {
 
 // mockTransport is a mock implementation of transport.Transport and kratoshttp.Transporter
 type mockTransport struct {
-	header    mockHeaderCarrier
 	req       *http.Request
 	operation string
 }
 
-func newMockTransport(operation string) *mockTransport {
-	req, _ := http.NewRequest("GET", "/test", nil)
+func newMockTransport(t *testing.T, method, op string) *mockTransport {
+	req, err := http.NewRequest(method, op, nil)
+	require.NoError(t, err)
 	return &mockTransport{
-		header:    make(mockHeaderCarrier),
 		req:       req,
-		operation: operation,
+		operation: op,
 	}
 }
 
 func (m *mockTransport) Kind() transport.Kind            { return transport.KindHTTP }
 func (m *mockTransport) Endpoint() string                { return "" }
 func (m *mockTransport) Operation() string               { return m.operation }
-func (m *mockTransport) RequestHeader() transport.Header { return m.header }
-func (m *mockTransport) ReplyHeader() transport.Header   { return m.header }
+func (m *mockTransport) RequestHeader() transport.Header { return mockHeaderCarrier(m.req.Header) }
+func (m *mockTransport) ReplyHeader() transport.Header   { return mockHeaderCarrier(m.req.Header) }
+func (m *mockTransport) Request() *http.Request          { return m.req }
+func (m *mockTransport) PathTemplate() string            { return m.operation }
 
-// Implement kratoshttp.Transporter interface
-func (m *mockTransport) Request() *http.Request {
-	return m.req
-}
-
-func (m *mockTransport) PathTemplate() string {
-	return m.operation
-}
-
-var _ transport.Transporter = (*mockTransport)(nil)
-var _ kratoshttp.Transporter = (*kratoshttp.Transport)(nil) // Changed to kratoshttp.Transport for correctness
+var _ kratoshttp.Transporter = (*mockTransport)(nil)
 
 // mockAuthorizer implements authz.Authorizer for testing purposes.
+type mockRule struct {
+	Resource string
+	Action   string
+}
 type mockAuthorizer struct {
-	allowRules map[string][]string // action -> required roles
+	allowRules map[mockRule][]string
 }
 
-func newMockAuthorizer(rules map[string][]string) *mockAuthorizer {
+func newMockAuthorizer(rules map[mockRule][]string) *mockAuthorizer {
 	return &mockAuthorizer{allowRules: rules}
 }
 
 // Authorized checks if the principal is authorized for the given rule specification.
 func (m *mockAuthorizer) Authorized(ctx context.Context, p security.Principal, spec authz.RuleSpec) (bool, error) {
-	action := spec.Action
-	requiredRoles, ok := m.allowRules[action]
+	rule := mockRule{Resource: spec.Resource, Action: spec.Action}
+	requiredRoles, ok := m.allowRules[rule]
 	if !ok {
-		// No specific rule for this action, deny by default
-		return false, securityv1.ErrorPermissionDenied("no rule defined for operation %s", action)
+		return false, securityv1.ErrorPermissionDenied("no rule defined for resource %s and action %s", rule.Resource, rule.Action)
 	}
 
 	principalRoles := p.GetRoles()
-	// Check if principal has any of the required roles
 	for _, requiredRole := range requiredRoles {
 		for _, pr := range principalRoles {
 			if pr == requiredRole {
@@ -109,7 +102,7 @@ func (m *mockAuthorizer) Authorized(ctx context.Context, p security.Principal, s
 			}
 		}
 	}
-	return false, securityv1.ErrorPermissionDenied("principal does not have required roles for operation %s", action) // No matching role found
+	return false, securityv1.ErrorPermissionDenied("principal does not have required roles for operation")
 }
 
 func runMiddleware(t *testing.T, authorizer authz.Authorizer, ctx context.Context, handler middleware.KHandler) (interface{}, error) {
@@ -122,6 +115,7 @@ func TestAuthZMiddleware_Success(t *testing.T) {
 	testCases := []struct {
 		name        string
 		principal   security.Principal
+		method      string
 		operation   string
 		authorizer  authz.Authorizer
 		expectError bool
@@ -129,27 +123,30 @@ func TestAuthZMiddleware_Success(t *testing.T) {
 		{
 			name:      "Admin user accessing admin operation",
 			principal: principal.New("adminUser", []string{"admin"}, nil, nil, nil),
+			method:    "GET",
 			operation: "/admin.Service/GetData",
-			authorizer: newMockAuthorizer(map[string][]string{
-				"/admin.Service/GetData": {"admin"},
+			authorizer: newMockAuthorizer(map[mockRule][]string{
+				{Resource: "/admin.Service/GetData", Action: "read"}: {"admin"},
 			}),
 			expectError: false,
 		},
 		{
 			name:      "Regular user accessing public operation",
 			principal: principal.New("regularUser", []string{"user"}, nil, nil, nil),
+			method:    "GET",
 			operation: "/public.Service/GetInfo",
-			authorizer: newMockAuthorizer(map[string][]string{
-				"/public.Service/GetInfo": {"user", "admin", "anonymous"}, // Allow user, admin, or anonymous
+			authorizer: newMockAuthorizer(map[mockRule][]string{
+				{Resource: "/public.Service/GetInfo", Action: "read"}: {"user", "admin", "anonymous"},
 			}),
 			expectError: false,
 		},
 		{
 			name:      "User with multiple roles accessing allowed operation",
 			principal: principal.New("multiRoleUser", []string{"user", "editor"}, nil, nil, nil),
+			method:    "POST",
 			operation: "/editor.Service/EditDoc",
-			authorizer: newMockAuthorizer(map[string][]string{
-				"/editor.Service/EditDoc": {"editor"},
+			authorizer: newMockAuthorizer(map[mockRule][]string{
+				{Resource: "/editor.Service/EditDoc", Action: "create"}: {"editor"},
 			}),
 			expectError: false,
 		},
@@ -157,8 +154,10 @@ func TestAuthZMiddleware_Success(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			tr := newMockTransport(tc.operation)
+			tr := newMockTransport(t, tc.method, tc.operation)
 			ctx := transport.NewServerContext(context.Background(), tr)
+			ctx = kratoshttp.NewContext(ctx, tr.Request())
+
 			ctx = principal.NewContext(ctx, tc.principal) // Inject principal into context
 
 			handler := func(ctx context.Context, req interface{}) (interface{}, error) {
@@ -182,6 +181,7 @@ func TestAuthZMiddleware_Failure(t *testing.T) {
 	testCases := []struct {
 		name        string
 		principal   security.Principal
+		method      string
 		operation   string
 		authorizer  authz.Authorizer
 		expectError bool
@@ -189,59 +189,65 @@ func TestAuthZMiddleware_Failure(t *testing.T) {
 		{
 			name:      "Regular user accessing admin operation",
 			principal: principal.New("regularUser", []string{"user"}, nil, nil, nil),
+			method:    "GET",
 			operation: "/admin.Service/GetData",
-			authorizer: newMockAuthorizer(map[string][]string{
-				"/admin.Service/GetData": {"admin"},
+			authorizer: newMockAuthorizer(map[mockRule][]string{
+				{Resource: "/admin.Service/GetData", Action: "read"}: {"admin"},
 			}),
-			expectError: true, // Should be forbidden
+			expectError: true,
 		},
 		{
 			name:      "Anonymous user accessing protected operation",
 			principal: principal.Anonymous(),
+			method:    "GET",
 			operation: "/protected.Service/GetSecret",
-			authorizer: newMockAuthorizer(map[string][]string{
-				"/protected.Service/GetSecret": {"admin", "user"},
+			authorizer: newMockAuthorizer(map[mockRule][]string{
+				{Resource: "/protected.Service/GetSecret", Action: "read"}: {"admin", "user"},
 			}),
-			expectError: true, // Should be forbidden
+			expectError: true,
 		},
 		{
 			name:      "User with no matching role for operation",
 			principal: principal.New("viewer", []string{"viewer"}, nil, nil, nil),
+			method:    "POST",
 			operation: "/editor.Service/EditDoc",
-			authorizer: newMockAuthorizer(map[string][]string{
-				"/editor.Service/EditDoc": {"editor"},
+			authorizer: newMockAuthorizer(map[mockRule][]string{
+				{Resource: "/editor.Service/EditDoc", Action: "create"}: {"editor"},
 			}),
-			expectError: true, // Should be forbidden
+			expectError: true,
 		},
 		{
 			name:      "No principal in context",
 			principal: nil, // Simulate no principal set by authn middleware
+			method:    "GET",
 			operation: "/any.Service/AnyOp",
-			authorizer: newMockAuthorizer(map[string][]string{
-				"/any.Service/AnyOp": {"admin", "user"},
+			authorizer: newMockAuthorizer(map[mockRule][]string{
+				{Resource: "/any.Service/AnyOp", Action: "read"}: {"admin", "user"},
 			}),
-			expectError: true, // Should return ErrUnauthorized
+			expectError: true,
 		},
 	}
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			tr := newMockTransport(tc.operation)
+			tr := newMockTransport(t, tc.method, tc.operation)
 			ctx := transport.NewServerContext(context.Background(), tr)
+			ctx = kratoshttp.NewContext(ctx, tr.Request())
+
 			if tc.principal != nil {
-				ctx = principal.NewContext(ctx, tc.principal) // Inject principal if not nil
+				ctx = principal.NewContext(ctx, tc.principal)
 			}
 
 			handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-				return "handler called", nil // Should not be reached if authorization fails
+				return "handler called", nil
 			}
 
 			_, err := runMiddleware(t, tc.authorizer, ctx, handler)
 			assert.Error(t, err)
 			if tc.principal == nil {
-				assert.True(t, securityv1.IsCredentialsInvalid(err)) // Specific error for missing principal
+				assert.True(t, securityv1.IsCredentialsInvalid(err))
 			} else {
-				assert.True(t, securityv1.IsPermissionDenied(err)) // Specific error for authorization failure
+				assert.True(t, securityv1.IsPermissionDenied(err))
 			}
 		})
 	}
@@ -251,30 +257,31 @@ func TestAuthZMiddleware_SkipChecker(t *testing.T) {
 	alwaysSkip := func(req security.Request) bool { return true }
 	neverSkip := func(req security.Request) bool { return false }
 
-	mockAuthz := newMockAuthorizer(map[string][]string{
-		"/protected.Service/GetData": {"admin"},
+	mockAuthz := newMockAuthorizer(map[mockRule][]string{
+		{Resource: "/protected.Service/GetData", Action: "read"}: {"admin"},
 	})
 
 	t.Run("SkipChecker allows skipping authorization", func(t *testing.T) {
-		tr := newMockTransport("/protected.Service/GetData")
+		tr := newMockTransport(t, "GET", "/protected.Service/GetData")
 		ctx := transport.NewServerContext(context.Background(), tr)
-		// No principal, but should skip
+		ctx = kratoshttp.NewContext(ctx, tr.Request())
 		mw := NewAuthZMiddleware(mockAuthz, WithSkipChecker(alwaysSkip))
 		_, err := mw.Server()(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return "handler called", nil
 		})(ctx, nil)
-		assert.NoError(t, err) // Should not error because authorization is skipped
+		assert.NoError(t, err)
 	})
 
 	t.Run("SkipChecker does not skip authorization", func(t *testing.T) {
-		tr := newMockTransport("/protected.Service/GetData")
+		tr := newMockTransport(t, "GET", "/protected.Service/GetData")
 		ctx := transport.NewServerContext(context.Background(), tr)
-		// No principal, and should not skip
+		ctx = kratoshttp.NewContext(ctx, tr.Request())
+
 		mw := NewAuthZMiddleware(mockAuthz, WithSkipChecker(neverSkip))
 		_, err := mw.Server()(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return "handler called", nil
 		})(ctx, nil)
-		assert.Error(t, err) // Should error because authorization is not skipped and principal is missing
+		assert.Error(t, err)
 		assert.True(t, securityv1.IsCredentialsInvalid(err))
 	})
 
@@ -283,20 +290,19 @@ func TestAuthZMiddleware_SkipChecker(t *testing.T) {
 			"/public.Service/GetInfo": true,
 		}
 		checker := PathSkipChecker(skipPaths)
-
-		// Should skip
-		tr := newMockTransport("/public.Service/GetInfo")
-		ctx := transport.NewServerContext(context.Background(), tr)
 		mw := NewAuthZMiddleware(mockAuthz, WithSkipChecker(checker))
+
+		tr := newMockTransport(t, "GET", "/public.Service/GetInfo")
+		ctx := transport.NewServerContext(context.Background(), tr)
+		ctx = kratoshttp.NewContext(ctx, tr.Request())
 		_, err := mw.Server()(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return "handler called", nil
 		})(ctx, nil)
 		assert.NoError(t, err)
 
-		// Should not skip
-		tr = newMockTransport("/protected.Service/GetData")
+		tr = newMockTransport(t, "GET", "/protected.Service/GetData")
 		ctx = transport.NewServerContext(context.Background(), tr)
-		mw = NewAuthZMiddleware(mockAuthz, WithSkipChecker(checker))
+		ctx = kratoshttp.NewContext(ctx, tr.Request())
 		_, err = mw.Server()(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return "handler called", nil
 		})(ctx, nil)
@@ -308,25 +314,23 @@ func TestAuthZMiddleware_SkipChecker(t *testing.T) {
 		checker1 := PathSkipChecker(map[string]bool{"/path1": true})
 		checker2 := PathSkipChecker(map[string]bool{"/path2": true})
 		composite := CompositeSkipChecker(checker1, checker2)
-
-		// Should skip via checker1
-		tr := newMockTransport("/path1")
-		ctx := transport.NewServerContext(context.Background(), tr)
 		mw := NewAuthZMiddleware(mockAuthz, WithSkipChecker(composite))
+
+		tr := newMockTransport(t, "GET", "/path1")
+		ctx := transport.NewServerContext(context.Background(), tr)
+		ctx = kratoshttp.NewContext(ctx, tr.Request())
 		_, err := mw.Server()(func(ctx context.Context, req interface{}) (interface{}, error) { return "ok", nil })(ctx, nil)
 		assert.NoError(t, err)
 
-		// Should skip via checker2
-		tr = newMockTransport("/path2")
+		tr = newMockTransport(t, "GET", "/path2")
 		ctx = transport.NewServerContext(context.Background(), tr)
-		mw = NewAuthZMiddleware(mockAuthz, WithSkipChecker(composite))
+		ctx = kratoshttp.NewContext(ctx, tr.Request())
 		_, err = mw.Server()(func(ctx context.Context, req interface{}) (interface{}, error) { return "ok", nil })(ctx, nil)
 		assert.NoError(t, err)
 
-		// Should not skip
-		tr = newMockTransport("/path3")
+		tr = newMockTransport(t, "GET", "/path3")
 		ctx = transport.NewServerContext(context.Background(), tr)
-		mw = NewAuthZMiddleware(mockAuthz, WithSkipChecker(composite))
+		ctx = kratoshttp.NewContext(ctx, tr.Request())
 		_, err = mw.Server()(func(ctx context.Context, req interface{}) (interface{}, error) { return "ok", nil })(ctx, nil)
 		assert.Error(t, err)
 		assert.True(t, securityv1.IsCredentialsInvalid(err))

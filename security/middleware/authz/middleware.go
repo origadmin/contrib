@@ -88,9 +88,25 @@ func (m *Middleware) Server() middleware.KMiddleware {
 
 			// Create a RuleSpec from the security request
 			ruleSpec := authz.RuleSpec{
-				Action:   securityReq.GetOperation(),
-				Resource: securityReq.GetOperation(), // For simplicity, using operation as resource for now
+				Resource: securityReq.GetOperation(),
 				// Domain and Attributes can be populated from securityReq if available and needed
+			}
+
+			// Determine action from HTTP method
+			switch securityReq.GetMethod() {
+			case "GET", "HEAD", "OPTIONS":
+				ruleSpec.Action = "read"
+			case "POST":
+				ruleSpec.Action = "create"
+			case "PUT", "PATCH":
+				ruleSpec.Action = "update"
+			case "DELETE":
+				ruleSpec.Action = "delete"
+			default:
+				// Fallback or default action if method is unknown or not HTTP (e.g. gRPC)
+				// For gRPC, the action might be inferred differently, but for now, we use the operation itself
+				// as a reasonable default, which can be handled by specific casbin policies.
+				ruleSpec.Action = securityReq.GetOperation()
 			}
 
 			// Authorize the principal for the request
