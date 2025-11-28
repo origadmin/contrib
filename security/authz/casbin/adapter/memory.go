@@ -18,8 +18,15 @@ type Adapter struct {
 	policies map[string][][]string
 }
 
+// NewWithPolicies creates a new in-memory adapter with pre-defined policies.
+func NewWithPolicies(policies map[string][][]string) *Adapter {
+	return &Adapter{
+		policies: policies,
+	}
+}
+
 // NewMemory creates a new in-memory adapter.
-func NewMemory() persist.Adapter {
+func NewMemory() *Adapter {
 	return &Adapter{
 		policies: make(map[string][][]string),
 	}
@@ -30,8 +37,7 @@ func (a *Adapter) LoadPolicy(m model.Model) error {
 	for ptype, rules := range a.policies {
 		for _, rule := range rules {
 			line := ptype + ", " + strings.Join(rule, ", ")
-			err := persist.LoadPolicyLine(line, m)
-			if err != nil {
+			if err := persist.LoadPolicyLine(line, m); err != nil {
 				return err
 			}
 		}
@@ -42,17 +48,21 @@ func (a *Adapter) LoadPolicy(m model.Model) error {
 // SavePolicy saves all policy rules to the storage.
 func (a *Adapter) SavePolicy(m model.Model) error {
 	a.policies = make(map[string][][]string)
-	for ptype, ast := range m["p"] {
-		for _, rule := range ast.Policy {
-			a.policies[ptype] = append(a.policies[ptype], rule)
-		}
-	}
-	for ptype, ast := range m["g"] {
-		for _, rule := range ast.Policy {
-			a.policies[ptype] = append(a.policies[ptype], rule)
-		}
-	}
+	a.savePoliciesFromSection("p", m)
+	a.savePoliciesFromSection("g", m)
 	return nil
+}
+
+// savePoliciesFromSection saves policies for a given section (e.g., "p" or "g").
+func (a *Adapter) savePoliciesFromSection(sec string, m model.Model) {
+	if astMap, ok := m[sec]; ok {
+		for ptype, ast := range astMap {
+			if _, exists := a.policies[ptype]; !exists {
+				a.policies[ptype] = make([][]string, 0, len(ast.Policy))
+			}
+			a.policies[ptype] = append(a.policies[ptype], ast.Policy...)
+		}
+	}
 }
 
 // AddPolicy adds a policy rule to the storage.
@@ -97,6 +107,7 @@ func (a *Adapter) RemoveFilteredPolicy(sec string, ptype string, fieldIndex int,
 	return nil
 }
 
+// arrayEquals checks if two string slices are equal.
 func arrayEquals(a, b []string) bool {
 	if len(a) != len(b) {
 		return false

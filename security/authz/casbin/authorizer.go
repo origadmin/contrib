@@ -11,7 +11,6 @@ import (
 
 	"github.com/casbin/casbin/v2"
 	"github.com/casbin/casbin/v2/model"
-	fileadapter "github.com/casbin/casbin/v2/persist/file-adapter"
 
 	casbinv1 "github.com/origadmin/contrib/api/gen/go/security/authz/casbin/v1"
 	authzv1 "github.com/origadmin/contrib/api/gen/go/security/authz/v1"
@@ -159,19 +158,16 @@ func newWithOptions(cfg *authzv1.Authorizer, opts ...options.Option) (*Options, 
 			}
 			if finalOpts.Policy == nil {
 				if casbinConfig.GetPolicyPath() != "" {
-					finalOpts.Policy = fileadapter.NewAdapter(casbinConfig.GetPolicyPath())
+					finalOpts.Policy = adapter.NewFile(casbinConfig.GetPolicyPath())
 				} else if len(casbinConfig.GetEmbeddedPolicies()) > 0 {
-					memAdapter := adapter.NewMemory()
+					policies := make(map[string][][]string)
 					for _, p := range casbinConfig.GetEmbeddedPolicies() {
 						if p.GetPType() == "" || len(p.GetRule()) == 0 {
 							return nil, fmt.Errorf("embedded policy rule is incomplete")
 						}
-						err := memAdapter.AddPolicy(p.GetPType(), p.GetPType(), p.GetRule())
-						if err != nil {
-							return nil, err
-						}
+						policies[p.GetPType()] = append(policies[p.GetPType()], p.GetRule())
 					}
-					finalOpts.Policy = memAdapter
+					finalOpts.Policy = adapter.NewWithPolicies(policies)
 				}
 			}
 		}
