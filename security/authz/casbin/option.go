@@ -15,11 +15,13 @@ import (
 )
 
 // Options holds configuration for the Casbin Authorizer, used with optionutil.
+// All fields are unexported to enforce configuration via functional options,
+// ensuring a controlled and validated setup process.
 type Options struct {
-	Model        casbinmodel.Model
-	Policy       persist.Adapter
-	Watcher      persist.Watcher
-	WildcardItem string
+	model        casbinmodel.Model
+	policy       persist.Adapter
+	watcher      persist.Watcher
+	wildcardItem string
 }
 
 type Option = options.Option
@@ -35,70 +37,70 @@ func DefaultPolicy() []byte {
 }
 
 // WithModel sets the Casbin model for the Authorizer.
-func WithModel(m casbinmodel.Model) options.Option {
+func WithModel(m casbinmodel.Model) Option {
 	return optionutil.Update(func(o *Options) {
-		o.Model = m
+		o.model = m
 	})
 }
 
 // WithStringModel sets the Casbin model from a string.
 // It panics if the model cannot be created from the string.
-func WithStringModel(str string) options.Option {
+func WithStringModel(str string) Option {
 	return optionutil.Update(func(o *Options) {
 		m, err := casbinmodel.NewModelFromString(str)
 		if err != nil {
 			panic(err) // Fail fast during configuration if model string is invalid
 		}
-		o.Model = m
+		o.model = m
 	})
 }
 
 // WithFileModel sets the Casbin model from a file path.
 // It panics if the model cannot be created from the file.
-func WithFileModel(path string) options.Option {
+func WithFileModel(path string) Option {
 	return optionutil.Update(func(o *Options) {
 		m, err := casbinmodel.NewModelFromFile(path)
 		if err != nil {
 			panic(err)
 		}
-		o.Model = m
+		o.model = m
 	})
 }
 
 // WithNameModel sets the Casbin model by its predefined name.
 // It panics if the named model cannot be found or created.
-func WithNameModel(name string) options.Option {
+func WithNameModel(name string) Option {
 	return optionutil.Update(func(o *Options) {
 		m, err := casbinmodel.NewModelFromString(model.MustModel(name))
 		if err != nil {
 			panic(err) // Fail fast during configuration if named model is invalid
 		}
-		o.Model = m
+		o.model = m
 	})
 }
 
 // WithPolicyAdapter sets the Casbin policy adapter.
-func WithPolicyAdapter(p persist.Adapter) options.Option {
+func WithPolicyAdapter(p persist.Adapter) Option {
 	return optionutil.Update(func(o *Options) {
-		o.Policy = p
+		o.policy = p
 	})
 }
 
 // WithWatcher sets the Casbin watcher for dynamic policy updates.
-func WithWatcher(w persist.Watcher) options.Option {
+func WithWatcher(w persist.Watcher) Option {
 	return optionutil.Update(func(o *Options) {
-		o.Watcher = w
+		o.watcher = w
 	})
 }
 
 // WithWildcardItem sets the wildcard item for domain matching.
-func WithWildcardItem(item string) options.Option {
+func WithWildcardItem(item string) Option {
 	return optionutil.Update(func(o *Options) {
-		o.WildcardItem = item
+		o.wildcardItem = item
 	})
 }
 
-// FromOptions creates a new Options struct by applying the given options.
-func FromOptions(opts []options.Option) *Options {
+// FromOptions creates a new Options struct by applying the given functional options.
+func FromOptions(opts ...Option) *Options {
 	return optionutil.NewT[Options](opts...)
 }

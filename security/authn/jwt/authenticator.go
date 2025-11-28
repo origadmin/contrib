@@ -1,4 +1,6 @@
-/* * Copyright (c) 2024 OrigAdmin. All rights reserved. */
+/*
+ * Copyright (c) 2024 OrigAdmin. All rights reserved.
+ */
 
 // Package jwt provides a JWT-based implementation of the security interfaces.
 package jwt
@@ -6,6 +8,7 @@ package jwt
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/dchest/uniuri"
@@ -15,17 +18,9 @@ import (
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authn"
-	securitycache "github.com/origadmin/contrib/security/authn/cache"
 	securityCredential "github.com/origadmin/contrib/security/credential"
 	securityPrincipal "github.com/origadmin/contrib/security/principal"
-	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/runtime/log"
-)
-
-const (
-	defaultIssuer          = "origadmin"
-	defaultAccessTokenTTL  = 2 * time.Hour
-	defaultRefreshTokenTTL = 7 * 24 * time.Hour
 )
 
 func init() {
@@ -34,49 +29,20 @@ func init() {
 
 // Authenticator implements the security interfaces for JWT.
 type Authenticator struct {
-	keyFunc              jwtv5.Keyfunc
-	signingMethod        jwtv5.SigningMethod
-	issuer               string
-	audience             []string
-	accessTokenLifetime  time.Duration
-	refreshTokenLifetime time.Duration
-	cache                securitycache.Cache
-	generateID           func() string
-	clock                func() time.Time
-	skipAudienceCheck    bool
+	*Options
+	skipAudienceCheck bool // Derived internal state, not a direct Option
 }
 
 // NewAuthenticator creates a new JWT Provider from the given configuration and options.
-func NewAuthenticator(cfg *authnv1.Authenticator, opts ...options.Option) (authn.Authenticator, error) {
-	jwtCfg := cfg.GetJwt()
-	if jwtCfg == nil {
-		return nil, securityv1.ErrorCredentialsInvalid("JWT configuration is missing")
-	}
-	o := FromOptions(opts...)
-	if err := o.Apply(jwtCfg); err != nil {
+func NewAuthenticator(cfg *authnv1.Authenticator, opts ...Option) (authn.Authenticator, error) {
+	finalOpts, err := newWithOptions(cfg, opts...)
+	if err != nil {
 		return nil, err
 	}
 
-	clock := o.clock
-	if clock == nil {
-		clock = time.Now
-	}
-	generateID := o.generateID
-	if generateID == nil {
-		generateID = uniuri.New
-	}
-
 	auth := &Authenticator{
-		keyFunc:              o.keyFunc,
-		signingMethod:        o.signingMethod,
-		issuer:               o.issuer,
-		audience:             o.audience,
-		accessTokenLifetime:  o.accessTokenLifetime,
-		refreshTokenLifetime: o.refreshTokenLifetime,
-		cache:                o.cache,
-		generateID:           generateID,
-		clock:                clock,
-		skipAudienceCheck:    len(o.audience) == 0,
+		Options:           finalOpts,
+		skipAudienceCheck: len(finalOpts.audience) == 0, // Calculate derived state here
 	}
 
 	return auth, nil
@@ -302,6 +268,70 @@ func mapJWTError(err error) error {
 	default:
 		return securityv1.ErrorTokenInvalid("unexpected token error: %v", err)
 	}
+}
+
+// newWithOptions merges configurations from all sources.
+func newWithOptions(cfg *authnv1.Authenticator, opts ...Option) (*Options, error) {
+	finalOpts := FromOptions(opts...)
+	jwtCfg := cfg.GetJwt()          // Get jwtCfg here, it might be nil
+	configProvided := jwtCfg != nil // Use a boolean flag to check if jwtCfg is provided
+
+	// Configure signing method and key function from the config file.
+	// Only apply if not already set by functional options.
+	if finalOpts.signingMethod == nil && finalOpts.keyFunc == nil && configProvided && jwtCfg.SigningMethod != "" && jwtCfg.SigningKey != "" {
+		signingMethod, keyFunc, err := configureKeys(jwtCfg.SigningMethod, jwtCfg.SigningKey)
+		if err != nil {
+			return nil, err
+		}
+		finalOpts.signingMethod = signingMethod
+		finalOpts.keyFunc = keyFunc
+	}
+
+	// Set Issuer. Only apply if not already set by functional options.
+	if finalOpts.issuer == "" {
+		if configProvided && jwtCfg.Issuer != "" {
+			finalOpts.issuer = jwtCfg.Issuer
+		} else {
+			finalOpts.issuer = DefaultIssuer
+		}
+	}
+
+	// Set Audience. Only apply if not already set by functional options.
+	if len(finalOpts.audience) == 0 && configProvided && len(jwtCfg.Audience) > 0 {
+		finalOpts.audience = jwtCfg.Audience
+	}
+
+	// Set token TTLs. Only apply if not already set by functional options.
+	if finalOpts.accessTokenLifetime == 0 {
+		if configProvided && jwtCfg.AccessTokenLifetime > 0 {
+			finalOpts.accessTokenLifetime = time.Duration(jwtCfg.AccessTokenLifetime) * time.Second
+		} else {
+			finalOpts.accessTokenLifetime = DefaultAccessTokenTTL
+		}
+	}
+
+	if finalOpts.refreshTokenLifetime == 0 {
+		if configProvided && jwtCfg.RefreshTokenLifetime > 0 {
+			finalOpts.refreshTokenLifetime = time.Duration(jwtCfg.RefreshTokenLifetime) * time.Second
+		} else {
+			finalOpts.refreshTokenLifetime = DefaultRefreshTokenTTL
+		}
+	}
+
+	// Set default clock and generateID if not provided by options
+	if finalOpts.clock == nil {
+		finalOpts.clock = time.Now
+	}
+	if finalOpts.generateID == nil {
+		finalOpts.generateID = uniuri.New
+	}
+
+	// Final validation for required fields
+	if finalOpts.signingMethod == nil || finalOpts.keyFunc == nil {
+		return nil, fmt.Errorf("JWT signing method and key function must be configured")
+	}
+
+	return finalOpts, nil
 }
 
 // Interface compliance checks.

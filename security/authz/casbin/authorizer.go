@@ -69,7 +69,7 @@ func (auth *Authorizer) Authorized(ctx context.Context, principal security.Princ
 		// Highest performance path for the most common domain model.
 		domain := spec.Domain
 		if len(domain) == 0 {
-			domain = auth.WildcardItem
+			domain = auth.wildcardItem
 		}
 		allowed, err = auth.enforcer.Enforce(principal.GetID(), domain, spec.Resource, spec.Action)
 
@@ -77,7 +77,7 @@ func (auth *Authorizer) Authorized(ctx context.Context, principal security.Princ
 		// Flexible path for any custom model definition.
 		domain := spec.Domain
 		if auth.hasDomain && len(domain) == 0 {
-			domain = auth.WildcardItem
+			domain = auth.wildcardItem
 		}
 		sourceArgs := [4]interface{}{principal.GetID(), domain, spec.Resource, spec.Action}
 		args := make([]interface{}, len(auth.argIndices))
@@ -106,7 +106,7 @@ func (auth *Authorizer) Authorized(ctx context.Context, principal security.Princ
 }
 
 // NewAuthorizer creates a new Authorizer instance.
-func NewAuthorizer(cfg *authzv1.Authorizer, opts ...options.Option) (authz.Authorizer, error) {
+func NewAuthorizer(cfg *authzv1.Authorizer, opts ...Option) (authz.Authorizer, error) {
 	finalOpts, err := newWithOptions(cfg, opts...)
 	if err != nil {
 		return nil, err
@@ -129,7 +129,7 @@ func NewAuthorizer(cfg *authzv1.Authorizer, opts ...options.Option) (authz.Autho
 
 // newWithOptions merges configurations from all sources.
 func newWithOptions(cfg *authzv1.Authorizer, opts ...options.Option) (*Options, error) {
-	finalOpts := FromOptions(opts)
+	finalOpts := FromOptions(opts...)
 
 	if cfg != nil {
 		var casbinConfig *casbinv1.Config
@@ -138,27 +138,27 @@ func newWithOptions(cfg *authzv1.Authorizer, opts ...options.Option) (*Options, 
 		}
 
 		if casbinConfig != nil {
-			if finalOpts.Model == nil {
+			if finalOpts.model == nil {
 				if casbinConfig.GetModelPath() != "" {
 					m, err := model.NewModelFromFile(casbinConfig.GetModelPath())
 					if err != nil {
 						return nil, fmt.Errorf("failed to load model from config file %s: %w", casbinConfig.GetModelPath(), err)
 					}
-					finalOpts.Model = m
+					finalOpts.model = m
 				} else if casbinConfig.GetModel() != "" {
 					m, err := model.NewModelFromString(casbinConfig.GetModel())
 					if err != nil {
 						return nil, fmt.Errorf("failed to load embedded model content: %w", err)
 					}
-					finalOpts.Model = m
+					finalOpts.model = m
 				}
 			}
-			if finalOpts.WildcardItem == "" && casbinConfig.GetWildcardItem() != "" {
-				finalOpts.WildcardItem = casbinConfig.GetWildcardItem()
+			if finalOpts.wildcardItem == "" && casbinConfig.GetWildcardItem() != "" {
+				finalOpts.wildcardItem = casbinConfig.GetWildcardItem()
 			}
-			if finalOpts.Policy == nil {
+			if finalOpts.policy == nil {
 				if casbinConfig.GetPolicyPath() != "" {
-					finalOpts.Policy = adapter.NewFile(casbinConfig.GetPolicyPath())
+					finalOpts.policy = adapter.NewFile(casbinConfig.GetPolicyPath())
 				} else if len(casbinConfig.GetEmbeddedPolicies()) > 0 {
 					policies := make(map[string][][]string)
 					for _, p := range casbinConfig.GetEmbeddedPolicies() {
@@ -167,24 +167,24 @@ func newWithOptions(cfg *authzv1.Authorizer, opts ...options.Option) (*Options, 
 						}
 						policies[p.GetPType()] = append(policies[p.GetPType()], p.GetRule())
 					}
-					finalOpts.Policy = adapter.NewWithPolicies(policies)
+					finalOpts.policy = adapter.NewWithPolicies(policies)
 				}
 			}
 		}
 	}
 
-	if finalOpts.Model == nil {
+	if finalOpts.model == nil {
 		m, err := model.NewModelFromString(DefaultModel())
 		if err != nil {
 			return nil, fmt.Errorf("failed to load default casbin model: %w", err)
 		}
-		finalOpts.Model = m
+		finalOpts.model = m
 	}
-	if finalOpts.Policy == nil {
-		finalOpts.Policy = adapter.NewMemory()
+	if finalOpts.policy == nil {
+		finalOpts.policy = adapter.NewMemory()
 	}
-	if finalOpts.WildcardItem == "" {
-		finalOpts.WildcardItem = DefaultWildcardItem
+	if finalOpts.wildcardItem == "" {
+		finalOpts.wildcardItem = DefaultWildcardItem
 	}
 
 	return finalOpts, nil
@@ -196,7 +196,7 @@ func (auth *Authorizer) initEnforcer() error {
 		return fmt.Errorf("authorizer options not initialized")
 	}
 
-	enforcer, err := casbin.NewSyncedEnforcer(auth.Model, auth.Policy)
+	enforcer, err := casbin.NewSyncedEnforcer(auth.model, auth.policy)
 	if err != nil {
 		return fmt.Errorf("failed to create casbin enforcer: %w", err)
 	}
@@ -204,7 +204,7 @@ func (auth *Authorizer) initEnforcer() error {
 
 	auth.authMode = authModeDynamic
 
-	r, ok := auth.Model["r"]
+	r, ok := auth.model["r"]
 	if !ok {
 		return fmt.Errorf("casbin model is missing request_definition section")
 	}
@@ -247,8 +247,8 @@ func (auth *Authorizer) initEnforcer() error {
 		}
 	}
 
-	if auth.Watcher != nil {
-		if err := auth.enforcer.SetWatcher(auth.Watcher); err != nil {
+	if auth.watcher != nil {
+		if err := auth.enforcer.SetWatcher(auth.watcher); err != nil {
 			return fmt.Errorf("failed to set casbin watcher: %w", err)
 		}
 		auth.log.Infof("Casbin watcher configured.")
