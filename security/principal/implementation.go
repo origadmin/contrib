@@ -20,6 +20,7 @@ type concretePrincipal struct {
 	permissions []string
 	scopes      map[string]bool
 	claims      securityifaces.Claims // Use securityifaces.Claims
+	domain      string
 }
 
 func (p *concretePrincipal) GetID() string                    { return p.id }
@@ -27,6 +28,7 @@ func (p *concretePrincipal) GetRoles() []string               { return p.roles }
 func (p *concretePrincipal) GetPermissions() []string         { return p.permissions }
 func (p *concretePrincipal) GetScopes() map[string]bool       { return p.scopes }
 func (p *concretePrincipal) GetClaims() securityifaces.Claims { return p.claims } // Use securityifaces.Claims
+func (p *concretePrincipal) GetDomain() string                { return p.domain }
 
 func (p *concretePrincipal) Export() *securityv1.Principal {
 	return &securityv1.Principal{
@@ -35,6 +37,7 @@ func (p *concretePrincipal) Export() *securityv1.Principal {
 		Permissions: p.GetPermissions(),
 		Scopes:      p.GetScopes(),
 		Claims:      p.claims.Export(),
+		Domain:      p.GetDomain(),
 	}
 }
 
@@ -261,7 +264,7 @@ func NewClaims(rawData map[string]any, encoders ...ClaimEncoder) (securityifaces
 }
 
 // New creates a new securityifaces.Principal instance.
-func New(id string, roles, permissions []string, scopes map[string]bool, claims securityifaces.Claims) securityifaces.Principal { // Use securityifaces.Principal and securityifaces.Claims
+func New(id string, roles, permissions []string, scopes map[string]bool, claims securityifaces.Claims, domain string) securityifaces.Principal { // Use securityifaces.Principal and securityifaces.Claims
 	if scopes == nil {
 		scopes = make(map[string]bool)
 	}
@@ -274,6 +277,7 @@ func New(id string, roles, permissions []string, scopes map[string]bool, claims 
 		permissions: permissions,
 		scopes:      scopes,
 		claims:      claims,
+		domain:      domain,
 	}
 }
 
@@ -287,12 +291,13 @@ func FromProto(protoP *securityv1.Principal) (securityifaces.Principal, error) {
 
 	claims := &defaultClaims{data: claimsData}
 
-	return New(protoP.GetId(), protoP.GetRoles(), protoP.GetPermissions(), protoP.GetScopes(), claims), nil
+	return New(protoP.GetId(), protoP.GetRoles(), protoP.GetPermissions(), protoP.GetScopes(), claims, protoP.GetDomain()), nil
 }
 
 func EmptyPrincipal(id string) securityifaces.Principal {
 	return &concretePrincipal{
 		id:          id,
+		domain:      "",
 		roles:       make([]string, 0),
 		permissions: make([]string, 0),
 		scopes:      make(map[string]bool),

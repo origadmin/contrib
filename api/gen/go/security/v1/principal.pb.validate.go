@@ -68,6 +68,8 @@ func (m *Principal) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
+	// no validation rules for Domain
+
 	// no validation rules for Scopes
 
 	{

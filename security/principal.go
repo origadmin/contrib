@@ -19,6 +19,9 @@ type Principal interface {
 	GetScopes() map[string]bool
 	// GetClaims returns the custom claims associated with the principal.
 	GetClaims() Claims
+	// GetDomain returns the domain associated with the principal.
+	// This is often used in multi-tenant or multi-project environments.
+	GetDomain() string
 	// Export converts the Principal to its Protobuf representation.
 	Export() *securityv1.Principal
 }

@@ -18,17 +18,21 @@ message Principal {
     (gnostic.openapi.v3.property) = {description: "Unique identifier for the principal."}
   ];
 
+  // The domain associated with the principal.
+  // This is often used in multi-tenant or multi-project environments.
+  string domain = 2 [(gnostic.openapi.v3.property) = {description: "The domain associated with the principal."}];
+
   // A list of roles assigned to the principal.
-  repeated string roles = 2 [(gnostic.openapi.v3.property) = {description: "List of roles assigned to the principal."}];
+  repeated string roles = 3 [(gnostic.openapi.v3.property) = {description: "List of roles assigned to the principal."}];
 
   // A list of permissions assigned to the principal.
-  repeated string permissions = 3 [(gnostic.openapi.v3.property) = {description: "List of permissions assigned to the principal."}];
+  repeated string permissions = 4 [(gnostic.openapi.v3.property) = {description: "List of permissions assigned to the principal."}];
 
   // A map of scopes assigned to the principal.
-  map<string, bool> scopes = 4 [(gnostic.openapi.v3.property) = {description: "Map of scopes assigned to the principal."}];
+  map<string, bool> scopes = 5 [(gnostic.openapi.v3.property) = {description: "Map of scopes assigned to the principal."}];
 
   // A map of standardized, type-safe claims associated with the principal.
   // Using google.protobuf.Value allows for flexible, JSON-like claims,
   // with robust Go helper functions in the structpb package.
-  map<string, google.protobuf.Value> claims = 5 [(gnostic.openapi.v3.property) = {description: "Standardized, flexible claims associated with the principal."}];
+  map<string, google.protobuf.Value> claims = 6 [(gnostic.openapi.v3.property) = {description: "Standardized, flexible claims associated with the principal."}];
 }

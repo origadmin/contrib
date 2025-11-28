@@ -31,16 +31,19 @@ type Principal struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The unique identifier for the principal (e.g., user ID, service account name).
 	Id string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// The domain associated with the principal.
+	// This is often used in multi-tenant or multi-project environments.
+	Domain string `protobuf:"bytes,2,opt,name=domain,proto3" json:"domain,omitempty"`
 	// A list of roles assigned to the principal.
-	Roles []string `protobuf:"bytes,2,rep,name=roles,proto3" json:"roles,omitempty"`
+	Roles []string `protobuf:"bytes,3,rep,name=roles,proto3" json:"roles,omitempty"`
 	// A list of permissions assigned to the principal.
-	Permissions []string `protobuf:"bytes,3,rep,name=permissions,proto3" json:"permissions,omitempty"`
+	Permissions []string `protobuf:"bytes,4,rep,name=permissions,proto3" json:"permissions,omitempty"`
 	// A map of scopes assigned to the principal.
-	Scopes map[string]bool `protobuf:"bytes,4,rep,name=scopes,proto3" json:"scopes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
+	Scopes map[string]bool `protobuf:"bytes,5,rep,name=scopes,proto3" json:"scopes,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"varint,2,opt,name=value"`
 	// A map of standardized, type-safe claims associated with the principal.
 	// Using google.protobuf.Value allows for flexible, JSON-like claims,
 	// with robust Go helper functions in the structpb package.
-	Claims        map[string]*structpb.Value `protobuf:"bytes,5,rep,name=claims,proto3" json:"claims,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Claims        map[string]*structpb.Value `protobuf:"bytes,6,rep,name=claims,proto3" json:"claims,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -82,6 +85,13 @@ func (x *Principal) GetId() string {
 	return ""
 }
 
+func (x *Principal) GetDomain() string {
+	if x != nil {
+		return x.Domain
+	}
+	return ""
+}
+
 func (x *Principal) GetRoles() []string {
 	if x != nil {
 		return x.Roles
@@ -114,13 +124,14 @@ var File_security_v1_principal_proto protoreflect.FileDescriptor
 
 const file_security_v1_principal_proto_rawDesc = "" +
 	"\n" +
-	"\x1bsecurity/v1/principal.proto\x12\x17contrib.api.security.v1\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x17validate/validate.proto\"\xff\x04\n" +
+	"\x1bsecurity/v1/principal.proto\x12\x17contrib.api.security.v1\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x17validate/validate.proto\"\xc8\x05\n" +
 	"\tPrincipal\x12A\n" +
-	"\x02id\x18\x01 \x01(\tB1\xfaB\x04r\x02\x10\x01\xbaG'\x92\x02$Unique identifier for the principal.R\x02id\x12D\n" +
-	"\x05roles\x18\x02 \x03(\tB.\xbaG+\x92\x02(List of roles assigned to the principal.R\x05roles\x12V\n" +
-	"\vpermissions\x18\x03 \x03(\tB4\xbaG1\x92\x02.List of permissions assigned to the principal.R\vpermissions\x12v\n" +
-	"\x06scopes\x18\x04 \x03(\v2..contrib.api.security.v1.Principal.ScopesEntryB.\xbaG+\x92\x02(Map of scopes assigned to the principal.R\x06scopes\x12\x8a\x01\n" +
-	"\x06claims\x18\x05 \x03(\v2..contrib.api.security.v1.Principal.ClaimsEntryBB\xbaG?\x92\x02<Standardized, flexible claims associated with the principal.R\x06claims\x1a9\n" +
+	"\x02id\x18\x01 \x01(\tB1\xfaB\x04r\x02\x10\x01\xbaG'\x92\x02$Unique identifier for the principal.R\x02id\x12G\n" +
+	"\x06domain\x18\x02 \x01(\tB/\xbaG,\x92\x02)The domain associated with the principal.R\x06domain\x12D\n" +
+	"\x05roles\x18\x03 \x03(\tB.\xbaG+\x92\x02(List of roles assigned to the principal.R\x05roles\x12V\n" +
+	"\vpermissions\x18\x04 \x03(\tB4\xbaG1\x92\x02.List of permissions assigned to the principal.R\vpermissions\x12v\n" +
+	"\x06scopes\x18\x05 \x03(\v2..contrib.api.security.v1.Principal.ScopesEntryB.\xbaG+\x92\x02(Map of scopes assigned to the principal.R\x06scopes\x12\x8a\x01\n" +
+	"\x06claims\x18\x06 \x03(\v2..contrib.api.security.v1.Principal.ClaimsEntryBB\xbaG?\x92\x02<Standardized, flexible claims associated with the principal.R\x06claims\x1a9\n" +
 	"\vScopesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\bR\x05value:\x028\x01\x1aQ\n" +
