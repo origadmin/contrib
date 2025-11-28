@@ -1,22 +1,21 @@
-// Package authz implements the functions, types, and interfaces for the module.
 package authz
 
 import (
-	"context"
-
-	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1" // Import securityv1
+	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authz"
 	securityPrincipal "github.com/origadmin/contrib/security/principal"
 	"github.com/origadmin/contrib/security/request"
+	"github.com/origadmin/runtime/context"
 	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/runtime/middleware"
 )
 
 // Middleware is a Kratos middleware for authorization.
 type Middleware struct {
-	Authorizer  authz.Authorizer
-	SkipChecker func(security.Request) bool
+	Authorizer      authz.Authorizer
+	SkipChecker     func(security.Request) bool
+	PropagationType securityPrincipal.PropagationType
 }
 
 // NewAuthZMiddleware creates a new authorization middleware with required skip checker.
@@ -29,6 +28,9 @@ func NewAuthZMiddleware(a authz.Authorizer, opts ...options.Option) *Middleware 
 	}
 	if m.SkipChecker == nil {
 		m.SkipChecker = NoOpSkipChecker()
+	}
+	if o.PropagationType == securityPrincipal.PropagationTypeUnknown {
+		o.PropagationType = securityPrincipal.PropagationTypeKratos
 	}
 	return m
 }

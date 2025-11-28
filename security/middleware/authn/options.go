@@ -3,13 +3,15 @@ package authn
 
 import (
 	"github.com/origadmin/contrib/security/authn"
+	"github.com/origadmin/contrib/security/principal"
 	"github.com/origadmin/runtime/extensions/optionutil"
 	"github.com/origadmin/runtime/interfaces/options"
 )
 
 type Options struct {
-	Authenticator authn.Authenticator
-	SkipChecker   SkipChecker
+	Authenticator   authn.Authenticator
+	SkipChecker     SkipChecker
+	PropagationType principal.PropagationType // Added field
 }
 
 func WithAuthenticator(authenticator authn.Authenticator) options.Option {
@@ -21,6 +23,13 @@ func WithAuthenticator(authenticator authn.Authenticator) options.Option {
 func WithSkipChecker(skipChecker SkipChecker) options.Option {
 	return optionutil.Update(func(o *Options) {
 		o.SkipChecker = skipChecker
+	})
+}
+
+// WithPropagationType sets the propagation type for the middleware.
+func WithPropagationType(pt principal.PropagationType) options.Option {
+	return optionutil.Update(func(o *Options) {
+		o.PropagationType = pt
 	})
 }
 

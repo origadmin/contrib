@@ -1,13 +1,10 @@
-/*
- * Copyright (c) 2024 OrigAdmin. All rights reserved.
- */
-
 package authn
 
 import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/transport"
+	"google.golang.org/grpc/metadata"
 
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authn"
@@ -36,6 +33,9 @@ func NewAuthNMiddleware(n authn.Authenticator, opts ...options.Option) *Middlewa
 	}
 	if a.SkipChecker == nil {
 		a.SkipChecker = NoOpSkipChecker()
+	}
+	if o.PropagationType == securityPrincipal.PropagationTypeUnknown {
+		o.PropagationType = securityPrincipal.PropagationTypeKratos
 	}
 	return a
 }
@@ -121,18 +121,25 @@ func (m *Middleware) Server() middleware.KMiddleware {
 	}
 }
 
-// Client implements the Kratos middleware (optional, for client-side authentication propagation)
+// Client implements the Kratos middleware for client-side authentication propagation.
+// It propagates the Principal from the context to the outgoing request's metadata/headers.
 func (m *Middleware) Client() middleware.KMiddleware {
 	return func(handler middleware.KHandler) middleware.KHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-			// Example: Propagate Principal from context to client request metadata
 			if p, ok := securityPrincipal.FromContext(ctx); ok {
+				encodedPrincipal, encodeErr := securityPrincipal.EncodePrincipal(p)
+				if encodeErr != nil {
+					return nil, encodeErr
+				}
+
 				if tr, ok := transport.FromClientContext(ctx); ok {
-					encodedPrincipal, encodeErr := securityPrincipal.EncodePrincipal(p)
-					if encodeErr != nil {
-						return nil, encodeErr
+					switch tr.Kind() {
+					case transport.KindHTTP:
+						tr.RequestHeader().Set(securityPrincipal.MetadataKey, encodedPrincipal)
+					case transport.KindGRPC:
+						// For gRPC, add to outgoing metadata
+						ctx = metadata.AppendToOutgoingContext(ctx, securityPrincipal.MetadataKey, encodedPrincipal)
 					}
-					tr.RequestHeader().Set(securityPrincipal.MetadataKey, encodedPrincipal)
 				}
 			}
 			return handler(ctx, req)

@@ -72,16 +72,6 @@ func (e *HeaderCredentialExtractor) Extract(ctx context.Context, request securit
 	return NewCredential(credentialType, authHeader, payload, goMeta)
 }
 
-// NewEmptyCredential creates an empty credential for cases where no credential is found in the request.
-func NewEmptyCredential() securityifaces.Credential {
-	return &credential{
-		credentialType: "none",
-		rawCredential:  "",
-		payload:        nil,
-		meta:           nil,
-	}
-}
-
 // ExtractFromTransport extracts credential from Kratos transport.
 func ExtractFromTransport(tr transport.Transporter) (securityifaces.Credential, error) {
 	// For gRPC, metadata is in tr.RequestHeader()

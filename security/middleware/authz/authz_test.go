@@ -156,8 +156,6 @@ func TestAuthZMiddleware_Success(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tr := newMockTransport(t, tc.method, tc.operation)
 			ctx := transport.NewServerContext(context.Background(), tr)
-			ctx = kratoshttp.NewContext(ctx, tr.Request())
-
 			ctx = principal.NewContext(ctx, tc.principal) // Inject principal into context
 
 			handler := func(ctx context.Context, req interface{}) (interface{}, error) {
@@ -232,7 +230,6 @@ func TestAuthZMiddleware_Failure(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tr := newMockTransport(t, tc.method, tc.operation)
 			ctx := transport.NewServerContext(context.Background(), tr)
-			ctx = kratoshttp.NewContext(ctx, tr.Request())
 
 			if tc.principal != nil {
 				ctx = principal.NewContext(ctx, tc.principal)
@@ -264,7 +261,6 @@ func TestAuthZMiddleware_SkipChecker(t *testing.T) {
 	t.Run("SkipChecker allows skipping authorization", func(t *testing.T) {
 		tr := newMockTransport(t, "GET", "/protected.Service/GetData")
 		ctx := transport.NewServerContext(context.Background(), tr)
-		ctx = kratoshttp.NewContext(ctx, tr.Request())
 		mw := NewAuthZMiddleware(mockAuthz, WithSkipChecker(alwaysSkip))
 		_, err := mw.Server()(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return "handler called", nil
@@ -275,7 +271,6 @@ func TestAuthZMiddleware_SkipChecker(t *testing.T) {
 	t.Run("SkipChecker does not skip authorization", func(t *testing.T) {
 		tr := newMockTransport(t, "GET", "/protected.Service/GetData")
 		ctx := transport.NewServerContext(context.Background(), tr)
-		ctx = kratoshttp.NewContext(ctx, tr.Request())
 
 		mw := NewAuthZMiddleware(mockAuthz, WithSkipChecker(neverSkip))
 		_, err := mw.Server()(func(ctx context.Context, req interface{}) (interface{}, error) {
@@ -294,7 +289,6 @@ func TestAuthZMiddleware_SkipChecker(t *testing.T) {
 
 		tr := newMockTransport(t, "GET", "/public.Service/GetInfo")
 		ctx := transport.NewServerContext(context.Background(), tr)
-		ctx = kratoshttp.NewContext(ctx, tr.Request())
 		_, err := mw.Server()(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return "handler called", nil
 		})(ctx, nil)
@@ -302,7 +296,6 @@ func TestAuthZMiddleware_SkipChecker(t *testing.T) {
 
 		tr = newMockTransport(t, "GET", "/protected.Service/GetData")
 		ctx = transport.NewServerContext(context.Background(), tr)
-		ctx = kratoshttp.NewContext(ctx, tr.Request())
 		_, err = mw.Server()(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return "handler called", nil
 		})(ctx, nil)
@@ -318,19 +311,16 @@ func TestAuthZMiddleware_SkipChecker(t *testing.T) {
 
 		tr := newMockTransport(t, "GET", "/path1")
 		ctx := transport.NewServerContext(context.Background(), tr)
-		ctx = kratoshttp.NewContext(ctx, tr.Request())
 		_, err := mw.Server()(func(ctx context.Context, req interface{}) (interface{}, error) { return "ok", nil })(ctx, nil)
 		assert.NoError(t, err)
 
 		tr = newMockTransport(t, "GET", "/path2")
 		ctx = transport.NewServerContext(context.Background(), tr)
-		ctx = kratoshttp.NewContext(ctx, tr.Request())
 		_, err = mw.Server()(func(ctx context.Context, req interface{}) (interface{}, error) { return "ok", nil })(ctx, nil)
 		assert.NoError(t, err)
 
 		tr = newMockTransport(t, "GET", "/path3")
 		ctx = transport.NewServerContext(context.Background(), tr)
-		ctx = kratoshttp.NewContext(ctx, tr.Request())
 		_, err = mw.Server()(func(ctx context.Context, req interface{}) (interface{}, error) { return "ok", nil })(ctx, nil)
 		assert.Error(t, err)
 		assert.True(t, securityv1.IsCredentialsInvalid(err))
