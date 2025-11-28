@@ -12,7 +12,7 @@ import (
 
 const (
 	// MetadataKey is the key used to store the Principal in gRPC metadata or HTTP headers.
-	MetadataKey = "x-principal-proto"
+	MetadataKey = "x-md-global-principal-proto"
 )
 
 // EncodePrincipal encodes a securityifaces.Principal into a base64-encoded Protobuf string.

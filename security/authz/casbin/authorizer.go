@@ -36,7 +36,7 @@ type Authorizer struct {
 	policy       persist.Adapter
 	enforcer     *casbin.SyncedEnforcer
 	wildcardItem string
-	hasDomain    bool // Indicates if the Casbin model supports domains.
+	hasDomain    bool
 }
 
 // Authorized checks if a principal is authorized to perform an action on a resource within a specific domain.

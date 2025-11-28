@@ -85,7 +85,7 @@ func WithFileModel(path string) options.Option {
 	return optionutil.Update(func(o *Options) {
 		m, err := casbinmodel.NewModelFromFile(path)
 		if err != nil {
-			panic(err) // Fail fast during configuration if file is invalid or not found
+			panic(err)
 		}
 		o.Model = m
 	})

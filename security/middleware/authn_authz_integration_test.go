@@ -22,6 +22,7 @@ import (
 	authnv1 "github.com/origadmin/contrib/api/gen/go/security/authn/v1"
 	authzv1 "github.com/origadmin/contrib/api/gen/go/security/authz/v1"
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
+	securityifaces "github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authn"
 	jwtAuthn "github.com/origadmin/contrib/security/authn/jwt"
 	"github.com/origadmin/contrib/security/authz"
@@ -64,6 +65,7 @@ p, alice, /admin.Service/GetData, read
 p, bob, /public.Service/GetInfo, read
 p, editor, /documents.Service/Edit, create
 p, user, /documents.Service/View, read
+p, user123, /documents.Service/Edit, create
 `
 
 	jwtAuth, err := jwtAuthn.NewAuthenticator(&authnv1.Authenticator{
@@ -334,5 +336,158 @@ func TestGatewayServerFlow(t *testing.T) {
 
 		require.Error(t, err, "Server should deny request with missing principal")
 		assert.True(t, securityv1.IsCredentialsInvalid(err), "Expected CredentialsInvalid error")
+	})
+}
+
+// TestCompleteGatewayClientServerFlow 测试完整的 Gateway -> Client -> Server 传递链路
+func TestCompleteGatewayClientServerFlow(t *testing.T) {
+	fx := newTestFixture(t)
+
+	t.Run("Complete flow: Gateway authenticates -> Client propagates -> Server authorizes", func(t *testing.T) {
+		// === Step 1: Gateway 处理客户端请求 ===
+		// 模拟客户端发送请求到 Gateway
+		gatewayTr := newMockTransport(t, "POST", "/documents.Service/Edit")
+		token := generateJWTToken(t, fx.secret, "user123", []string{"editor"})
+		gatewayTr.RequestHeader().Set("Authorization", "Bearer "+token)
+		gatewayCtx := transport.NewServerContext(context.Background(), gatewayTr)
+
+		// Gateway 进行认证
+		var gatewayPrincipal securityifaces.Principal
+		gatewayAuthnHandler := fx.authnMiddleware.Server()(func(ctx context.Context, req interface{}) (interface{}, error) {
+			// 认证成功，提取 principal
+			p, ok := principal.FromContext(ctx)
+			require.True(t, ok, "Gateway should have principal in context after authn")
+			gatewayPrincipal = p
+			assert.Equal(t, "user123", p.GetID())
+			assert.Contains(t, p.GetRoles(), "editor")
+			return "gateway authenticated", nil
+		})
+
+		_, err := gatewayAuthnHandler(gatewayCtx, nil)
+		require.NoError(t, err, "Gateway authentication should succeed")
+		require.NotNil(t, gatewayPrincipal, "Gateway should extract principal")
+
+		// === Step 2: Client 传播认证信息到后端服务 ===
+		// 模拟 Gateway 作为客户端调用后端服务
+		backendServiceTr := newMockTransport(t, "POST", "/documents.Service/Edit")
+
+		// 将 Gateway 认证后的 principal 放入客户端 context
+		clientCtx := transport.NewClientContext(
+			principal.NewContext(context.Background(), gatewayPrincipal),
+			backendServiceTr,
+		)
+
+		// Client 中间件传播 principal
+		clientPropagateHandler := fx.authnMiddleware.Client()(func(ctx context.Context, req interface{}) (interface{}, error) {
+			// 验证 principal 是否被正确传播到 header
+			encodedPrincipal := backendServiceTr.RequestHeader().Get(principal.MetadataKey)
+			require.NotEmpty(t, encodedPrincipal, "Client should propagate principal in header")
+
+			// 验证编码的 principal 可以正确解码
+			decodedPrincipal, err := principal.DecodePrincipal(encodedPrincipal)
+			require.NoError(t, err, "Should be able to decode propagated principal")
+			assert.Equal(t, gatewayPrincipal.GetID(), decodedPrincipal.GetID())
+
+			return "client propagated", nil
+		})
+
+		_, err = clientPropagateHandler(clientCtx, nil)
+		require.NoError(t, err, "Client propagation should succeed")
+
+		// === Step 3: Server 接收传播信息并进行授权 ===
+		// 模拟后端服务接收请求
+		serverTr := newMockTransport(t, "POST", "/documents.Service/Edit")
+
+		// 将客户端传播的 principal header 复制到服务器 transport
+		propagatedPrincipal := backendServiceTr.RequestHeader().Get(principal.MetadataKey)
+		serverTr.RequestHeader().Set(principal.MetadataKey, propagatedPrincipal)
+		serverCtx := transport.NewServerContext(context.Background(), serverTr)
+
+		// Server 进行授权检查
+		var serverPrincipal securityifaces.Principal
+		serverAuthzHandler := kratosMiddleware.Chain(
+			principalFromHeaderMiddleware(), // 首先从 header 解析 principal
+			fx.authzMiddleware.Server(),     // 然后进行授权
+		)(func(ctx context.Context, req interface{}) (interface{}, error) {
+			// 验证 principal 是否正确传递到 server
+			p, ok := principal.FromContext(ctx)
+			require.True(t, ok, "Server should have principal in context")
+			serverPrincipal = p
+			assert.Equal(t, "user123", p.GetID())
+			assert.Contains(t, p.GetRoles(), "editor")
+			return "server authorized", nil
+		})
+
+		_, err = serverAuthzHandler(serverCtx, nil)
+		require.NoError(t, err, "Server authorization should succeed")
+		require.NotNil(t, serverPrincipal, "Server should receive principal")
+
+		// === 验证整个链路的完整性 ===
+		assert.Equal(t, gatewayPrincipal.GetID(), serverPrincipal.GetID(), "Principal ID should be consistent across the chain")
+		assert.Equal(t, gatewayPrincipal.GetRoles(), serverPrincipal.GetRoles(), "Principal roles should be consistent across the chain")
+	})
+
+	t.Run("Complete flow with insufficient permissions", func(t *testing.T) {
+		// === Step 1: Gateway 认证成功（但权限不足） ===
+		gatewayTr := newMockTransport(t, "POST", "/documents.Service/Edit")
+		token := generateJWTToken(t, fx.secret, "user456", []string{"user"}) // user 角色，不是 editor
+		gatewayTr.RequestHeader().Set("Authorization", "Bearer "+token)
+		gatewayCtx := transport.NewServerContext(context.Background(), gatewayTr)
+
+		var gatewayPrincipal securityifaces.Principal
+		gatewayAuthnHandler := fx.authnMiddleware.Server()(func(ctx context.Context, req interface{}) (interface{}, error) {
+			p, ok := principal.FromContext(ctx)
+			require.True(t, ok)
+			gatewayPrincipal = p
+			return "gateway authenticated", nil
+		})
+
+		_, err := gatewayAuthnHandler(gatewayCtx, nil)
+		require.NoError(t, err)
+
+		// === Step 2: Client 传播 ===
+		backendServiceTr := newMockTransport(t, "POST", "/documents.Service/Edit")
+		clientCtx := transport.NewClientContext(
+			principal.NewContext(context.Background(), gatewayPrincipal),
+			backendServiceTr,
+		)
+
+		clientPropagateHandler := fx.authnMiddleware.Client()(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return "client propagated", nil
+		})
+
+		_, err = clientPropagateHandler(clientCtx, nil)
+		require.NoError(t, err)
+
+		// === Step 3: Server 授权失败 ===
+		serverTr := newMockTransport(t, "POST", "/documents.Service/Edit")
+		propagatedPrincipal := backendServiceTr.RequestHeader().Get(principal.MetadataKey)
+		serverTr.RequestHeader().Set(principal.MetadataKey, propagatedPrincipal)
+		serverCtx := transport.NewServerContext(context.Background(), serverTr)
+
+		serverAuthzHandler := kratosMiddleware.Chain(
+			principalFromHeaderMiddleware(),
+			fx.authzMiddleware.Server(),
+		)(successHandler)
+
+		_, err = serverAuthzHandler(serverCtx, nil)
+		require.Error(t, err, "Server should deny due to insufficient permissions")
+		assert.True(t, securityv1.IsPermissionDenied(err), "Should return PermissionDenied error")
+	})
+
+	t.Run("Complete flow with invalid token at gateway", func(t *testing.T) {
+		// === Step 1: Gateway 认证失败 ===
+		gatewayTr := newMockTransport(t, "POST", "/documents.Service/Edit")
+		gatewayTr.RequestHeader().Set("Authorization", "Bearer invalid-token")
+		gatewayCtx := transport.NewServerContext(context.Background(), gatewayTr)
+
+		gatewayAuthnHandler := fx.authnMiddleware.Server()(successHandler)
+
+		_, err := gatewayAuthnHandler(gatewayCtx, nil)
+		require.Error(t, err, "Gateway should reject invalid token")
+		assert.True(t, securityv1.IsTokenInvalid(err), "Should return TokenInvalid error")
+
+		// 由于 Gateway 认证失败，后续的 Client 和 Server 步骤不会执行
+		// 这验证了认证失败时整个链路被正确阻断
 	})
 }
