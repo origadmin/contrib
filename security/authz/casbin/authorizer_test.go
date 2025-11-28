@@ -189,11 +189,53 @@ type mockPrincipal struct {
 	id string
 }
 
-func (m *mockPrincipal) GetID() string                  { return m.id }
-func (m *mockPrincipal) GetRoles() []string             { return nil }
-func (m *mockPrincipal) GetPermissions() []string       { return nil }
-func (m *mockPrincipal) GetScopes() map[string]bool     { return nil }
-func (m *mockPrincipal) GetClaims() security.Claims     { return nil }
+func (m *mockPrincipal) GetID() string              { return m.id }
+func (m *mockPrincipal) GetRoles() []string         { return nil }
+func (m *mockPrincipal) GetPermissions() []string   { return nil }
+func (m *mockPrincipal) GetScopes() map[string]bool { return nil }
+func (m *mockPrincipal) GetClaims() security.Claims { return nil }
 func (m *mockPrincipal) Export() *securityv1.Principal {
 	return &securityv1.Principal{Id: m.id}
+}
+
+// TestImplicitDomainWildcard verifies that an empty domain is treated as a wildcard.
+func (s *AuthorizerTestSuite) TestImplicitDomainWildcard() {
+	t := s.T()
+	cfg := &authzv1.Authorizer{
+		Casbin: &casbinv1.Config{
+			ModelPath:  "testdata/model_fast_path_domain.conf",
+			PolicyPath: "testdata/policy_wildcard_domain.csv",
+		},
+	}
+
+	auth, err := casbin.NewAuthorizer(cfg, s.opts...)
+	require.NoError(t, err)
+	require.NotNil(t, auth)
+
+	// Scenario 1: 'admin' has access to 'read-only-resource' in ANY domain ('*').
+	// We check with an EMPTY domain, expecting it to be treated as a wildcard and return true.
+	t.Run("should allow when policy has wildcard and spec has empty domain", func(t *testing.T) {
+		spec := authz.RuleSpec{Resource: "read-only-resource", Action: "read", Domain: ""}
+		allowed, err := auth.Authorized(context.Background(), &mockPrincipal{id: "admin"}, spec)
+		require.NoError(t, err)
+		assert.True(t, allowed, "Expected admin to be authorized due to wildcard domain policy")
+	})
+
+	// Scenario 2: 'user' has access to 'read-write-resource' ONLY in 'specific-domain'.
+	// We check with an EMPTY domain, expecting it to become '*' and NOT match 'specific-domain', returning false.
+	t.Run("should deny when policy has specific domain and spec has empty domain", func(t *testing.T) {
+		spec := authz.RuleSpec{Resource: "read-write-resource", Action: "write", Domain: ""}
+		allowed, err := auth.Authorized(context.Background(), &mockPrincipal{id: "user"}, spec)
+		require.NoError(t, err)
+		assert.False(t, allowed, "Expected user to be denied as '*' does not match 'specific-domain'")
+	})
+
+	// Scenario 3: 'user' has access to 'read-write-resource' ONLY in 'specific-domain'.
+	// We check with the CORRECT domain, expecting it to return true.
+	t.Run("should allow when policy has specific domain and spec has matching domain", func(t *testing.T) {
+		spec := authz.RuleSpec{Resource: "read-write-resource", Action: "write", Domain: "specific-domain"}
+		allowed, err := auth.Authorized(context.Background(), &mockPrincipal{id: "user"}, spec)
+		require.NoError(t, err)
+		assert.True(t, allowed, "Expected user to be authorized with explicit domain match")
+	})
 }

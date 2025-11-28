@@ -9,10 +9,14 @@ import (
 	"github.com/casbin/casbin/v2/persist"
 
 	"github.com/origadmin/contrib/security/authz/casbin/internal/model"
-	"github.com/origadmin/contrib/security/authz/casbin/internal/policy"
 	"github.com/origadmin/runtime/extensions/optionutil"
 	"github.com/origadmin/runtime/interfaces/options"
 )
+
+
+
+
+
 
 // Options holds configuration for the Casbin Authorizer, used with optionutil.
 // All fields are unexported to enforce configuration via functional options,
@@ -31,10 +35,7 @@ func DefaultModel() string {
 	return model.DefaultRestfullWithRoleModel
 }
 
-// DefaultPolicy returns the default Casbin policy data.
-func DefaultPolicy() []byte {
-	return policy.MustPolicy("keymatch_with_rbac_in_domain.csv")
-}
+
 
 // WithModel sets the Casbin model for the Authorizer.
 func WithModel(m casbinmodel.Model) Option {

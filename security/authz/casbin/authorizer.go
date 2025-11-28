@@ -181,6 +181,10 @@ func newWithOptions(cfg *authzv1.Authorizer, opts ...options.Option) (*Options, 
 		finalOpts.model = m
 	}
 	if finalOpts.policy == nil {
+		// If no policy is configured via options, config file, or embedded policies,
+		// default to an empty in-memory adapter. This implements a "default deny"
+		// security posture, meaning no authorization rules are present until explicitly
+		// added or loaded from a source.
 		finalOpts.policy = adapter.NewMemory()
 	}
 	if finalOpts.wildcardItem == "" {
@@ -269,3 +273,5 @@ func slicesEqual(a, b []string) bool {
 	}
 	return true
 }
+
+
