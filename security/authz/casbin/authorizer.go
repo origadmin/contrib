@@ -13,6 +13,7 @@ import (
 	"github.com/casbin/casbin/v2/model"
 	fileadapter "github.com/casbin/casbin/v2/persist/file-adapter"
 
+	casbinv1 "github.com/origadmin/contrib/api/gen/go/security/authz/casbin/v1"
 	authzv1 "github.com/origadmin/contrib/api/gen/go/security/authz/v1"
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authz"
@@ -132,7 +133,11 @@ func newWithOptions(cfg *authzv1.Authorizer, opts ...options.Option) (*Options, 
 	finalOpts := FromOptions(opts)
 
 	if cfg != nil {
-		casbinConfig := cfg.GetCasbin()
+		var casbinConfig *casbinv1.Config
+		if cfg.GetCasbin() != nil {
+			casbinConfig = cfg.GetCasbin()
+		}
+
 		if casbinConfig != nil {
 			if finalOpts.Model == nil {
 				if casbinConfig.GetModelPath() != "" {
@@ -201,7 +206,6 @@ func (auth *Authorizer) initEnforcer() error {
 	}
 	auth.enforcer = enforcer
 
-	// Default to dynamic mode.
 	auth.authMode = authModeDynamic
 
 	r, ok := auth.Model["r"]
@@ -219,7 +223,6 @@ func (auth *Authorizer) initEnforcer() error {
 		trimmedTokens = append(trimmedTokens, strings.TrimSpace(token))
 	}
 
-	// Check for fast path matches without using reflection.
 	if slicesEqual(trimmedTokens, fastPathNonDomainTokens) {
 		auth.authMode = authModeFastPathNonDomain
 		auth.hasDomain = false
@@ -229,7 +232,6 @@ func (auth *Authorizer) initEnforcer() error {
 		auth.hasDomain = true
 		auth.log.Debug("Using fast path for domain model.")
 	} else {
-		// Fallback to dynamic mode for custom models.
 		auth.log.Debug("Using dynamic path for custom model.")
 		auth.argIndices = make([]int, 0, len(trimmedTokens))
 		for _, token := range trimmedTokens {

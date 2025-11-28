@@ -22,12 +22,14 @@ type Options struct {
 	WildcardItem string
 }
 
+type Option = options.Option
+
 // DefaultModel returns the default Casbin model string.
 func DefaultModel() string {
 	return model.DefaultRestfullWithRoleModel
 }
 
-// DefaultPolicy returns the default Casbin policy data. (Still unused, but kept for now as it was in original)
+// DefaultPolicy returns the default Casbin policy data.
 func DefaultPolicy() []byte {
 	return policy.MustPolicy("keymatch_with_rbac_in_domain.csv")
 }
