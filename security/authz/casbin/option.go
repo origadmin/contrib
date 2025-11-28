@@ -8,7 +8,6 @@ import (
 	casbinmodel "github.com/casbin/casbin/v2/model"
 	"github.com/casbin/casbin/v2/persist"
 
-	"github.com/origadmin/contrib/security/authz/casbin/adapter"
 	"github.com/origadmin/contrib/security/authz/casbin/internal/model"
 	"github.com/origadmin/contrib/security/authz/casbin/internal/policy"
 	"github.com/origadmin/runtime/extensions/optionutil"
@@ -19,35 +18,8 @@ import (
 type Options struct {
 	Model        casbinmodel.Model
 	Policy       persist.Adapter
+	Watcher      persist.Watcher
 	WildcardItem string
-}
-
-// Apply applies the configurations from this Options struct to an Authorizer instance.
-func (o *Options) Apply(s *Authorizer) error {
-	if o.Policy != nil {
-		s.policy = o.Policy
-	} else {
-		s.policy = adapter.NewMemory()
-	}
-
-	if o.Model != nil {
-		s.model = o.Model
-	} else {
-		m, err := casbinmodel.NewModelFromString(DefaultModel()) // Default model
-		if err != nil {
-			return err
-		}
-		s.model = m
-	}
-
-	if o.WildcardItem != "" {
-		s.wildcardItem = o.WildcardItem
-	} else {
-		s.wildcardItem = "*" // Default wildcard item
-	}
-
-	// Enforcer creation logic will be moved to NewAuthorizer
-	return nil
 }
 
 // DefaultModel returns the default Casbin model string.
@@ -107,6 +79,13 @@ func WithNameModel(name string) options.Option {
 func WithPolicyAdapter(p persist.Adapter) options.Option {
 	return optionutil.Update(func(o *Options) {
 		o.Policy = p
+	})
+}
+
+// WithWatcher sets the Casbin watcher for dynamic policy updates.
+func WithWatcher(w persist.Watcher) options.Option {
+	return optionutil.Update(func(o *Options) {
+		o.Watcher = w
 	})
 }
 

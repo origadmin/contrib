@@ -78,6 +78,8 @@ func (m *Config) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
+	// no validation rules for Model
+
 	for idx, item := range m.GetEmbeddedPolicies() {
 		_, _ = idx, item
 
@@ -111,6 +113,8 @@ func (m *Config) validate(all bool) error {
 		}
 
 	}
+
+	// no validation rules for WildcardItem
 
 	if len(errors) > 0 {
 		return ConfigMultiError(errors)
@@ -189,30 +193,31 @@ var _ interface {
 	ErrorName() string
 } = ConfigValidationError{}
 
-// Validate checks the field values on Policy with the rules defined in the
+// Validate checks the field values on PolicyRule with the rules defined in the
 // proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
-func (m *Policy) Validate() error {
+func (m *PolicyRule) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on Policy with the rules defined in the
-// proto definition for this message. If any rules are violated, the result is
-// a list of violation errors wrapped in PolicyMultiError, or nil if none found.
-func (m *Policy) ValidateAll() error {
+// ValidateAll checks the field values on PolicyRule with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in PolicyRuleMultiError, or
+// nil if none found.
+func (m *PolicyRule) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *Policy) validate(all bool) error {
+func (m *PolicyRule) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetSubject()) < 1 {
-		err := PolicyValidationError{
-			field:  "Subject",
+	if utf8.RuneCountInString(m.GetPType()) < 1 {
+		err := PolicyRuleValidationError{
+			field:  "PType",
 			reason: "value length must be at least 1 runes",
 		}
 		if !all {
@@ -221,43 +226,30 @@ func (m *Policy) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if utf8.RuneCountInString(m.GetObject()) < 1 {
-		err := PolicyValidationError{
-			field:  "Object",
-			reason: "value length must be at least 1 runes",
+	if len(m.GetRule()) < 1 {
+		err := PolicyRuleValidationError{
+			field:  "Rule",
+			reason: "value must contain at least 1 item(s)",
 		}
 		if !all {
 			return err
 		}
 		errors = append(errors, err)
 	}
-
-	if utf8.RuneCountInString(m.GetAction()) < 1 {
-		err := PolicyValidationError{
-			field:  "Action",
-			reason: "value length must be at least 1 runes",
-		}
-		if !all {
-			return err
-		}
-		errors = append(errors, err)
-	}
-
-	// no validation rules for Extras
 
 	if len(errors) > 0 {
-		return PolicyMultiError(errors)
+		return PolicyRuleMultiError(errors)
 	}
 
 	return nil
 }
 
-// PolicyMultiError is an error wrapping multiple validation errors returned by
-// Policy.ValidateAll() if the designated constraints aren't met.
-type PolicyMultiError []error
+// PolicyRuleMultiError is an error wrapping multiple validation errors
+// returned by PolicyRule.ValidateAll() if the designated constraints aren't met.
+type PolicyRuleMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m PolicyMultiError) Error() string {
+func (m PolicyRuleMultiError) Error() string {
 	msgs := make([]string, 0, len(m))
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -266,11 +258,11 @@ func (m PolicyMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m PolicyMultiError) AllErrors() []error { return m }
+func (m PolicyRuleMultiError) AllErrors() []error { return m }
 
-// PolicyValidationError is the validation error returned by Policy.Validate if
-// the designated constraints aren't met.
-type PolicyValidationError struct {
+// PolicyRuleValidationError is the validation error returned by
+// PolicyRule.Validate if the designated constraints aren't met.
+type PolicyRuleValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -278,22 +270,22 @@ type PolicyValidationError struct {
 }
 
 // Field function returns field value.
-func (e PolicyValidationError) Field() string { return e.field }
+func (e PolicyRuleValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e PolicyValidationError) Reason() string { return e.reason }
+func (e PolicyRuleValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e PolicyValidationError) Cause() error { return e.cause }
+func (e PolicyRuleValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e PolicyValidationError) Key() bool { return e.key }
+func (e PolicyRuleValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e PolicyValidationError) ErrorName() string { return "PolicyValidationError" }
+func (e PolicyRuleValidationError) ErrorName() string { return "PolicyRuleValidationError" }
 
 // Error satisfies the builtin error interface
-func (e PolicyValidationError) Error() string {
+func (e PolicyRuleValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -305,14 +297,14 @@ func (e PolicyValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sPolicy.%s: %s%s",
+		"invalid %sPolicyRule.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = PolicyValidationError{}
+var _ error = PolicyRuleValidationError{}
 
 var _ interface {
 	Field() string
@@ -320,4 +312,4 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = PolicyValidationError{}
+} = PolicyRuleValidationError{}

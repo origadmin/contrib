@@ -23,36 +23,41 @@ message Config {
     (gnostic.openapi.v3.property) = {description: "Path to the Casbin policy file."}
   ];
 
+  // Optional: The content of the Casbin model configuration file embedded directly.
+  string model = 5 [
+    json_name = "model",
+    (gnostic.openapi.v3.property) = {description: "Content of the Casbin model configuration file embedded directly."}
+  ];
+
+
   // Optional: Policy rules can also be embedded directly in the configuration.
-  repeated Policy embedded_policies = 3 [
+  repeated PolicyRule embedded_policies = 3 [
     json_name = "embedded_policies",
     (gnostic.openapi.v3.property) = {description: "Embedded Casbin policy rules."}
   ];
+
+  // Wildcard item used for domain matching. Defaults to "*".
+  string wildcard_item = 4 [
+    json_name = "wildcard_item",
+    (gnostic.openapi.v3.property) = {description: "Wildcard item used for domain matching. Defaults to '*'"}
+  ];
 }
 
-// Policy defines a single Casbin policy rule.
-message Policy {
-  string subject = 1 [
-    json_name = "subject",
+// PolicyRule defines a single Casbin policy rule in a format that Casbin understands.
+message PolicyRule {
+  // The type of the policy rule, e.g., "p" for policy or "g" for grouping/role.
+  string p_type = 1 [
+    json_name = "p_type",
     (validate.rules).string.min_len = 1,
-    (gnostic.openapi.v3.property) = {description: "The subject of the policy."}
+    (gnostic.openapi.v3.property) = {description: "The type of the policy rule (e.g., 'p' or 'g')."}
   ];
-  string object = 2 [
-    json_name = "object",
-    (validate.rules).string.min_len = 1,
-    (gnostic.openapi.v3.property) = {description: "The object of the policy."}
-  ];
-  string action = 3 [
-    json_name = "action",
-    (validate.rules).string.min_len = 1,
-    (gnostic.openapi.v3.property) = {description: "The action of the policy."}
-  ];
-  repeated string domain = 4 [
-    json_name = "domain",
-    (gnostic.openapi.v3.property) = {description: "The domains associated with the policy."}
-  ];
-  map<string, string> extras = 6 [
-    json_name = "extras",
-    (gnostic.openapi.v3.property) = {description: "The extra data associated with the policy."}
+
+  // The content of the rule as a list of strings.
+  // e.g., for a "p" rule: ["alice", "data1", "read"]
+  // e.g., for a "g" rule: ["bob", "admin"]
+  repeated string rule = 2 [
+    json_name = "rule",
+    (validate.rules).repeated.min_items = 1,
+    (gnostic.openapi.v3.property) = {description: "The content of the rule as a list of strings."}
   ];
 }

@@ -20,6 +20,12 @@ import (
 const (
 	// BearerCredentialType represents the type for bearer tokens (e.g., JWT).
 	BearerCredentialType = "jwt"
+
+	// OIDCCredentialType represents the type for OpenID Connect (OIDC) tokens.
+	OIDCCredentialType = "oidc"
+
+	// APIKeyCredentialType represents the type for API keys.
+	APIKeyCredentialType = "api_key"
 )
 
 // credential is the concrete implementation of the security.Credential interface.
@@ -97,7 +103,7 @@ func (c *credential) Source() *securityv1.CredentialSource {
 }
 
 func PayloadBearerCredential(cred securityifaces.Credential) (*securityv1.BearerCredential, error) { // Use securityifaces.Credential
-	if cred.Type() != "jwt" {
+	if cred.Type() != BearerCredentialType {
 		return nil, fmt.Errorf("credential type is not jwt")
 	}
 	var bearer securityv1.BearerCredential
@@ -109,8 +115,9 @@ func PayloadBearerCredential(cred securityifaces.Credential) (*securityv1.Bearer
 }
 
 func PayloadOIDCCredential(cred securityifaces.Credential) (*oidcv1.OidcCredential, error) { // Use securityifaces.Credential
-	if cred.Type() != "oidc" {
-		return nil, fmt.Errorf("credential type is not oidc")
+
+	if cred.Type() != OIDCCredentialType {
+		return nil, fmt.Errorf("credential type is not %s", OIDCCredentialType)
 	}
 	var oidc oidcv1.OidcCredential
 	err := cred.ParsedPayload(&oidc)
@@ -121,8 +128,8 @@ func PayloadOIDCCredential(cred securityifaces.Credential) (*oidcv1.OidcCredenti
 }
 
 func PayloadAPIKeyCredential(cred securityifaces.Credential) (*apikeyv1.KeyCredential, error) { // Use securityifaces.Credential
-	if cred.Type() != "api_key" {
-		return nil, fmt.Errorf("credential type is not api_key")
+	if cred.Type() != APIKeyCredentialType {
+		return nil, fmt.Errorf("credential type is not %s", APIKeyCredentialType)
 	}
 	var apiKey apikeyv1.KeyCredential
 	err := cred.ParsedPayload(&apiKey)

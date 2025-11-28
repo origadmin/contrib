@@ -30,10 +30,14 @@ type Config struct {
 	ModelPath string `protobuf:"bytes,1,opt,name=model_path,proto3" json:"model_path,omitempty"`
 	// The path to the Casbin policy file (e.g., rbac_policy.csv).
 	PolicyPath string `protobuf:"bytes,2,opt,name=policy_path,proto3" json:"policy_path,omitempty"`
+	// Optional: The content of the Casbin model configuration file embedded directly.
+	Model string `protobuf:"bytes,5,opt,name=model,proto3" json:"model,omitempty"`
 	// Optional: Policy rules can also be embedded directly in the configuration.
-	EmbeddedPolicies []*Policy `protobuf:"bytes,3,rep,name=embedded_policies,proto3" json:"embedded_policies,omitempty"`
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	EmbeddedPolicies []*PolicyRule `protobuf:"bytes,3,rep,name=embedded_policies,proto3" json:"embedded_policies,omitempty"`
+	// Wildcard item used for domain matching. Defaults to "*".
+	WildcardItem  string `protobuf:"bytes,4,opt,name=wildcard_item,proto3" json:"wildcard_item,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Config) Reset() {
@@ -80,39 +84,54 @@ func (x *Config) GetPolicyPath() string {
 	return ""
 }
 
-func (x *Config) GetEmbeddedPolicies() []*Policy {
+func (x *Config) GetModel() string {
+	if x != nil {
+		return x.Model
+	}
+	return ""
+}
+
+func (x *Config) GetEmbeddedPolicies() []*PolicyRule {
 	if x != nil {
 		return x.EmbeddedPolicies
 	}
 	return nil
 }
 
-// Policy defines a single Casbin policy rule.
-type Policy struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Subject       string                 `protobuf:"bytes,1,opt,name=subject,proto3" json:"subject,omitempty"`
-	Object        string                 `protobuf:"bytes,2,opt,name=object,proto3" json:"object,omitempty"`
-	Action        string                 `protobuf:"bytes,3,opt,name=action,proto3" json:"action,omitempty"`
-	Domain        []string               `protobuf:"bytes,4,rep,name=domain,proto3" json:"domain,omitempty"`
-	Extras        map[string]string      `protobuf:"bytes,6,rep,name=extras,proto3" json:"extras,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+func (x *Config) GetWildcardItem() string {
+	if x != nil {
+		return x.WildcardItem
+	}
+	return ""
+}
+
+// PolicyRule defines a single Casbin policy rule in a format that Casbin understands.
+type PolicyRule struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The type of the policy rule, e.g., "p" for policy or "g" for grouping/role.
+	PType string `protobuf:"bytes,1,opt,name=p_type,proto3" json:"p_type,omitempty"`
+	// The content of the rule as a list of strings.
+	// e.g., for a "p" rule: ["alice", "data1", "read"]
+	// e.g., for a "g" rule: ["bob", "admin"]
+	Rule          []string `protobuf:"bytes,2,rep,name=rule,proto3" json:"rule,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Policy) Reset() {
-	*x = Policy{}
+func (x *PolicyRule) Reset() {
+	*x = PolicyRule{}
 	mi := &file_security_authz_casbin_v1_config_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Policy) String() string {
+func (x *PolicyRule) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Policy) ProtoMessage() {}
+func (*PolicyRule) ProtoMessage() {}
 
-func (x *Policy) ProtoReflect() protoreflect.Message {
+func (x *PolicyRule) ProtoReflect() protoreflect.Message {
 	mi := &file_security_authz_casbin_v1_config_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -124,42 +143,21 @@ func (x *Policy) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Policy.ProtoReflect.Descriptor instead.
-func (*Policy) Descriptor() ([]byte, []int) {
+// Deprecated: Use PolicyRule.ProtoReflect.Descriptor instead.
+func (*PolicyRule) Descriptor() ([]byte, []int) {
 	return file_security_authz_casbin_v1_config_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *Policy) GetSubject() string {
+func (x *PolicyRule) GetPType() string {
 	if x != nil {
-		return x.Subject
+		return x.PType
 	}
 	return ""
 }
 
-func (x *Policy) GetObject() string {
+func (x *PolicyRule) GetRule() []string {
 	if x != nil {
-		return x.Object
-	}
-	return ""
-}
-
-func (x *Policy) GetAction() string {
-	if x != nil {
-		return x.Action
-	}
-	return ""
-}
-
-func (x *Policy) GetDomain() []string {
-	if x != nil {
-		return x.Domain
-	}
-	return nil
-}
-
-func (x *Policy) GetExtras() map[string]string {
-	if x != nil {
-		return x.Extras
+		return x.Rule
 	}
 	return nil
 }
@@ -168,22 +166,19 @@ var File_security_authz_casbin_v1_config_proto protoreflect.FileDescriptor
 
 const file_security_authz_casbin_v1_config_proto_rawDesc = "" +
 	"\n" +
-	"%security/authz/casbin/v1/config.proto\x12$contrib.api.security.authz.casbin.v1\x1a$gnostic/openapi/v3/annotations.proto\x1a\x17validate/validate.proto\"\xb4\x02\n" +
+	"%security/authz/casbin/v1/config.proto\x12$contrib.api.security.authz.casbin.v1\x1a$gnostic/openapi/v3/annotations.proto\x1a\x17validate/validate.proto\"\xfd\x03\n" +
 	"\x06Config\x12Y\n" +
 	"\n" +
 	"model_path\x18\x01 \x01(\tB9\xfaB\x04r\x02\x10\x01\xbaG/\x92\x02,Path to the Casbin model configuration file.R\n" +
 	"model_path\x12N\n" +
-	"\vpolicy_path\x18\x02 \x01(\tB,\xfaB\x04r\x02\x10\x01\xbaG\"\x92\x02\x1fPath to the Casbin policy file.R\vpolicy_path\x12\x7f\n" +
-	"\x11embedded_policies\x18\x03 \x03(\v2,.contrib.api.security.authz.casbin.v1.PolicyB#\xbaG \x92\x02\x1dEmbedded Casbin policy rules.R\x11embedded_policies\"\xd2\x03\n" +
-	"\x06Policy\x12A\n" +
-	"\asubject\x18\x01 \x01(\tB'\xfaB\x04r\x02\x10\x01\xbaG\x1d\x92\x02\x1aThe subject of the policy.R\asubject\x12>\n" +
-	"\x06object\x18\x02 \x01(\tB&\xfaB\x04r\x02\x10\x01\xbaG\x1c\x92\x02\x19The object of the policy.R\x06object\x12>\n" +
-	"\x06action\x18\x03 \x01(\tB&\xfaB\x04r\x02\x10\x01\xbaG\x1c\x92\x02\x19The action of the policy.R\x06action\x12E\n" +
-	"\x06domain\x18\x04 \x03(\tB-\xbaG*\x92\x02'The domains associated with the policy.R\x06domain\x12\x82\x01\n" +
-	"\x06extras\x18\x06 \x03(\v28.contrib.api.security.authz.casbin.v1.Policy.ExtrasEntryB0\xbaG-\x92\x02*The extra data associated with the policy.R\x06extras\x1a9\n" +
-	"\vExtrasEntry\x12\x10\n" +
-	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
-	"\x05value\x18\x02 \x01(\tR\x05value:\x028\x01B\xb9\x02\n" +
+	"\vpolicy_path\x18\x02 \x01(\tB,\xfaB\x04r\x02\x10\x01\xbaG\"\x92\x02\x1fPath to the Casbin policy file.R\vpolicy_path\x12]\n" +
+	"\x05model\x18\x05 \x01(\tBG\xbaGD\x92\x02AContent of the Casbin model configuration file embedded directly.R\x05model\x12\x83\x01\n" +
+	"\x11embedded_policies\x18\x03 \x03(\v20.contrib.api.security.authz.casbin.v1.PolicyRuleB#\xbaG \x92\x02\x1dEmbedded Casbin policy rules.R\x11embedded_policies\x12c\n" +
+	"\rwildcard_item\x18\x04 \x01(\tB=\xbaG:\x92\x027Wildcard item used for domain matching. Defaults to '*'R\rwildcard_item\"\xb3\x01\n" +
+	"\n" +
+	"PolicyRule\x12T\n" +
+	"\x06p_type\x18\x01 \x01(\tB<\xfaB\x04r\x02\x10\x01\xbaG2\x92\x02/The type of the policy rule (e.g., 'p' or 'g').R\x06p_type\x12O\n" +
+	"\x04rule\x18\x02 \x03(\tB;\xfaB\x05\x92\x01\x02\b\x01\xbaG0\x92\x02-The content of the rule as a list of strings.R\x04ruleB\xb9\x02\n" +
 	"(com.contrib.api.security.authz.casbin.v1B\vConfigProtoP\x01ZIgithub.com/origadmin/contrib/api/gen/go/security/authz/casbin/v1;casbinv1\xa2\x02\x05CASAC\xaa\x02$Contrib.Api.Security.Authz.Casbin.V1\xca\x02$Contrib\\Api\\Security\\Authz\\Casbin\\V1\xe2\x020Contrib\\Api\\Security\\Authz\\Casbin\\V1\\GPBMetadata\xea\x02)Contrib::Api::Security::Authz::Casbin::V1b\x06proto3"
 
 var (
@@ -198,20 +193,18 @@ func file_security_authz_casbin_v1_config_proto_rawDescGZIP() []byte {
 	return file_security_authz_casbin_v1_config_proto_rawDescData
 }
 
-var file_security_authz_casbin_v1_config_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
+var file_security_authz_casbin_v1_config_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_security_authz_casbin_v1_config_proto_goTypes = []any{
-	(*Config)(nil), // 0: contrib.api.security.authz.casbin.v1.Config
-	(*Policy)(nil), // 1: contrib.api.security.authz.casbin.v1.Policy
-	nil,            // 2: contrib.api.security.authz.casbin.v1.Policy.ExtrasEntry
+	(*Config)(nil),     // 0: contrib.api.security.authz.casbin.v1.Config
+	(*PolicyRule)(nil), // 1: contrib.api.security.authz.casbin.v1.PolicyRule
 }
 var file_security_authz_casbin_v1_config_proto_depIdxs = []int32{
-	1, // 0: contrib.api.security.authz.casbin.v1.Config.embedded_policies:type_name -> contrib.api.security.authz.casbin.v1.Policy
-	2, // 1: contrib.api.security.authz.casbin.v1.Policy.extras:type_name -> contrib.api.security.authz.casbin.v1.Policy.ExtrasEntry
-	2, // [2:2] is the sub-list for method output_type
-	2, // [2:2] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	1, // 0: contrib.api.security.authz.casbin.v1.Config.embedded_policies:type_name -> contrib.api.security.authz.casbin.v1.PolicyRule
+	1, // [1:1] is the sub-list for method output_type
+	1, // [1:1] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_security_authz_casbin_v1_config_proto_init() }
@@ -225,7 +218,7 @@ func file_security_authz_casbin_v1_config_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_security_authz_casbin_v1_config_proto_rawDesc), len(file_security_authz_casbin_v1_config_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   3,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
