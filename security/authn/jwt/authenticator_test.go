@@ -205,3 +205,291 @@ func TestPrincipalIntegration(t *testing.T) {
 		assert.False(t, ok, "Type assertion to *Claims should fail after FromProto, this is expected.")
 	})
 }
+
+// mockCache is a simple in-memory cache for testing revocation.
+type mockCache struct {
+	data map[string]time.Duration
+}
+
+func newMockCache() *mockCache {
+	return &mockCache{
+		data: make(map[string]time.Duration),
+	}
+}
+
+func (m *mockCache) Store(ctx context.Context, key string, ttl time.Duration) error {
+	m.data[key] = ttl // In a real cache, this would store the key with an expiration. For mock, just store it.
+	return nil
+}
+
+func (m *mockCache) Exist(ctx context.Context, key string) (bool, error) {
+	_, ok := m.data[key]
+	return ok, nil
+}
+
+func (m *mockCache) Remove(ctx context.Context, key string) error {
+	delete(m.data, key)
+	return nil
+}
+
+func (m *mockCache) Close(ctx context.Context) error {
+	return nil
+}
+
+func TestAuthenticatorAdvancedFailures(t *testing.T) {
+	secret := "test-secret"
+	issuer := "test-issuer"
+	audience := []string{"test-audience"}
+	keyFunc := func(t *jwtv5.Token) (interface{}, error) {
+		return []byte(secret), nil
+	}
+
+	// Authenticator with cache for revocation tests
+	mockCache := newMockCache()
+	authWithCache, err := NewAuthenticator(
+		&authnv1.Authenticator{
+			Jwt: &jwtv1.Config{},
+		},
+		WithSigningMethod(jwtv5.SigningMethodHS256),
+		WithKeyFunc(keyFunc),
+		WithIssuer(issuer),
+		WithAudience(audience), // Use spread operator for []string
+		WithCache(mockCache),      // Inject mock cache
+	)
+	require.NoError(t, err, "Failed to create authenticator with cache")
+
+	// Authenticator without cache
+	authNoCache, err := NewAuthenticator(
+		&authnv1.Authenticator{
+			Jwt: &jwtv1.Config{},
+		},
+		WithSigningMethod(jwtv5.SigningMethodHS256),
+		WithKeyFunc(keyFunc),
+		WithIssuer(issuer),
+		WithAudience(audience),
+	)
+	require.NoError(t, err, "Failed to create authenticator without cache")
+
+	now := time.Now()
+	validClaims := &Claims{
+		RegisteredClaims: jwtv5.RegisteredClaims{
+			Issuer:    issuer,
+			Subject:   "user123",
+			Audience:  jwtv5.ClaimStrings(audience),
+			ExpiresAt: jwtv5.NewNumericDate(now.Add(time.Hour)),
+			IssuedAt:  jwtv5.NewNumericDate(now),
+			NotBefore: jwtv5.NewNumericDate(now),
+			ID:        "token123",
+		},
+	}
+	validPrinc := principal.New(validClaims.Subject, nil, nil, nil, validClaims)
+
+	t.Run("Token Not Valid Yet", func(t *testing.T) {
+		nbfClaims := &Claims{
+			RegisteredClaims: jwtv5.RegisteredClaims{
+				Issuer:    issuer,
+				Subject:   "nbf-user",
+				Audience:  jwtv5.ClaimStrings(audience),
+				ExpiresAt: jwtv5.NewNumericDate(now.Add(time.Hour)),
+				NotBefore: jwtv5.NewNumericDate(now.Add(time.Hour)), // Not valid until 1 hour from now
+				IssuedAt:  jwtv5.NewNumericDate(now),
+			},
+		}
+		token := jwtv5.NewWithClaims(jwtv5.SigningMethodHS256, nbfClaims)
+		tokenString, err := token.SignedString([]byte(secret))
+		require.NoError(t, err)
+
+		bearerPayload := &securityv1.BearerCredential{Token: tokenString}
+		bearerCred, err := credential.NewCredential(credential.BearerCredentialType, tokenString, bearerPayload, nil)
+		require.NoError(t, err)
+
+		_, err = authWithCache.Authenticate(context.Background(), bearerCred)
+		assert.Error(t, err, "Expected an error for 'not valid yet' token")
+		assert.True(t, securityv1.IsTokenInvalid(err), "Expected TokenInvalid error for 'not valid yet' token")
+	})
+
+	t.Run("Invalid Issuer", func(t *testing.T) {
+		badIssuerClaims := &Claims{
+			RegisteredClaims: jwtv5.RegisteredClaims{
+				Issuer:    "bad-issuer", // Mismatch
+				Subject:   "user123",
+				Audience:  jwtv5.ClaimStrings(audience),
+				ExpiresAt: jwtv5.NewNumericDate(now.Add(time.Hour)),
+				IssuedAt:  jwtv5.NewNumericDate(now),
+				NotBefore: jwtv5.NewNumericDate(now),
+			},
+		}
+		token := jwtv5.NewWithClaims(jwtv5.SigningMethodHS256, badIssuerClaims)
+		tokenString, err := token.SignedString([]byte(secret))
+		require.NoError(t, err)
+
+		bearerPayload := &securityv1.BearerCredential{Token: tokenString}
+		bearerCred, err := credential.NewCredential(credential.BearerCredentialType, tokenString, bearerPayload, nil)
+		require.NoError(t, err)
+
+		_, err = authWithCache.Authenticate(context.Background(), bearerCred)
+		assert.Error(t, err, "Expected an error for invalid issuer")
+		assert.True(t, securityv1.IsClaimsInvalid(err), "Expected ClaimsInvalid error for invalid issuer")
+	})
+
+	t.Run("Invalid Audience", func(t *testing.T) {
+		badAudienceClaims := &Claims{
+			RegisteredClaims: jwtv5.RegisteredClaims{
+				Issuer:    issuer,
+				Subject:   "user123",
+				Audience:  jwtv5.ClaimStrings{"bad-audience"}, // Mismatch
+				ExpiresAt: jwtv5.NewNumericDate(now.Add(time.Hour)),
+				IssuedAt:  jwtv5.NewNumericDate(now),
+				NotBefore: jwtv5.NewNumericDate(now),
+			},
+		}
+		token := jwtv5.NewWithClaims(jwtv5.SigningMethodHS256, badAudienceClaims)
+		tokenString, err := token.SignedString([]byte(secret))
+		require.NoError(t, err)
+
+		bearerPayload := &securityv1.BearerCredential{Token: tokenString}
+		bearerCred, err := credential.NewCredential(credential.BearerCredentialType, tokenString, bearerPayload, nil)
+		require.NoError(t, err)
+
+		_, err = authWithCache.Authenticate(context.Background(), bearerCred)
+		assert.Error(t, err, "Expected an error for invalid audience")
+		assert.True(t, securityv1.IsClaimsInvalid(err), "Expected ClaimsInvalid error for invalid audience")
+	})
+
+	t.Run("Missing Subject Claim for Authentication", func(t *testing.T) {
+		noSubClaims := &Claims{
+			RegisteredClaims: jwtv5.RegisteredClaims{
+				Issuer:    issuer,
+				Audience:  jwtv5.ClaimStrings(audience),
+				ExpiresAt: jwtv5.NewNumericDate(now.Add(time.Hour)),
+				IssuedAt:  jwtv5.NewNumericDate(now),
+				NotBefore: jwtv5.NewNumericDate(now),
+				ID:        "token-nosub",
+			},
+		}
+		token := jwtv5.NewWithClaims(jwtv5.SigningMethodHS256, noSubClaims)
+		tokenString, err := token.SignedString([]byte(secret))
+		require.NoError(t, err)
+
+		bearerPayload := &securityv1.BearerCredential{Token: tokenString}
+		bearerCred, err := credential.NewCredential(credential.BearerCredentialType, tokenString, bearerPayload, nil)
+		require.NoError(t, err)
+
+		_, err = authWithCache.Authenticate(context.Background(), bearerCred)
+		assert.Error(t, err, "Expected an error for missing subject claim")
+		assert.True(t, securityv1.IsClaimsInvalid(err), "Expected ClaimsInvalid error for missing subject")
+	})
+
+	t.Run("Revocation Tests", func(t *testing.T) {
+		t.Run("Successful Revocation", func(t *testing.T) {
+			resp, err := authWithCache.(credential.Creator).CreateCredential(context.Background(), validPrinc)
+			require.NoError(t, err)
+			accessToken := resp.Payload().GetToken().GetAccessToken()
+
+			bearerPayload := &securityv1.BearerCredential{Token: accessToken}
+			bearerCred, err := credential.NewCredential(credential.BearerCredentialType, accessToken, bearerPayload, nil)
+			require.NoError(t, err)
+
+			// Revoke the token
+			err = authWithCache.(credential.Revoker).Revoke(context.Background(), bearerCred)
+			require.NoError(t, err, "Failed to revoke token")
+
+			// Try to authenticate the revoked token
+			_, err = authWithCache.Authenticate(context.Background(), bearerCred)
+			assert.Error(t, err, "Expected error for revoked token authentication")
+			assert.True(t, securityv1.IsTokenExpired(err), "Expected TokenExpired error for revoked token") // Revoked tokens are treated as expired
+		})
+
+		t.Run("Revoke without Cache Configured", func(t *testing.T) {
+			resp, err := authNoCache.(credential.Creator).CreateCredential(context.Background(), validPrinc)
+			require.NoError(t, err)
+			accessToken := resp.Payload().GetToken().GetAccessToken()
+
+			bearerPayload := &securityv1.BearerCredential{Token: accessToken}
+			bearerCred, err := credential.NewCredential(credential.BearerCredentialType, accessToken, bearerPayload, nil)
+			require.NoError(t, err)
+
+			err = authNoCache.(credential.Revoker).Revoke(context.Background(), bearerCred)
+			assert.Error(t, err, "Expected error when revoking without cache")
+			assert.True(t, securityv1.IsSigningMethodUnsupported(err), "Expected SigningMethodUnsupported error")
+		})
+
+		t.Run("Revoke Token with Missing JTI", func(t *testing.T) {
+			claimsNoID := &Claims{
+				RegisteredClaims: jwtv5.RegisteredClaims{
+					Issuer:    issuer,
+					Subject:   "user-no-jti",
+					Audience:  jwtv5.ClaimStrings(audience),
+					ExpiresAt: jwtv5.NewNumericDate(now.Add(time.Hour)),
+					IssuedAt:  jwtv5.NewNumericDate(now),
+					NotBefore: jwtv5.NewNumericDate(now),
+					ID:        "", // Missing JTI
+				},
+			}
+			token := jwtv5.NewWithClaims(jwtv5.SigningMethodHS256, claimsNoID)
+			tokenString, err := token.SignedString([]byte(secret))
+			require.NoError(t, err)
+
+			bearerPayload := &securityv1.BearerCredential{Token: tokenString}
+			bearerCred, err := credential.NewCredential(credential.BearerCredentialType, tokenString, bearerPayload, nil)
+			require.NoError(t, err)
+
+			err = authWithCache.(credential.Revoker).Revoke(context.Background(), bearerCred)
+			assert.Error(t, err, "Expected error for revoking token with missing JTI")
+			assert.True(t, securityv1.IsClaimsInvalid(err), "Expected ClaimsInvalid error for missing JTI")
+		})
+
+		t.Run("Revoke Already Expired Token", func(t *testing.T) {
+			expiredClaims := &Claims{
+				RegisteredClaims: jwtv5.RegisteredClaims{
+					Issuer:    issuer,
+					Subject:   "expired-user-revoke",
+					Audience:  jwtv5.ClaimStrings(audience),
+					ExpiresAt: jwtv5.NewNumericDate(now.Add(-time.Hour)), // Expired
+					IssuedAt:  jwtv5.NewNumericDate(now.Add(-2 * time.Hour)),
+					ID:        "expired-jti",
+				},
+			}
+			token := jwtv5.NewWithClaims(jwtv5.SigningMethodHS256, expiredClaims)
+			tokenString, err := token.SignedString([]byte(secret))
+			require.NoError(t, err)
+
+			bearerPayload := &securityv1.BearerCredential{Token: tokenString}
+			bearerCred, err := credential.NewCredential(credential.BearerCredentialType, tokenString, bearerPayload, nil)
+			require.NoError(t, err)
+
+			err = authWithCache.(credential.Revoker).Revoke(context.Background(), bearerCred)
+			assert.NoError(t, err, "Expected no error when revoking an already expired token")
+		})
+
+		t.Run("Revoke Malformed Token String", func(t *testing.T) {
+			malformedToken := "this-is-not-a-jwt-token"
+			bearerPayload := &securityv1.BearerCredential{Token: malformedToken}
+			bearerCred, err := credential.NewCredential(credential.BearerCredentialType, malformedToken, bearerPayload, nil)
+			require.NoError(t, err)
+
+			err = authWithCache.(credential.Revoker).Revoke(context.Background(), bearerCred)
+			assert.Error(t, err, "Expected error when revoking a malformed token string")
+			assert.True(t, securityv1.IsTokenInvalid(err), "Expected TokenInvalid error for malformed token during revocation")
+		})
+	})
+
+	t.Run("Supports Method", func(t *testing.T) {
+		jwtCred, err := credential.NewCredential(credential.BearerCredentialType, "token", nil, nil)
+		require.NoError(t, err)
+		assert.True(t, authWithCache.Supports(jwtCred), "Authenticator should support JWT credential type")
+
+		otherCred, err := credential.NewCredential("other-type", "token", nil, nil)
+		require.NoError(t, err)
+		assert.False(t, authWithCache.Supports(otherCred), "Authenticator should not support other credential types")
+	})
+
+	t.Run("NewAuthenticator Configuration Errors", func(t *testing.T) {
+		t.Run("Missing Signing Method and Key Func", func(t *testing.T) {
+			_, err := NewAuthenticator(&authnv1.Authenticator{Jwt: &jwtv1.Config{}})
+			assert.Error(t, err)
+			assert.Contains(t, err.Error(), "JWT signing method and key function must be configured")
+		})
+	})
+}
+

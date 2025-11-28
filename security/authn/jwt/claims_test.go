@@ -90,6 +90,26 @@ func TestClaims(t *testing.T) {
 		assert.False(t, ok)
 	})
 
+	t.Run("GetFloat64", func(t *testing.T) {
+		// Test with a float value if possible (RegisteredClaims mostly have int/string)
+		// For now, testing non-existent or wrong type
+		_, ok := claims.GetFloat64("exp") // Not a float64
+		assert.False(t, ok)
+
+		_, ok = claims.GetFloat64("nonexistent")
+		assert.False(t, ok)
+	})
+
+	t.Run("GetBool", func(t *testing.T) {
+		// Test with a bool value if possible (RegisteredClaims mostly have int/string)
+		// For now, testing non-existent or wrong type
+		_, ok := claims.GetBool("sub") // Not a bool
+		assert.False(t, ok)
+
+		_, ok = claims.GetBool("nonexistent")
+		assert.False(t, ok)
+	})
+
 	t.Run("UnmarshalValue", func(t *testing.T) {
 		var roles []string
 		err := claims.UnmarshalValue("roles", &roles)
@@ -103,6 +123,19 @@ func TestClaims(t *testing.T) {
 
 		var dummy string
 		err = claims.UnmarshalValue("nonexistent", &dummy)
+		assert.Error(t, err)
+
+		// Test type mismatch
+		var intTarget int
+		err = claims.UnmarshalValue("sub", &intTarget) // "sub" is string, expect error
+		assert.Error(t, err)
+
+		var stringSliceTarget []string
+		err = claims.UnmarshalValue("sub", &stringSliceTarget) // "sub" is string, expect error
+		assert.Error(t, err)
+
+		var stringTarget string
+		err = claims.UnmarshalValue("roles", &stringTarget) // "roles" is []string, expect error
 		assert.Error(t, err)
 	})
 
