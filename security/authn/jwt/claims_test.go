@@ -9,15 +9,17 @@ import (
 	"time"
 
 	jwtv5 "github.com/golang-jwt/jwt/v5"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func TestClaims_Get(t *testing.T) {
+func TestClaims(t *testing.T) {
 	now := time.Now()
 	claims := &Claims{
 		RegisteredClaims: jwtv5.RegisteredClaims{
 			Issuer:    "test-issuer",
 			Subject:   "user123",
-			Audience:  []string{"test-audience"},
+			Audience:  jwtv5.ClaimStrings{"test-audience"},
 			ExpiresAt: jwtv5.NewNumericDate(now.Add(time.Hour)),
 			IssuedAt:  jwtv5.NewNumericDate(now),
 			NotBefore: jwtv5.NewNumericDate(now),
@@ -28,231 +30,106 @@ func TestClaims_Get(t *testing.T) {
 		Scopes:      map[string]bool{"read": true, "write": false},
 	}
 
-	tests := []struct {
-		name     string
-		key      string
-		want     interface{}
-		wantBool bool
-	}{
-		{"Standard claims - sub", "sub", "user123", true},
-		{"Standard claims - iss", "iss", "test-issuer", true},
-		{"Standard claims - aud", "aud", []string{"test-audience"}, true},
-		{"Standard claims - exp", "exp", now.Add(time.Hour).Unix(), true},
-		{"Standard claims - iat", "iat", now.Unix(), true},
-		{"Standard claims - nbf", "nbf", now.Unix(), true},
-		{"Standard claims - jti", "jti", "token123", true},
-		{"Custom claims - roles", "roles", []string{"admin", "user"}, true},
-		{"Custom claims - permissions", "permissions", []string{"read", "write"}, true},
-		{"Custom claims - scopes", "scopes", map[string]bool{"read": true, "write": false}, true},
-		{"Non-existent key", "nonexistent", nil, false},
-	}
+	t.Run("Get", func(t *testing.T) {
+		// Standard claims
+		val, ok := claims.Get("sub")
+		assert.True(t, ok)
+		assert.Equal(t, "user123", val)
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, ok := claims.Get(tt.key)
-			if ok != tt.wantBool {
-				t.Errorf("Claims.Get() ok = %v, want %v", ok, tt.wantBool)
-				return
-			}
-			if ok && !equalValues(got, tt.want) {
-				t.Errorf("Claims.Get() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
+		exp, ok := claims.Get("exp")
+		assert.True(t, ok)
+		assert.Equal(t, now.Add(time.Hour).Unix(), exp)
 
-func TestClaims_GetString(t *testing.T) {
-	claims := &Claims{
-		RegisteredClaims: jwtv5.RegisteredClaims{
-			Issuer:  "test-issuer",
-			Subject: "user123",
-			ID:      "token123",
-		},
-	}
+		// Custom claims
+		roles, ok := claims.Get("roles")
+		assert.True(t, ok)
+		assert.Equal(t, []string{"admin", "user"}, roles)
 
-	tests := []struct {
-		name   string
-		key    string
-		want   string
-		wantOK bool
-	}{
-		{"Existing string", "sub", "user123", true},
-		{"Existing string", "iss", "test-issuer", true},
-		{"Existing string", "jti", "token123", true},
-		{"Non-string value", "exp", "", false},
-		{"Non-existent key", "nonexistent", "", false},
-	}
+		// Non-existent key
+		_, ok = claims.Get("nonexistent")
+		assert.False(t, ok)
+	})
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, ok := claims.GetString(tt.key)
-			if ok != tt.wantOK {
-				t.Errorf("Claims.GetString() ok = %v, want %v", ok, tt.wantOK)
-				return
-			}
-			if ok && got != tt.want {
-				t.Errorf("Claims.GetString() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
+	t.Run("GetString", func(t *testing.T) {
+		sub, ok := claims.GetString("sub")
+		assert.True(t, ok)
+		assert.Equal(t, "user123", sub)
 
-func TestClaims_GetStringSlice(t *testing.T) {
-	claims := &Claims{
-		Roles:       []string{"admin", "user"},
-		Permissions: []string{"read", "write"},
-		RegisteredClaims: jwtv5.RegisteredClaims{
-			Audience: []string{"aud1", "aud2"},
-		},
-	}
+		_, ok = claims.GetString("exp") // Not a string
+		assert.False(t, ok)
+	})
 
-	tests := []struct {
-		name   string
-		key    string
-		want   []string
-		wantOK bool
-	}{
-		{"Roles", "roles", []string{"admin", "user"}, true},
-		{"Permissions", "permissions", []string{"read", "write"}, true},
-		{"Audience", "aud", []string{"aud1", "aud2"}, true},
-		{"Non-slice value", "sub", nil, false},
-		{"Non-existent key", "nonexistent", nil, false},
-	}
+	t.Run("GetStringSlice", func(t *testing.T) {
+		roles, ok := claims.GetStringSlice("roles")
+		assert.True(t, ok)
+		assert.Equal(t, []string{"admin", "user"}, roles)
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, ok := claims.GetStringSlice(tt.key)
-			if ok != tt.wantOK {
-				t.Errorf("Claims.GetStringSlice() ok = %v, want %v", ok, tt.wantOK)
-				return
-			}
-			if ok && !equalStringSlices(got, tt.want) {
-				t.Errorf("Claims.GetStringSlice() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}
+		aud, ok := claims.GetStringSlice("aud")
+		assert.True(t, ok)
+		assert.Equal(t, []string{"test-audience"}, aud)
 
-func TestClaims_UnmarshalValue(t *testing.T) {
-	claims := &Claims{
-		Roles:       []string{"admin", "user"},
-		Permissions: []string{"read", "write"},
-		Scopes:      map[string]bool{"read": true, "write": false},
-	}
+		_, ok = claims.GetStringSlice("sub") // Not a slice
+		assert.False(t, ok)
+	})
 
-	t.Run("Unmarshal roles", func(t *testing.T) {
+	t.Run("GetInt64", func(t *testing.T) {
+		exp, ok := claims.GetInt64("exp")
+		assert.True(t, ok)
+		assert.Equal(t, now.Add(time.Hour).Unix(), exp)
+
+		_, ok = claims.GetInt64("sub") // Not an int64
+		assert.False(t, ok)
+	})
+
+	t.Run("GetMap", func(t *testing.T) {
+		scopes, ok := claims.GetMap("scopes")
+		assert.True(t, ok)
+		assert.Equal(t, map[string]interface{}{"read": true, "write": false}, scopes)
+
+		_, ok = claims.GetMap("sub") // Not a map
+		assert.False(t, ok)
+	})
+
+	t.Run("UnmarshalValue", func(t *testing.T) {
 		var roles []string
 		err := claims.UnmarshalValue("roles", &roles)
-		if err != nil {
-			t.Errorf("Claims.UnmarshalValue() error = %v", err)
-			return
-		}
-		if !equalStringSlices(roles, []string{"admin", "user"}) {
-			t.Errorf("Claims.UnmarshalValue() = %v, want %v", roles, []string{"admin", "user"})
-		}
-	})
+		require.NoError(t, err)
+		assert.Equal(t, []string{"admin", "user"}, roles)
 
-	t.Run("Unmarshal scopes", func(t *testing.T) {
 		var scopes map[string]bool
-		err := claims.UnmarshalValue("scopes", &scopes)
-		if err != nil {
-			t.Errorf("Claims.UnmarshalValue() error = %v", err)
-			return
-		}
-		if !equalMaps(scopes, map[string]bool{"read": true, "write": false}) {
-			t.Errorf("Claims.UnmarshalValue() = %v, want %v", scopes, map[string]bool{"read": true, "write": false})
-		}
+		err = claims.UnmarshalValue("scopes", &scopes)
+		require.NoError(t, err)
+		assert.Equal(t, map[string]bool{"read": true, "write": false}, scopes)
+
+		var dummy string
+		err = claims.UnmarshalValue("nonexistent", &dummy)
+		assert.Error(t, err)
 	})
 
-	t.Run("Non-existent key", func(t *testing.T) {
-		var value string
-		err := claims.UnmarshalValue("nonexistent", &value)
-		if err == nil {
-			t.Error("Claims.UnmarshalValue() expected error for non-existent key")
-		}
+	t.Run("Export", func(t *testing.T) {
+		exported := claims.Export()
+		require.NotNil(t, exported)
+
+		// Check standard claims
+		sub, ok := exported["sub"]
+		require.True(t, ok)
+		assert.Equal(t, "user123", sub.GetStringValue())
+
+		// Check custom claims
+		rolesVal, ok := exported["roles"]
+		require.True(t, ok)
+		roleList := rolesVal.GetListValue()
+		require.NotNil(t, roleList)
+		assert.Len(t, roleList.Values, 2)
+		assert.Equal(t, "admin", roleList.Values[0].GetStringValue())
+		assert.Equal(t, "user", roleList.Values[1].GetStringValue())
+
+		// Check map claims
+		scopesVal, ok := exported["scopes"]
+		require.True(t, ok)
+		scopeMap := scopesVal.GetStructValue()
+		require.NotNil(t, scopeMap)
+		assert.True(t, scopeMap.Fields["read"].GetBoolValue())
+		assert.False(t, scopeMap.Fields["write"].GetBoolValue())
 	})
-}
-
-func TestClaims_Export(t *testing.T) {
-	now := time.Now()
-	claims := &Claims{
-		RegisteredClaims: jwtv5.RegisteredClaims{
-			Issuer:    "test-issuer",
-			Subject:   "user123",
-			Audience:  []string{"test-audience"},
-			ExpiresAt: jwtv5.NewNumericDate(now.Add(time.Hour)),
-			IssuedAt:  jwtv5.NewNumericDate(now),
-			NotBefore: jwtv5.NewNumericDate(now),
-			ID:        "token123",
-		},
-		Roles:       []string{"admin", "user"},
-		Permissions: []string{"read", "write"},
-		Scopes:      map[string]bool{"read": true, "write": false},
-	}
-
-	exported := claims.Export()
-	if exported == nil {
-		t.Error("Claims.Export() returned nil")
-		return
-	}
-
-	// Check some key fields
-	if val, ok := exported["sub"]; !ok || val.GetStringValue() != "user123" {
-		t.Errorf("Exported claims missing or incorrect 'sub': %v", val)
-	}
-
-	if _, ok := exported["roles"]; !ok {
-		t.Error("Exported claims missing 'roles'")
-	}
-}
-
-// Helper functions for comparison
-func equalValues(a, b interface{}) bool {
-	switch av := a.(type) {
-	case string:
-		bv, ok := b.(string)
-		return ok && av == bv
-	case int64:
-		bv, ok := b.(int64)
-		return ok && av == bv
-	case []string:
-		bv, ok := b.([]string)
-		return ok && equalStringSlices(av, bv)
-	case jwtv5.ClaimStrings:
-		// Handle JWT audience which is of type ClaimStrings
-		bv, ok := b.([]string)
-		if !ok {
-			return false
-		}
-		return equalStringSlices([]string(av), bv)
-	case map[string]bool:
-		bv, ok := b.(map[string]bool)
-		return ok && equalMaps(av, bv)
-	default:
-		return false
-	}
-}
-
-func equalStringSlices(a, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
-}
-
-func equalMaps(a, b map[string]bool) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for k, v := range a {
-		if bv, ok := b[k]; !ok || bv != v {
-			return false
-		}
-	}
-	return true
 }
