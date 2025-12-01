@@ -53,8 +53,8 @@ func (m *Middleware) Server() middleware.KMiddleware {
 			if !ok {
 				return nil, securityv1.ErrorCredentialsInvalid("principal not found in context")
 			}
-			// Encapsulate RuleSpec creation logic
-			ruleSpec := authz.NewRuleSpecFromContextAndSecurityRequest(ctx, securityReq)
+			// Create the rule specification from the principal and request.
+			ruleSpec := authz.NewRuleSpec(principal, securityReq)
 
 			authorized, authzErr := m.Authorizer.Authorized(ctx, principal, ruleSpec)
 			if authzErr != nil {

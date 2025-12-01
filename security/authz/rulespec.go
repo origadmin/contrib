@@ -26,17 +26,14 @@ type RuleSpec struct {
 	Attributes security.Claims
 }
 
-// NewRuleSpecFromContextAndSecurityRequest creates an authz.RuleSpec from a context and security.Request.
+// NewRuleSpec creates an authz.RuleSpec from a principal and a security.Request.
 // It maps HTTP methods to standard authorization actions (read, create, update, delete).
-// If the method does not match a standard action, the operation itself is used as the action.
-// The Domain is extracted from the Principal found in the context.
-func NewRuleSpecFromContextAndSecurityRequest(ctx context.Context, req security.Request) RuleSpec {
+func NewRuleSpec(p security.Principal, req security.Request) RuleSpec {
 	ruleSpec := RuleSpec{
 		Resource: req.GetOperation(),
 	}
 
-	// Extract Principal from context to get the Domain
-	if p, ok := securityPrincipal.FromContext(ctx); ok {
+	if p != nil {
 		ruleSpec.Domain = p.GetDomain()
 	}
 
@@ -50,6 +47,7 @@ func NewRuleSpecFromContextAndSecurityRequest(ctx context.Context, req security.
 	case "DELETE":
 		ruleSpec.Action = ActionDelete
 	default:
+		// Fallback to the operation name if the HTTP method is not standard.
 		ruleSpec.Action = req.GetOperation()
 	}
 	return ruleSpec
