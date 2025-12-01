@@ -226,10 +226,10 @@ func TestAuthNMiddleware_WithJwtAuthenticator_Failure(t *testing.T) {
 		expectError bool
 		expectedErr error
 	}{
-		{"No Token", jwtAuthn, "", true, securityv1.ErrorCredentialsInvalid("token is missing")},
-		{"Malformed Token", jwtAuthn, "Bearer malformed", true, securityv1.ErrorCredentialsInvalid("token format is invalid")},
-		{"Invalid Signature", jwtAuthn, "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c", true, securityv1.ErrorCredentialsInvalid("token signature is invalid")},
-		{"Expired Token", jwtAuthn, "Bearer " + expiredToken, true, securityv1.ErrorCredentialsInvalid("token is expired")},
+		{"No Token", jwtAuthn, "", true, securityv1.ErrorCredentialsInvalid("unsupported credential type: none")},
+		{"Malformed Token", jwtAuthn, "Bearer malformed", true, securityv1.ErrorTokenInvalid("token is malformed: token is malformed: token contains an invalid number of segments")},
+		{"Invalid Signature", jwtAuthn, "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c", true, securityv1.ErrorTokenInvalid("token signature is invalid: token signature is invalid: signature is invalid")},
+		{"Expired Token", jwtAuthn, "Bearer " + expiredToken, true, securityv1.ErrorTokenExpired("token has expired: token has invalid claims: token is expired")},
 		{
 			"KeyFunc returns error",
 			func() authn.Authenticator {
@@ -244,7 +244,7 @@ func TestAuthNMiddleware_WithJwtAuthenticator_Failure(t *testing.T) {
 			}(),
 			"Bearer " + validToken,
 			true,
-			securityv1.ErrorCredentialsInvalid("token signature is invalid"), // Kratos wraps KeyFunc errors as CredentialsInvalid
+			securityv1.ErrorTokenInvalid("unexpected token error: token is unverifiable: error while executing keyfunc: key func error"),
 		},
 		{
 			"Authenticator returns generic error",
