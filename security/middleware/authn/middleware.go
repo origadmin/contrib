@@ -4,9 +4,7 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/transport"
-	"google.golang.org/grpc/metadata"
-
-	"github.com/origadmin/contrib/security"
+	"github.com/origadmin/contrib/security" // Import the security package
 	"github.com/origadmin/contrib/security/authn"
 	securityCredential "github.com/origadmin/contrib/security/credential"
 	securityPrincipal "github.com/origadmin/contrib/security/principal"
@@ -16,70 +14,36 @@ import (
 )
 
 // Middleware is a Kratos middleware for authentication.
+// It embeds the Options struct to hold its configuration.
 type Middleware struct {
-	Authenticator authn.Authenticator
-	SkipChecker   func(security.Request) bool
+	*Options
 }
 
-// NewAuthNMiddleware creates a new authentication middleware with required skip checker.
-// The skipChecker function determines whether authentication should be skipped for a given request.
-func NewAuthNMiddleware(n authn.Authenticator, opts ...options.Option) *Middleware {
-	o := FromOptions(opts)
-	// The 'opts' parameter is kept for future extensibility or other generic options,
-	// but it's no longer needed for passing security configuration.
-	a := &Middleware{
-		Authenticator: n,
-		SkipChecker:   o.SkipChecker,
-	}
-	if a.SkipChecker == nil {
-		a.SkipChecker = NoOpSkipChecker()
-	}
-	if o.PropagationType == securityPrincipal.PropagationTypeUnknown {
-		o.PropagationType = securityPrincipal.PropagationTypeKratos
-	}
-	return a
+// New is a convenience function for creating a new authentication middleware for manual use.
+func New(authenticator authn.Authenticator, opts ...options.Option) *Middleware {
+	allOpts := append([]options.Option{WithAuthenticator(authenticator)}, opts...)
+	o := fromOptions(allOpts...)
+	return newMiddleware(o)
 }
 
-// SkipChecker is a function type for determining whether to skip authentication.
-type SkipChecker func(security.Request) bool
-
-// PathSkipChecker creates a skip checker that skips authentication for specified paths.
-func PathSkipChecker(skipPaths map[string]bool) SkipChecker {
-	return func(req security.Request) bool {
-		if skipPaths == nil {
-			return false
-		}
-		operation := req.GetOperation()
-		return skipPaths[operation]
+// newMiddleware is the internal constructor that takes a pre-parsed options struct.
+func newMiddleware(opts *Options) *Middleware {
+	m := &Middleware{
+		Options: opts,
 	}
-}
-
-// NoOpSkipChecker creates a skip checker that never skips authentication.
-func NoOpSkipChecker() SkipChecker {
-	return func(req security.Request) bool {
-		return false
+	// Use the common NoOpSkipChecker if none is provided
+	if m.SkipChecker == nil {
+		m.SkipChecker = security.NoOpSkipChecker()
 	}
-}
-
-// CompositeSkipChecker creates a skip checker that combines multiple checkers with OR logic.
-func CompositeSkipChecker(checkers ...SkipChecker) SkipChecker {
-	return func(req security.Request) bool {
-		for _, checker := range checkers {
-			if checker(req) {
-				return true
-			}
-		}
-		return false
-	}
+	return m
 }
 
 // Server implements the Kratos middleware.
 func (m *Middleware) Server() middleware.KMiddleware {
 	return func(handler middleware.KHandler) middleware.KHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-			// 1. Check if Principal already exists in context (e.g., from a previous middleware or test)
 			if _, ok := securityPrincipal.FromContext(ctx); ok {
-				return handler(ctx, req) // Already authenticated, proceed
+				return handler(ctx, req)
 			}
 			securityReq, err := request.NewFromServerContext(ctx)
 			if err != nil {
@@ -88,59 +52,32 @@ func (m *Middleware) Server() middleware.KMiddleware {
 			if m.SkipChecker(securityReq) {
 				return handler(ctx, req)
 			}
-
-			// 2. Extract credential from transport context
 			var cred security.Credential
 			if tr, ok := transport.FromServerContext(ctx); ok {
-				// Assuming securityCredential.ExtractFromTransport can handle various transport types
-				// and return a security.Credential object.
 				cred, err = securityCredential.ExtractFromTransport(tr)
 				if err != nil {
-					// Log the error but don't necessarily return it as an API error yet,
-					// as some endpoints might be public.
-					// The Authenticate call below will return the appropriate API error.
 					cred = securityCredential.NewEmptyCredential()
 				}
 			} else {
-				// No transport context, create an empty credential
 				cred = securityCredential.NewEmptyCredential()
 			}
-
-			// 3. Authenticate the credential
 			principal, authErr := m.Authenticator.Authenticate(ctx, cred)
 			if authErr != nil {
-				// Authentication failed, return the specific API error
 				return nil, authErr
 			}
-
-			// 4. Inject Principal into context
 			ctx = securityPrincipal.NewContext(ctx, principal)
-
 			return handler(ctx, req)
 		}
 	}
 }
 
 // Client implements the Kratos middleware for client-side authentication propagation.
-// It propagates the Principal from the context to the outgoing request's metadata/headers.
 func (m *Middleware) Client() middleware.KMiddleware {
 	return func(handler middleware.KHandler) middleware.KHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
 			if p, ok := securityPrincipal.FromContext(ctx); ok {
-				encodedPrincipal, encodeErr := securityPrincipal.EncodePrincipal(p)
-				if encodeErr != nil {
-					return nil, encodeErr
-				}
-
-				if tr, ok := transport.FromClientContext(ctx); ok {
-					switch tr.Kind() {
-					case transport.KindHTTP:
-						tr.RequestHeader().Set(securityPrincipal.MetadataKey, encodedPrincipal)
-					case transport.KindGRPC:
-						// For gRPC, add to outgoing metadata
-						ctx = metadata.AppendToOutgoingContext(ctx, securityPrincipal.MetadataKey, encodedPrincipal)
-					}
-				}
+				// Use the helper function for propagation
+				ctx = securityPrincipal.PropagatePrincipalToClientContext(ctx, p, m.PropagationType)
 			}
 			return handler(ctx, req)
 		}
