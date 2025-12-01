@@ -1,10 +1,7 @@
 package authz
 
 import (
-	"context"
-
 	"github.com/origadmin/contrib/security"
-	securityPrincipal "github.com/origadmin/contrib/security/principal" // Import principal package to get Principal from context
 )
 
 // Define standard authorization actions as constants.

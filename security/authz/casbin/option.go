@@ -13,11 +13,6 @@ import (
 	"github.com/origadmin/runtime/interfaces/options"
 )
 
-
-
-
-
-
 // Options holds configuration for the Casbin Authorizer, used with optionutil.
 // All fields are unexported to enforce configuration via functional options,
 // ensuring a controlled and validated setup process.
@@ -34,8 +29,6 @@ type Option = options.Option
 func DefaultModel() string {
 	return model.DefaultRestfullWithRoleModel
 }
-
-
 
 // WithModel sets the Casbin model for the Authorizer.
 func WithModel(m casbinmodel.Model) Option {

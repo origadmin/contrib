@@ -52,10 +52,11 @@ func TestAuthenticator(t *testing.T) {
 
 	princ := principal.New(
 		claims.Subject,
-		claims.Roles,
-		claims.Permissions,
-		claims.Scopes,
-		claims,
+		"", // Add domain parameter
+		principal.WithRoles(claims.Roles),
+		principal.WithPermissions(claims.Permissions),
+		principal.WithScopes(claims.Scopes),
+		principal.WithClaims(claims),
 	)
 
 	t.Run("CreateCredential and Authenticate", func(t *testing.T) {
@@ -160,10 +161,11 @@ func TestPrincipalIntegration(t *testing.T) {
 
 	princ := principal.New(
 		claims.Subject,
-		claims.Roles,
-		claims.Permissions,
-		claims.Scopes,
-		claims,
+		"", // Add domain parameter
+		principal.WithRoles(claims.Roles),
+		principal.WithPermissions(claims.Permissions),
+		principal.WithScopes(claims.Scopes),
+		principal.WithClaims(claims),
 	)
 
 	t.Run("Principal Claims Access", func(t *testing.T) {
@@ -282,7 +284,7 @@ func TestAuthenticatorAdvancedFailures(t *testing.T) {
 			ID:        "token123",
 		},
 	}
-	validPrinc := principal.New(validClaims.Subject, nil, nil, nil, validClaims)
+	validPrinc := principal.New(validClaims.Subject, "", principal.WithClaims(validClaims))
 
 	t.Run("Token Not Valid Yet", func(t *testing.T) {
 		nbfClaims := &Claims{
@@ -492,4 +494,3 @@ func TestAuthenticatorAdvancedFailures(t *testing.T) {
 		})
 	})
 }
-

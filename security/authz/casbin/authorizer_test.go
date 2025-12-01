@@ -190,6 +190,7 @@ type mockPrincipal struct {
 }
 
 func (m *mockPrincipal) GetID() string              { return m.id }
+func (m *mockPrincipal) GetDomain() string          { return "" }
 func (m *mockPrincipal) GetRoles() []string         { return nil }
 func (m *mockPrincipal) GetPermissions() []string   { return nil }
 func (m *mockPrincipal) GetScopes() map[string]bool { return nil }

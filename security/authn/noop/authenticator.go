@@ -14,7 +14,7 @@ import (
 )
 
 func init() {
-	authn.Register("noop", &noop{})
+	authn.Register(authn.Noop, &noop{})
 }
 
 type authenticator struct{}
