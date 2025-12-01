@@ -3,9 +3,8 @@ package principal
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/v2/transport"                 // For Kratos transport types
-	kratoshttp "github.com/go-kratos/kratos/v2/transport/http" // For Kratos HTTP transport
-	"google.golang.org/grpc/metadata"                          // For gRPC metadata
+	"github.com/go-kratos/kratos/v2/transport" // For Kratos transport types
+	"google.golang.org/grpc/metadata"          // For gRPC metadata
 
 	"github.com/origadmin/contrib/security/request" // For request.NewFromHTTPRequest
 	"github.com/origadmin/runtime/log"              // For logging warnings
@@ -43,25 +42,18 @@ func PropagateToClientContext(ctx context.Context, encodedPrincipal string, pt P
 
 // ExtractFromServerContext extracts an encoded principal string from an incoming request's
 // transport-specific metadata/headers.
-func ExtractFromServerContext(ctx context.Context, pt PropagationType) (string, bool) {
+func ExtractFromServerContext(ctx context.Context, pt PropagationType) (string, context.Context) {
 	var encodedPrincipal string
-	found := false
 
 	switch pt {
 	case PropagationTypeKratos:
 		if tr, ok := transport.FromServerContext(ctx); ok {
-			if val := tr.RequestHeader().Get(MetadataKey); val != "" {
-				encodedPrincipal = val
-				found = true
-			}
+			encodedPrincipal = tr.RequestHeader().Get(MetadataKey)
 		}
 	case PropagationTypeHTTP:
 		securityReq, reqErr := request.NewFromServerContext(ctx)
 		if reqErr == nil {
-			if val := securityReq.Get(MetadataKey); val != "" {
-				encodedPrincipal = val
-				found = true
-			}
+			encodedPrincipal = securityReq.Get(MetadataKey)
 		} else {
 			log.Warnf("failed to create security request from context for principal extraction: %v", reqErr)
 		}
@@ -72,69 +64,9 @@ func ExtractFromServerContext(ctx context.Context, pt PropagationType) (string, 
 		if ok {
 			if principals := md.Get(MetadataKey); len(principals) > 0 {
 				encodedPrincipal = principals[0]
-				found = true
 			}
 		}
 	}
 
-	return encodedPrincipal, found
-}
-
-// --- Domain Propagation ---
-
-// PropagateDomainToClientContext prepares the context for an outgoing client request
-// by injecting domain into transport-specific metadata/headers.
-func PropagateDomainToClientContext(ctx context.Context, domain string, pt PropagationType) context.Context {
-	if domain == "" {
-		return ctx
-	}
-
-	switch pt {
-	case PropagationTypeKratos:
-		if tr, ok := transport.FromClientContext(ctx); ok {
-			tr.RequestHeader().Set(DomainMetadataKey, domain)
-		}
-	case PropagationTypeGRPC:
-		ctx = metadata.AppendToOutgoingContext(ctx, DomainMetadataKey, domain)
-	case PropagationTypeHTTP:
-		ctx = context.WithValue(ctx, DomainMetadataKey, domain) // Store domain string in context
-	default:
-		log.Warnf("Unsupported propagation type %s for Domain client propagation", pt.String())
-	}
-	return ctx
-}
-
-// ExtractDomainFromServerContext extracts Domain from incoming request's
-// transport-specific metadata/headers and injects it into the context.
-func ExtractDomainFromServerContext(ctx context.Context, pt PropagationType) (string, context.Context, error) {
-	var domain string
-	switch pt {
-	case PropagationTypeKratos:
-		if tr, ok := transport.FromServerContext(ctx); ok {
-			if ht, isHttp := tr.(kratoshttp.Transporter); isHttp {
-				domain = ht.Request().Header.Get(DomainMetadataKey)
-			}
-		}
-	case PropagationTypeGRPC:
-		md, ok := metadata.FromIncomingContext(ctx)
-		if ok {
-			if domains := md.Get(DomainMetadataKey); len(domains) > 0 {
-				domain = domains[0]
-			}
-		}
-	case PropagationTypeHTTP:
-		securityReq, reqErr := request.NewFromServerContext(ctx)
-		if reqErr == nil {
-			domain = securityReq.Get(DomainMetadataKey)
-		}
-	default:
-		log.Warnf("Unsupported propagation type %s for Domain server extraction", pt.String())
-		return "", ctx, nil
-	}
-
-	if domain != "" {
-		ctx = NewDomainContext(ctx, domain)
-		return domain, ctx, nil
-	}
-	return "", ctx, nil
+	return encodedPrincipal, ctx
 }

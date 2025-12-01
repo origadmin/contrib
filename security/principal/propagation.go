@@ -16,8 +16,6 @@ import (
 const (
 	// MetadataKey is the key used to store the Principal in gRPC metadata or HTTP headers.
 	MetadataKey = "x-md-global-principal-proto"
-	// DomainMetadataKey is the key used to store the Domain in gRPC metadata or HTTP headers.
-	DomainMetadataKey = "x-md-global-domain"
 )
 
 // Encode encodes a securityifaces.Principal into a base64-encoded Protobuf string.
@@ -80,43 +78,6 @@ func Extract(ctx context.Context) (string, bool) {
 		}
 		if encodedPrincipal != "" {
 			return encodedPrincipal, true
-		}
-	}
-	return "", false
-}
-
-// InjectDomain injects an already encoded domain string into the outgoing request context.
-// It handles both HTTP and gRPC transports.
-func InjectDomain(ctx context.Context, domain string) context.Context {
-	if tr, ok := transport.FromClientContext(ctx); ok {
-		switch tr.Kind() {
-		case transport.KindHTTP:
-			tr.RequestHeader().Set(DomainMetadataKey, domain)
-		case transport.KindGRPC:
-			return metadata.AppendToOutgoingContext(ctx, DomainMetadataKey, domain)
-		}
-	}
-	return ctx
-}
-
-// ExtractDomain extracts the encoded domain string from the incoming request context.
-// It handles both HTTP and gRPC transports.
-func ExtractDomain(ctx context.Context) (string, bool) {
-	if tr, ok := transport.FromServerContext(ctx); ok {
-		var domain string
-		switch tr.Kind() {
-		case transport.KindHTTP:
-			domain = tr.RequestHeader().Get(DomainMetadataKey)
-		case transport.KindGRPC:
-			if md, ok := metadata.FromIncomingContext(ctx); ok {
-				vals := md.Get(DomainMetadataKey)
-				if len(vals) > 0 {
-					domain = vals[0]
-				}
-			}
-		}
-		if domain != "" {
-			return domain, true
 		}
 	}
 	return "", false

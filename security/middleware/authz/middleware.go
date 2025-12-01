@@ -53,21 +53,9 @@ func (m *Middleware) Server() middleware.KMiddleware {
 			if !ok {
 				return nil, securityv1.ErrorCredentialsInvalid("principal not found in context")
 			}
-			ruleSpec := authz.RuleSpec{
-				Resource: securityReq.GetOperation(),
-			}
-			switch securityReq.GetMethod() {
-			case "GET", "HEAD", "OPTIONS":
-				ruleSpec.Action = "read"
-			case "POST":
-				ruleSpec.Action = "create"
-			case "PUT", "PATCH":
-				ruleSpec.Action = "update"
-			case "DELETE":
-				ruleSpec.Action = "delete"
-			default:
-				ruleSpec.Action = securityReq.GetOperation()
-			}
+			// Encapsulate RuleSpec creation logic
+			ruleSpec := authz.NewRuleSpecFromContextAndSecurityRequest(ctx, securityReq)
+
 			authorized, authzErr := m.Authorizer.Authorized(ctx, principal, ruleSpec)
 			if authzErr != nil {
 				return nil, authzErr
