@@ -13,7 +13,8 @@ import (
 // PropagateToClientContext prepares the context for an outgoing client request
 // by injecting an encoded Principal string into transport-specific metadata/headers.
 // Parameters are ordered by priority: PropagationType, Context, Principal data, optional Request.
-func PropagateToClientContext(pt PropagationType, ctx context.Context, encodedPrincipal string, req any) context.Context {
+func PropagateToClientContext(pt PropagationType, ctx context.Context, req any,
+	encodedPrincipal string) context.Context {
 	if encodedPrincipal == "" {
 		return ctx // Nothing to propagate
 	}

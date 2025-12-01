@@ -42,7 +42,7 @@ func (m *Middleware) Server() middleware.KMiddleware {
 			}
 
 			// Extract the encoded principal from the transport (gRPC metadata or HTTP header).
-			encodedPrincipal := securityPrincipalProp.ExtractFromServerContext(ctx, m.PropagationType)
+			encodedPrincipal := securityPrincipalProp.ExtractFromServerContext(m.PropagationType, ctx, req)
 			if encodedPrincipal == "" {
 				// No principal found in the request.
 				return handler(ctx, req)
@@ -84,7 +84,7 @@ func (m *Middleware) Client() middleware.KMiddleware {
 			}
 
 			// 3. Inject the encoded Principal into the outgoing request context.
-			newCtx := securityPrincipalProp.PropagateToClientContext(ctx, encodedPrincipal, m.PropagationType)
+			newCtx := securityPrincipalProp.PropagateToClientContext(m.PropagationType, ctx, req, encodedPrincipal)
 
 			// 4. Call the next handler in the chain with the new context.
 			return handler(newCtx, req)
