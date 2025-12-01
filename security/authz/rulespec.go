@@ -15,6 +15,17 @@ const (
 	ActionDelete = "delete"
 )
 
+// RuleSpec encapsulates the specification of an authorization rule to be checked.
+// It is a pure data container that describes the core elements required for authorization checks.
+type RuleSpec struct {
+	Domain   string // Represent the project or tenant. It can be empty.
+	Resource string // The resource being accessed.
+	Action   string // Actions to be performed on the resource.
+	// Attributes contain additional attributes related to this rule, such as the owner of the resource, status, and so on.
+	// This allows RuleSpec to carry more complex contextual information to support ABAC.
+	Attributes security.Claims
+}
+
 // NewRuleSpecFromContextAndSecurityRequest creates an authz.RuleSpec from a context and security.Request.
 // It maps HTTP methods to standard authorization actions (read, create, update, delete).
 // If the method does not match a standard action, the operation itself is used as the action.

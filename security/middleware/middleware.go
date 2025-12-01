@@ -20,10 +20,14 @@ type Factory struct {
 }
 
 // NewFactory creates a new middleware factory.
-// The propType determines which protocol (e.g., Kratos, GRPC, HTTP) is used to propagate principals.
-func NewFactory(propType principal.PropagationType) *Factory {
+// It accepts an optional PropagationType. If omitted, it defaults to PropagationTypeKratos.
+func NewFactory(propType ...principal.PropagationType) *Factory {
+	pt := principal.PropagationTypeKratos // Default to Kratos propagation
+	if len(propType) > 0 {
+		pt = propType[0]
+	}
 	return &Factory{
-		propType: propType,
+		propType: pt,
 	}
 }
 
