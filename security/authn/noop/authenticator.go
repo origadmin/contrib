@@ -39,11 +39,6 @@ func (a authenticator) Supports(cred security.Credential) bool {
 type noop struct{}
 
 func (f *noop) NewAuthenticator(cfg *authnv1.Authenticator, opts ...options.Option) (authn.Authenticator, error) {
-	//o := FromOptions(opts...)
-	//err := o.Apply(cfg)
-	//if err != nil {
-	//	return nil, err
-	//}
 	return &authenticator{}, nil
 }
 

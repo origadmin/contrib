@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/goexts/generic/maps"
 	"google.golang.org/protobuf/types/known/structpb"
 
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
@@ -263,50 +262,119 @@ func NewClaims(rawData map[string]any, encoders ...ClaimEncoder) (securityifaces
 	return &defaultClaims{data: claimsData}, nil
 }
 
-// New creates a new securityifaces.Principal instance.
-func New(id string, roles, permissions []string, scopes map[string]bool, claims securityifaces.Claims, domain string) securityifaces.Principal { // Use securityifaces.Principal and securityifaces.Claims
+// newEmptyClaims creates an empty Claims instance by direct construction.
+func newEmptyClaims() securityifaces.Claims {
+	return &defaultClaims{data: make(map[string]*structpb.Value)}
+}
+
+// Option is a functional option for configuring a Principal.
+type Option func(*concretePrincipal)
+
+// WithRoles sets the roles for the principal. If the provided roles slice is nil, this option does nothing,
+// preserving the default empty slice set by the New constructor.
+func WithRoles(roles []string) Option {
+	return func(p *concretePrincipal) {
+		if roles != nil {
+			p.roles = roles
+		}
+	}
+}
+
+// WithPermissions sets the permissions for the principal. If the provided permissions slice is nil, this option does nothing,
+// preserving the default empty slice set by the New constructor.
+func WithPermissions(permissions []string) Option {
+	return func(p *concretePrincipal) {
+		if permissions != nil {
+			p.permissions = permissions
+		}
+	}
+}
+
+// WithScopes sets the scopes for the principal. If the provided scopes map is nil, this option does nothing,
+// preserving the default empty map set by the New constructor.
+func WithScopes(scopes map[string]bool) Option {
+	return func(p *concretePrincipal) {
+		if scopes != nil {
+			p.scopes = scopes
+		}
+	}
+}
+
+// WithClaims sets the claims for the principal. If the provided claims are nil, this option does nothing,
+// preserving the default empty claims set by the New constructor.
+func WithClaims(claims securityifaces.Claims) Option {
+	return func(p *concretePrincipal) {
+		if claims != nil {
+			p.claims = claims
+		}
+	}
+}
+
+// New creates a new securityifaces.Principal instance using functional options.
+// It ensures that all fields are initialized to non-nil values.
+func New(id string, domain string, opts ...Option) securityifaces.Principal {
+	// Initialize with explicit empty values
+	p := &concretePrincipal{
+		id:          id,
+		domain:      domain,
+		roles:       make([]string, 0),
+		permissions: make([]string, 0),
+		scopes:      make(map[string]bool),
+		claims:      newEmptyClaims(), // Use the direct empty claims constructor
+	}
+
+	// Apply all provided options
+	for _, opt := range opts {
+		opt(p)
+	}
+
+	return p
+}
+
+// FromProto converts a *securityv1.Principal Protobuf message to a securityifaces.Principal.
+// If the input protoP is nil, it returns a NewPrincipalWithID, ensuring a non-nil Principal is always returned.
+// This function directly constructs the concretePrincipal, optimizing for the structured Protobuf input.
+func FromProto(protoP *securityv1.Principal) (securityifaces.Principal, error) {
+	if protoP == nil {
+		// Return a NewPrincipalWithID to avoid nil panics in subsequent calls,
+		// providing a safe default when no Protobuf principal is provided.
+		return NewPrincipalWithID(""), nil
+	}
+
+	claims := &defaultClaims{data: protoP.GetClaims()}
+
+	// Explicit nil checks and initialization for fields from Protobuf message.
+	roles := protoP.GetRoles()
+	if roles == nil {
+		roles = make([]string, 0)
+	}
+	permissions := protoP.GetPermissions()
+	if permissions == nil {
+		permissions = make([]string, 0)
+	}
+	scopes := protoP.GetScopes()
 	if scopes == nil {
 		scopes = make(map[string]bool)
 	}
-	if claims == nil {
-		claims, _ = NewClaims(nil)
-	}
+
+	// Directly construct the concretePrincipal instance.
 	return &concretePrincipal{
-		id:          id,
-		domain:      domain,
+		id:          protoP.GetId(),
+		domain:      protoP.GetDomain(),
 		roles:       roles,
 		permissions: permissions,
 		scopes:      scopes,
 		claims:      claims,
-	}
+	}, nil
 }
 
-// FromProto converts a *securityv1.Principal Protobuf message to a securityifaces.Principal.
-func FromProto(protoP *securityv1.Principal) (securityifaces.Principal, error) {
-	if protoP == nil {
-		return nil, nil
-	}
-
-	claimsData := maps.Clone(protoP.GetClaims())
-
-	claims := &defaultClaims{data: claimsData}
-
-	return New(protoP.GetId(), protoP.GetRoles(), protoP.GetPermissions(), protoP.GetScopes(), claims, protoP.GetDomain()), nil
-}
-
-func EmptyPrincipal(id string) securityifaces.Principal {
-	return &concretePrincipal{
-		id:          id,
-		domain:      "",
-		roles:       make([]string, 0),
-		permissions: make([]string, 0),
-		scopes:      make(map[string]bool),
-		claims: &defaultClaims{
-			data: make(map[string]*structpb.Value),
-		},
-	}
+// NewPrincipalWithID creates a new securityifaces.Principal instance with a specified ID.
+// All other fields (domain, roles, permissions, scopes, claims) are initialized to their default empty values
+// by the underlying New constructor.
+func NewPrincipalWithID(id string) securityifaces.Principal {
+	return New(id, "")
 }
 
 func Anonymous() securityifaces.Principal {
-	return EmptyPrincipal("anonymous")
+	return NewPrincipalWithID("anonymous")
 }

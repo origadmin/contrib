@@ -13,6 +13,12 @@ import (
 	"github.com/origadmin/runtime/interfaces/options"
 )
 
+const (
+	DefaultAuthenticator = "jwt"
+	Noop                 = "noop"
+	JWT                  = "jwt"
+)
+
 // Factory is an interface for a provider factory that can create a Provider
 // instance when given a runtime configuration. It's a stateless object
 // intended to be registered at init time.
