@@ -2,6 +2,7 @@ package authn
 
 import (
 	"context"
+	"errors" // Import the errors package
 	"net/http"
 	"testing"
 	"time"
@@ -93,12 +94,25 @@ type header interface {
 var _ transport.Transporter = (*mockTransport)(nil)
 var _ kratoshttp.Transporter = (*mockTransport)(nil)
 
+// mockErrorAuthenticator is a mock implementation of authn.Authenticator that always returns a predefined error.
+type mockErrorAuthenticator struct {
+	err error
+}
+
+func (m *mockErrorAuthenticator) Authenticate(ctx context.Context, cred security.Credential) (security.Principal, error) {
+	return nil, m.err
+}
+
+func (m *mockErrorAuthenticator) Supports(cred security.Credential) bool {
+	return true // For testing purposes, assume it supports all credentials
+}
+
 func runMiddleware(t *testing.T, authn authn.Authenticator, ctx context.Context) (context.Context, error) {
 	t.Helper()
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return "handler called", nil
 	}
-	mw := NewAuthNMiddleware(authn)
+	mw := New(authn)
 	_, err := mw.Server()(handler)(ctx, nil)
 	return ctx, err
 }
@@ -119,7 +133,7 @@ func TestAuthNMiddleware_WithNoopAuthenticator(t *testing.T) {
 		assert.Equal(t, principal.Anonymous().GetID(), p.GetID(), "Principal should be anonymous")
 		return "handler called", nil
 	}
-	mw := NewAuthNMiddleware(noopAuthn)
+	mw := New(noopAuthn)
 	_, err = mw.Server()(handler)(ctx, nil)
 	require.NoError(t, err)
 }
@@ -143,7 +157,7 @@ func TestAuthNMiddleware_WithJwtAuthenticator_Success(t *testing.T) {
 	// 2. Create a valid token
 	creator, ok := jwtAuthn.(securityCredential.Creator)
 	require.True(t, ok)
-	testPrincipal := principal.New("user123", []string{"users"}, nil, nil, nil)
+	testPrincipal := principal.New("user123", "", principal.WithRoles([]string{"users"}))
 	resp, err := creator.CreateCredential(context.Background(), testPrincipal)
 	require.NoError(t, err)
 	tokenString := resp.Payload().GetToken().GetAccessToken()
@@ -161,7 +175,7 @@ func TestAuthNMiddleware_WithJwtAuthenticator_Success(t *testing.T) {
 		assert.Equal(t, []string{"users"}, p.GetRoles())
 		return "handler called", nil
 	}
-	mw := NewAuthNMiddleware(jwtAuthn)
+	mw := New(jwtAuthn)
 	_, err = mw.Server()(handler)(ctx, nil)
 	require.NoError(t, err)
 }
@@ -194,15 +208,51 @@ func TestAuthNMiddleware_WithJwtAuthenticator_Failure(t *testing.T) {
 	expiredToken, err := jwtv5.NewWithClaims(jwtv5.SigningMethodHS256, expiredClaims).SignedString(secret)
 	require.NoError(t, err)
 
+	// Create a valid token for testing KeyFunc error and generic Authenticator error
+	validClaims := &jwt.Claims{
+		RegisteredClaims: jwtv5.RegisteredClaims{
+			Issuer:    issuer,
+			Subject:   "valid-user",
+			ExpiresAt: jwtv5.NewNumericDate(time.Now().Add(1 * time.Hour)),
+		},
+	}
+	validToken, err := jwtv5.NewWithClaims(jwtv5.SigningMethodHS256, validClaims).SignedString(secret)
+	require.NoError(t, err)
+
 	testCases := []struct {
 		name        string
+		authenticator authn.Authenticator
 		tokenHeader string
 		expectError bool
+		expectedErr error
 	}{
-		{"No Token", "", true}, // No token should result in error from JWT authenticator
-		{"Malformed Token", "Bearer malformed", true},
-		{"Invalid Signature", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c", true},
-		{"Expired Token", "Bearer " + expiredToken, true},
+		{"No Token", jwtAuthn, "", true, securityv1.ErrorCredentialsInvalid("token is missing")},
+		{"Malformed Token", jwtAuthn, "Bearer malformed", true, securityv1.ErrorCredentialsInvalid("token format is invalid")},
+		{"Invalid Signature", jwtAuthn, "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c", true, securityv1.ErrorCredentialsInvalid("token signature is invalid")},
+		{"Expired Token", jwtAuthn, "Bearer " + expiredToken, true, securityv1.ErrorCredentialsInvalid("token is expired")},
+		{
+			"KeyFunc returns error",
+			func() authn.Authenticator {
+				auth, _ := jwt.NewAuthenticator(
+					jwtCfg,
+					jwt.WithSigningMethod(jwtv5.SigningMethodHS256),
+					jwt.WithKeyFunc(func(token *jwtv5.Token) (interface{}, error) {
+						return nil, errors.New("key func error")
+					}),
+				)
+				return auth
+			}(),
+			"Bearer " + validToken,
+			true,
+			securityv1.ErrorCredentialsInvalid("token signature is invalid"), // Kratos wraps KeyFunc errors as CredentialsInvalid
+		},
+		{
+			"Authenticator returns generic error",
+			&mockErrorAuthenticator{err: errors.New("internal authenticator failure")},
+			"Bearer " + validToken,
+			true,
+			errors.New("internal authenticator failure"),
+		},
 	}
 
 	for _, tc := range testCases {
@@ -214,17 +264,18 @@ func TestAuthNMiddleware_WithJwtAuthenticator_Failure(t *testing.T) {
 			ctx := transport.NewServerContext(context.Background(), tr)
 
 			handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-				// This handler should only be called if there's no error
 				return "handler called", nil
 			}
 
-			mw := NewAuthNMiddleware(jwtAuthn)
+			mw := New(tc.authenticator)
 			_, err := mw.Server()(handler)(ctx, nil)
 
 			if tc.expectError {
 				assert.Error(t, err, "Expected an error for case: %s", tc.name)
+				if tc.expectedErr != nil {
+					assert.EqualError(t, err, tc.expectedErr.Error())
+				}
 			} else {
-				// For cases that should not error
 				assert.NoError(t, err, "Expected no error for case: %s", tc.name)
 				p, ok := principal.FromContext(ctx)
 				require.True(t, ok)
@@ -258,7 +309,7 @@ func TestDeploymentMode_Standalone(t *testing.T) {
 		// 2. Create a valid token and set it in the request
 		creator, ok := jwtAuthn.(securityCredential.Creator)
 		require.True(t, ok)
-		testPrincipal := principal.New("user123", []string{"users", "admin"}, []string{"read", "write"}, nil, nil)
+		testPrincipal := principal.New("user123", "", principal.WithRoles([]string{"users", "admin"}), principal.WithPermissions([]string{"read", "write"}))
 		resp, err := creator.CreateCredential(context.Background(), testPrincipal)
 		require.NoError(t, err)
 		tokenCred := resp.Payload().GetToken()
@@ -277,7 +328,7 @@ func TestDeploymentMode_Standalone(t *testing.T) {
 			assert.Equal(t, []string{"read", "write"}, p.GetPermissions())
 			return "handler called", nil
 		}
-		mw := NewAuthNMiddleware(jwtAuthn)
+		mw := New(jwtAuthn)
 		_, err = mw.Server()(handler)(ctx, nil)
 		require.NoError(t, err)
 	})
@@ -298,7 +349,7 @@ func TestDeploymentMode_Standalone(t *testing.T) {
 			assert.Equal(t, principal.Anonymous().GetID(), p.GetID())
 			return "handler called", nil
 		}
-		mw := NewAuthNMiddleware(noopAuthn)
+		mw := New(noopAuthn)
 		_, err = mw.Server()(handler)(ctx, nil)
 		require.NoError(t, err)
 	})
@@ -325,7 +376,7 @@ func TestDeploymentMode_Microservice_Gateway(t *testing.T) {
 		// 2. Simulate client request reaching API Gateway
 		creator, ok := gatewayAuthn.(securityCredential.Creator)
 		require.True(t, ok)
-		userPrincipal := principal.New("user456", []string{"api-user"}, []string{"api:read"}, nil, nil)
+		userPrincipal := principal.New("user456", "", principal.WithRoles([]string{"api-user"}), principal.WithPermissions([]string{"api:read"}))
 		resp, err := creator.CreateCredential(context.Background(), userPrincipal)
 		require.NoError(t, err)
 		tokenCred := resp.Payload().GetToken()
@@ -349,7 +400,7 @@ func TestDeploymentMode_Microservice_Gateway(t *testing.T) {
 
 			return "forward to downstream service", nil
 		}
-		mw := NewAuthNMiddleware(gatewayAuthn)
+		mw := New(gatewayAuthn)
 		_, err = mw.Server()(handler)(ctx, nil)
 		require.NoError(t, err)
 
@@ -381,7 +432,7 @@ func TestDeploymentMode_Microservice_Gateway(t *testing.T) {
 		handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 			return "should not reach here", nil
 		}
-		mw := NewAuthNMiddleware(gatewayAuthn)
+		mw := New(gatewayAuthn)
 		_, err = mw.Server()(handler)(ctx, nil)
 		assert.Error(t, err, "Gateway should reject invalid token")
 	})
@@ -408,7 +459,7 @@ func TestDeploymentMode_Microservice_IndependentAuth(t *testing.T) {
 		// 2. Simulate user login to obtain token
 		creator, ok := authServiceAuthn.(securityCredential.Creator)
 		require.True(t, ok)
-		userPrincipal := principal.New("user789", []string{"service-user"}, []string{"service:access"}, nil, nil)
+		userPrincipal := principal.New("user789", "", principal.WithRoles([]string{"service-user"}), principal.WithPermissions([]string{"service:access"}))
 		resp, err := creator.CreateCredential(context.Background(), userPrincipal)
 		require.NoError(t, err)
 		tokenCred := resp.Payload().GetToken()
@@ -455,7 +506,7 @@ func TestDeploymentMode_Microservice_IndependentAuth(t *testing.T) {
 		gatewayAuthn := &mockGatewayAuthenticator{
 			authService: authServiceAuthn,
 		}
-		mw := NewAuthNMiddleware(gatewayAuthn)
+		mw := New(gatewayAuthn)
 		_, err = mw.Server()(handler)(ctx, nil)
 		require.NoError(t, err)
 
@@ -500,7 +551,7 @@ func TestAuthnAuthz_CombinationModes(t *testing.T) {
 		// 2. Create token
 		creator, ok := authnOnly.(securityCredential.Creator)
 		require.True(t, ok)
-		testPrincipal := principal.New("readonly-user", []string{"readonly"}, []string{}, nil, nil)
+		testPrincipal := principal.New("readonly-user", "", principal.WithRoles([]string{"readonly"}))
 		resp, err := creator.CreateCredential(context.Background(), testPrincipal)
 		require.NoError(t, err)
 		tokenCred := resp.Payload().GetToken()
@@ -517,7 +568,7 @@ func TestAuthnAuthz_CombinationModes(t *testing.T) {
 			// Business logic can personalize based on Principal but doesn't check permissions
 			return "personalized data for " + p.GetID(), nil
 		}
-		mw := NewAuthNMiddleware(authnOnly)
+		mw := New(authnOnly)
 		result, err := mw.Server()(handler)(ctx, nil)
 		require.NoError(t, err)
 		assert.Equal(t, "personalized data for readonly-user", result)
@@ -538,7 +589,7 @@ func TestAuthnAuthz_CombinationModes(t *testing.T) {
 			assert.Equal(t, principal.Anonymous().GetID(), p.GetID())
 			return "public data", nil
 		}
-		mw := NewAuthNMiddleware(noopAuthn)
+		mw := New(noopAuthn)
 		result, err := mw.Server()(handler)(ctx, nil)
 		require.NoError(t, err)
 		assert.Equal(t, "public data", result)
@@ -566,7 +617,7 @@ func TestCrossService_PrincipalPropagation(t *testing.T) {
 		// 2. Create user token
 		creator, ok := authServiceAuthn.(securityCredential.Creator)
 		require.True(t, ok)
-		userPrincipal := principal.New("cross-service-user", []string{"user", "api-access"}, []string{"cross:call"}, nil, nil)
+		userPrincipal := principal.New("cross-service-user", "", principal.WithRoles([]string{"user", "api-access"}), principal.WithPermissions([]string{"cross:call"}))
 		resp, err := creator.CreateCredential(context.Background(), userPrincipal)
 		require.NoError(t, err)
 		tokenCred := resp.Payload().GetToken()
@@ -591,7 +642,7 @@ func TestCrossService_PrincipalPropagation(t *testing.T) {
 			return "service A processed", nil
 		}
 
-		mwA := NewAuthNMiddleware(authServiceAuthn)
+		mwA := New(authServiceAuthn)
 		_, err = mwA.Server()(serviceAHandler)(serviceACtx, nil)
 		require.NoError(t, err)
 
@@ -610,7 +661,7 @@ func TestCrossService_PrincipalPropagation(t *testing.T) {
 				userRoles := tr.RequestHeader().Get("X-Forward-User-Roles")
 
 				// Reconstruct Principal and inject into context
-				reconstructedPrincipal := principal.New(userID, []string{userRoles}, []string{}, nil, nil)
+				reconstructedPrincipal := principal.New(userID, "", principal.WithRoles([]string{userRoles}))
 				ctx = principal.NewContext(ctx, reconstructedPrincipal)
 
 				p, ok := principal.FromContext(ctx)
@@ -624,7 +675,7 @@ func TestCrossService_PrincipalPropagation(t *testing.T) {
 
 		// Service B uses Noop authenticator since authentication was completed in Service A
 		noopAuthn, _ := noop.NewAuthenticator(nil)
-		mwB := NewAuthNMiddleware(noopAuthn)
+		mwB := New(noopAuthn)
 		result, err := mwB.Server()(serviceBHandler)(serviceBCtx, nil)
 		require.NoError(t, err)
 		assert.Equal(t, "service B processed for user: cross-service-user", result)

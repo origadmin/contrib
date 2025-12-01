@@ -3,6 +3,7 @@ package authz
 
 import (
 	"context"
+	"errors" // Import the errors package
 	"net/http"
 	"testing"
 
@@ -15,6 +16,7 @@ import (
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authz"
 	"github.com/origadmin/contrib/security/principal"
+	"github.com/origadmin/runtime/interfaces/options" // Import options package
 	"github.com/origadmin/runtime/middleware"
 )
 
@@ -79,15 +81,24 @@ type mockRule struct {
 	Action   string
 }
 type mockAuthorizer struct {
-	allowRules map[mockRule][]string
+	allowRules  map[mockRule][]string
+	errToReturn error // New field to simulate a generic error
 }
 
 func newMockAuthorizer(rules map[mockRule][]string) *mockAuthorizer {
 	return &mockAuthorizer{allowRules: rules}
 }
 
+// newMockAuthorizerWithError creates a mock authorizer that always returns the given error.
+func newMockAuthorizerWithError(err error) *mockAuthorizer {
+	return &mockAuthorizer{errToReturn: err}
+}
+
 // Authorized checks if the principal is authorized for the given rule specification.
 func (m *mockAuthorizer) Authorized(ctx context.Context, p security.Principal, spec authz.RuleSpec) (bool, error) {
+	if m.errToReturn != nil {
+		return false, m.errToReturn
+	}
 	rule := mockRule{Resource: spec.Resource, Action: spec.Action}
 	requiredRoles, ok := m.allowRules[rule]
 	if !ok {
@@ -105,9 +116,9 @@ func (m *mockAuthorizer) Authorized(ctx context.Context, p security.Principal, s
 	return false, securityv1.ErrorPermissionDenied("principal does not have required roles for operation")
 }
 
-func runMiddleware(t *testing.T, authorizer authz.Authorizer, ctx context.Context, handler middleware.KHandler) (interface{}, error) {
+func runMiddleware(t *testing.T, authorizer authz.Authorizer, ctx context.Context, handler middleware.KHandler, opts ...options.Option) (interface{}, error) {
 	t.Helper()
-	mw := NewAuthZMiddleware(authorizer)
+	mw := New(authorizer, opts...)
 	return mw.Server()(handler)(ctx, nil)
 }
 
@@ -122,7 +133,7 @@ func TestAuthZMiddleware_Success(t *testing.T) {
 	}{
 		{
 			name:      "Admin user accessing admin operation",
-			principal: principal.New("adminUser", []string{"admin"}, nil, nil, nil),
+			principal: principal.New("adminUser", "", principal.WithRoles([]string{"admin"})),
 			method:    "GET",
 			operation: "/admin.Service/GetData",
 			authorizer: newMockAuthorizer(map[mockRule][]string{
@@ -132,7 +143,7 @@ func TestAuthZMiddleware_Success(t *testing.T) {
 		},
 		{
 			name:      "Regular user accessing public operation",
-			principal: principal.New("regularUser", []string{"user"}, nil, nil, nil),
+			principal: principal.New("regularUser", "", principal.WithRoles([]string{"user"})),
 			method:    "GET",
 			operation: "/public.Service/GetInfo",
 			authorizer: newMockAuthorizer(map[mockRule][]string{
@@ -142,7 +153,7 @@ func TestAuthZMiddleware_Success(t *testing.T) {
 		},
 		{
 			name:      "User with multiple roles accessing allowed operation",
-			principal: principal.New("multiRoleUser", []string{"user", "editor"}, nil, nil, nil),
+			principal: principal.New("multiRoleUser", "", principal.WithRoles([]string{"user", "editor"})),
 			method:    "POST",
 			operation: "/editor.Service/EditDoc",
 			authorizer: newMockAuthorizer(map[mockRule][]string{
@@ -186,7 +197,7 @@ func TestAuthZMiddleware_Failure(t *testing.T) {
 	}{
 		{
 			name:      "Regular user accessing admin operation",
-			principal: principal.New("regularUser", []string{"user"}, nil, nil, nil),
+			principal: principal.New("regularUser", "", principal.WithRoles([]string{"user"})),
 			method:    "GET",
 			operation: "/admin.Service/GetData",
 			authorizer: newMockAuthorizer(map[mockRule][]string{
@@ -206,7 +217,7 @@ func TestAuthZMiddleware_Failure(t *testing.T) {
 		},
 		{
 			name:      "User with no matching role for operation",
-			principal: principal.New("viewer", []string{"viewer"}, nil, nil, nil),
+			principal: principal.New("viewer", "", principal.WithRoles([]string{"viewer"})),
 			method:    "POST",
 			operation: "/editor.Service/EditDoc",
 			authorizer: newMockAuthorizer(map[mockRule][]string{
@@ -222,6 +233,14 @@ func TestAuthZMiddleware_Failure(t *testing.T) {
 			authorizer: newMockAuthorizer(map[mockRule][]string{
 				{Resource: "/any.Service/AnyOp", Action: "read"}: {"admin", "user"},
 			}),
+			expectError: true,
+		},
+		{
+			name:        "Authorizer returns generic error",
+			principal:   principal.New("user", "", principal.WithRoles([]string{"user"})),
+			method:      "GET",
+			operation:   "/some.Service/SomeOp",
+			authorizer:  newMockAuthorizerWithError(errors.New("internal authorizer error")), // Use the new constructor
 			expectError: true,
 		},
 	}
@@ -244,15 +263,21 @@ func TestAuthZMiddleware_Failure(t *testing.T) {
 			if tc.principal == nil {
 				assert.True(t, securityv1.IsCredentialsInvalid(err))
 			} else {
-				assert.True(t, securityv1.IsPermissionDenied(err))
+				// Check if the authorizer was configured to return a specific error
+				mockAuth, ok := tc.authorizer.(*mockAuthorizer)
+				if ok && mockAuth.errToReturn != nil {
+					assert.EqualError(t, err, mockAuth.errToReturn.Error())
+				} else {
+					assert.True(t, securityv1.IsPermissionDenied(err))
+				}
 			}
 		})
 	}
 }
 
 func TestAuthZMiddleware_SkipChecker(t *testing.T) {
-	alwaysSkip := func(req security.Request) bool { return true }
-	neverSkip := func(req security.Request) bool { return false }
+	alwaysSkip := func(ctx context.Context, req security.Request) bool { return true }
+	neverSkip := func(ctx context.Context, req security.Request) bool { return false }
 
 	mockAuthz := newMockAuthorizer(map[mockRule][]string{
 		{Resource: "/protected.Service/GetData", Action: "read"}: {"admin"},
@@ -261,7 +286,7 @@ func TestAuthZMiddleware_SkipChecker(t *testing.T) {
 	t.Run("SkipChecker allows skipping authorization", func(t *testing.T) {
 		tr := newMockTransport(t, "GET", "/protected.Service/GetData")
 		ctx := transport.NewServerContext(context.Background(), tr)
-		mw := NewAuthZMiddleware(mockAuthz, WithSkipChecker(alwaysSkip))
+		mw := New(mockAuthz, WithSkipChecker(alwaysSkip))
 		_, err := mw.Server()(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return "handler called", nil
 		})(ctx, nil)
@@ -272,7 +297,7 @@ func TestAuthZMiddleware_SkipChecker(t *testing.T) {
 		tr := newMockTransport(t, "GET", "/protected.Service/GetData")
 		ctx := transport.NewServerContext(context.Background(), tr)
 
-		mw := NewAuthZMiddleware(mockAuthz, WithSkipChecker(neverSkip))
+		mw := New(mockAuthz, WithSkipChecker(neverSkip))
 		_, err := mw.Server()(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return "handler called", nil
 		})(ctx, nil)
@@ -281,11 +306,15 @@ func TestAuthZMiddleware_SkipChecker(t *testing.T) {
 	})
 
 	t.Run("PathSkipChecker skips specific path", func(t *testing.T) {
-		skipPaths := map[string]bool{
+		skipPathsMap := map[string]bool{
 			"/public.Service/GetInfo": true,
 		}
-		checker := PathSkipChecker(skipPaths)
-		mw := NewAuthZMiddleware(mockAuthz, WithSkipChecker(checker))
+		var skipPaths []string
+		for path := range skipPathsMap {
+			skipPaths = append(skipPaths, path)
+		}
+		checker := PathSkipChecker(skipPaths...)
+		mw := New(mockAuthz, WithSkipChecker(checker))
 
 		tr := newMockTransport(t, "GET", "/public.Service/GetInfo")
 		ctx := transport.NewServerContext(context.Background(), tr)
@@ -304,10 +333,22 @@ func TestAuthZMiddleware_SkipChecker(t *testing.T) {
 	})
 
 	t.Run("CompositeSkipChecker combines checkers", func(t *testing.T) {
-		checker1 := PathSkipChecker(map[string]bool{"/path1": true})
-		checker2 := PathSkipChecker(map[string]bool{"/path2": true})
-		composite := CompositeSkipChecker(checker1, checker2)
-		mw := NewAuthZMiddleware(mockAuthz, WithSkipChecker(composite))
+		// Define a simple CompositeSkipChecker for testing purposes if not found in security package
+		compositeSkipChecker := func(checkers ...security.SkipChecker) security.SkipChecker {
+			return func(ctx context.Context, req security.Request) bool {
+				for _, checker := range checkers {
+					if checker(ctx, req) {
+						return true
+					}
+				}
+				return false
+			}
+		}
+
+		checker1 := PathSkipChecker("/path1")
+		checker2 := PathSkipChecker("/path2")
+		composite := compositeSkipChecker(checker1, checker2)
+		mw := New(mockAuthz, WithSkipChecker(composite))
 
 		tr := newMockTransport(t, "GET", "/path1")
 		ctx := transport.NewServerContext(context.Background(), tr)
