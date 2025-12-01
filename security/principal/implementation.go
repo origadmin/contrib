@@ -273,11 +273,11 @@ func New(id string, roles, permissions []string, scopes map[string]bool, claims 
 	}
 	return &concretePrincipal{
 		id:          id,
+		domain:      domain,
 		roles:       roles,
 		permissions: permissions,
 		scopes:      scopes,
 		claims:      claims,
-		domain:      domain,
 	}
 }
 
