@@ -46,38 +46,29 @@ func Decode(encoded string) (securityifaces.Principal, error) {
 	return FromProto(protoP)
 }
 
-// Inject injects an already encoded principal string into the outgoing request context.
-// It handles both HTTP and gRPC transports.
+// Inject injects an encoded principal string into an outgoing request context.
+// It prioritizes the Kratos transport abstraction but falls back to the native gRPC metadata mechanism.
 func Inject(ctx context.Context, encodedPrincipal string) context.Context {
+	// Prioritize Kratos transport, which handles both HTTP and gRPC.
 	if tr, ok := transport.FromClientContext(ctx); ok {
-		switch tr.Kind() {
-		case transport.KindHTTP:
-			tr.RequestHeader().Set(MetadataKey, encodedPrincipal)
-		case transport.KindGRPC:
-			return metadata.AppendToOutgoingContext(ctx, MetadataKey, encodedPrincipal)
-		}
+		tr.RequestHeader().Set(MetadataKey, encodedPrincipal)
+		return ctx // Kratos transporter header is modified in-place.
 	}
-	return ctx
+	// Fallback for native gRPC contexts that don't have a Kratos transporter.
+	return metadata.AppendToOutgoingContext(ctx, MetadataKey, encodedPrincipal)
 }
 
-// Extract extracts the encoded principal string from the incoming request context.
-// It handles both HTTP and gRPC transports.
+// Extract extracts an encoded principal string from an incoming request context.
+// It prioritizes the Kratos transport abstraction but falls back to the native gRPC metadata mechanism.
 func Extract(ctx context.Context) (string, bool) {
+	// Prioritize Kratos transport, which handles both HTTP and gRPC.
 	if tr, ok := transport.FromServerContext(ctx); ok {
-		var encodedPrincipal string
-		switch tr.Kind() {
-		case transport.KindHTTP:
-			encodedPrincipal = tr.RequestHeader().Get(MetadataKey)
-		case transport.KindGRPC:
-			if md, ok := metadata.FromIncomingContext(ctx); ok {
-				vals := md.Get(MetadataKey)
-				if len(vals) > 0 {
-					encodedPrincipal = vals[0]
-				}
-			}
-		}
-		if encodedPrincipal != "" {
+		if encodedPrincipal := tr.RequestHeader().Get(MetadataKey); encodedPrincipal != "" {
 			return encodedPrincipal, true
+		}
+	} else if md, ok := metadata.FromIncomingContext(ctx); ok { // Fallback for native gRPC.
+		if vals := md.Get(MetadataKey); len(vals) > 0 {
+			return vals[0], true
 		}
 	}
 	return "", false

@@ -2,20 +2,18 @@ package principal
 
 import (
 	"context"
+	"net/http"
 
-	"github.com/go-kratos/kratos/v2/transport" // For Kratos transport types
-	"google.golang.org/grpc/metadata"          // For gRPC metadata
+	"github.com/go-kratos/kratos/v2/transport"
+	"google.golang.org/grpc/metadata"
 
-	"github.com/origadmin/contrib/security/request" // For request.NewFromHTTPRequest
-	"github.com/origadmin/runtime/log"              // For logging warnings
+	"github.com/origadmin/runtime/log"
 )
-
-// --- Principal Propagation ---
 
 // PropagateToClientContext prepares the context for an outgoing client request
 // by injecting an encoded Principal string into transport-specific metadata/headers.
-// The returned context should be used for the outgoing client call.
-func PropagateToClientContext(ctx context.Context, encodedPrincipal string, pt PropagationType) context.Context {
+// Parameters are ordered by priority: PropagationType, Context, Principal data, optional Request.
+func PropagateToClientContext(pt PropagationType, ctx context.Context, encodedPrincipal string, req any) context.Context {
 	if encodedPrincipal == "" {
 		return ctx // Nothing to propagate
 	}
@@ -26,12 +24,11 @@ func PropagateToClientContext(ctx context.Context, encodedPrincipal string, pt P
 			tr.RequestHeader().Set(MetadataKey, encodedPrincipal)
 		}
 	case PropagationTypeHTTP:
-		// For native HTTP client round trippers, we can't modify http.Request directly here.
-		// This should be handled by a specific RoundTripper implementation.
-		// This function primarily prepares the context.
-		// For now, let's inject into context, expecting a RoundTripper to pick it up.
-		// The RoundTripper will then set the header using the encodedPrincipal from context.
-		ctx = context.WithValue(ctx, MetadataKey, encodedPrincipal) // Store encoded string in context
+		if r, ok := req.(*http.Request); ok && r != nil {
+			r.Header.Set(MetadataKey, encodedPrincipal)
+		} else {
+			log.Warnf("PropagationTypeHTTP requires a non-nil *http.Request passed as the 'req' parameter")
+		}
 	case PropagationTypeGRPC:
 		fallthrough
 	default: // Default behavior is gRPC
@@ -42,7 +39,8 @@ func PropagateToClientContext(ctx context.Context, encodedPrincipal string, pt P
 
 // ExtractFromServerContext extracts an encoded principal string from an incoming request's
 // transport-specific metadata/headers.
-func ExtractFromServerContext(ctx context.Context, pt PropagationType) string {
+// Parameters are ordered by priority: PropagationType, Context, optional Request.
+func ExtractFromServerContext(pt PropagationType, ctx context.Context, req any) string {
 	var encodedPrincipal string
 
 	switch pt {
@@ -51,11 +49,10 @@ func ExtractFromServerContext(ctx context.Context, pt PropagationType) string {
 			encodedPrincipal = tr.RequestHeader().Get(MetadataKey)
 		}
 	case PropagationTypeHTTP:
-		securityReq, reqErr := request.NewFromServerContext(ctx)
-		if reqErr == nil {
-			encodedPrincipal = securityReq.Get(MetadataKey)
+		if r, ok := req.(*http.Request); ok && r != nil {
+			encodedPrincipal = r.Header.Get(MetadataKey)
 		} else {
-			log.Warnf("failed to create security request from context for principal extraction: %v", reqErr)
+			log.Warnf("PropagationTypeHTTP requires a non-nil *http.Request passed as the 'req' parameter")
 		}
 	case PropagationTypeGRPC:
 		fallthrough
