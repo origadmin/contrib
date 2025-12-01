@@ -42,8 +42,8 @@ func (m *Middleware) Server() middleware.KMiddleware {
 			}
 
 			// Extract the encoded principal from the transport (gRPC metadata or HTTP header).
-			encodedPrincipal, found := securityPrincipalProp.ExtractFromServerContext(ctx, m.PropagationType)
-			if !found {
+			encodedPrincipal := securityPrincipalProp.ExtractFromServerContext(ctx, m.PropagationType)
+			if encodedPrincipal == "" {
 				// No principal found in the request.
 				return handler(ctx, req)
 			}

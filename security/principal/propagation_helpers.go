@@ -42,7 +42,7 @@ func PropagateToClientContext(ctx context.Context, encodedPrincipal string, pt P
 
 // ExtractFromServerContext extracts an encoded principal string from an incoming request's
 // transport-specific metadata/headers.
-func ExtractFromServerContext(ctx context.Context, pt PropagationType) (string, context.Context) {
+func ExtractFromServerContext(ctx context.Context, pt PropagationType) string {
 	var encodedPrincipal string
 
 	switch pt {
@@ -68,5 +68,5 @@ func ExtractFromServerContext(ctx context.Context, pt PropagationType) (string, 
 		}
 	}
 
-	return encodedPrincipal, ctx
+	return encodedPrincipal
 }
