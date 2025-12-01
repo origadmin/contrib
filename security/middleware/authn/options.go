@@ -3,16 +3,14 @@ package authn
 import (
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authn"
-	"github.com/origadmin/contrib/security/principal"
 	"github.com/origadmin/runtime/extensions/optionutil"
 	"github.com/origadmin/runtime/interfaces/options"
 )
 
 // Options holds configurations for the authn middleware, parsed from a generic options slice.
 type Options struct {
-	Authenticator   authn.Authenticator
-	SkipChecker     security.SkipChecker
-	PropagationType principal.PropagationType
+	Authenticator authn.Authenticator
+	SkipChecker   security.SkipChecker
 }
 
 // WithAuthenticator provides an Authenticator via a runtime option.
@@ -26,13 +24,6 @@ func WithAuthenticator(authenticator authn.Authenticator) options.Option {
 func WithSkipChecker(skipChecker security.SkipChecker) options.Option {
 	return optionutil.Update(func(o *Options) {
 		o.SkipChecker = skipChecker
-	})
-}
-
-// WithPropagationType provides a PropagationType via a runtime option.
-func WithPropagationType(pt principal.PropagationType) options.Option {
-	return optionutil.Update(func(o *Options) {
-		o.PropagationType = pt
 	})
 }
 

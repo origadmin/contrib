@@ -43,18 +43,25 @@ func PropagateToClientContext(ctx context.Context, encodedPrincipal string, pt P
 
 // ExtractFromServerContext extracts an encoded principal string from an incoming request's
 // transport-specific metadata/headers.
-func ExtractFromServerContext(ctx context.Context, pt PropagationType) (string, context.Context) {
+func ExtractFromServerContext(ctx context.Context, pt PropagationType) (string, bool) {
 	var encodedPrincipal string
+	found := false
 
 	switch pt {
 	case PropagationTypeKratos:
 		if tr, ok := transport.FromServerContext(ctx); ok {
-			encodedPrincipal = tr.RequestHeader().Get(MetadataKey)
+			if val := tr.RequestHeader().Get(MetadataKey); val != "" {
+				encodedPrincipal = val
+				found = true
+			}
 		}
 	case PropagationTypeHTTP:
 		securityReq, reqErr := request.NewFromServerContext(ctx)
 		if reqErr == nil {
-			encodedPrincipal = securityReq.Get(MetadataKey)
+			if val := securityReq.Get(MetadataKey); val != "" {
+				encodedPrincipal = val
+				found = true
+			}
 		} else {
 			log.Warnf("failed to create security request from context for principal extraction: %v", reqErr)
 		}
@@ -65,11 +72,12 @@ func ExtractFromServerContext(ctx context.Context, pt PropagationType) (string, 
 		if ok {
 			if principals := md.Get(MetadataKey); len(principals) > 0 {
 				encodedPrincipal = principals[0]
+				found = true
 			}
 		}
 	}
 
-	return encodedPrincipal, ctx
+	return encodedPrincipal, found
 }
 
 // --- Domain Propagation ---
