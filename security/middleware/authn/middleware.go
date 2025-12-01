@@ -5,7 +5,7 @@ import (
 
 	"github.com/go-kratos/kratos/v2/transport"
 
-	"github.com/origadmin/contrib/security" // Import the security package
+	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authn"
 	securityCredential "github.com/origadmin/contrib/security/credential"
 	securityPrincipal "github.com/origadmin/contrib/security/principal"
@@ -50,7 +50,7 @@ func (m *Middleware) Server() middleware.KMiddleware {
 			if err != nil {
 				return nil, err
 			}
-			if m.SkipChecker(securityReq) {
+			if m.SkipChecker(ctx, securityReq) {
 				return handler(ctx, req)
 			}
 			var cred security.Credential

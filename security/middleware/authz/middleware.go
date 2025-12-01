@@ -4,7 +4,7 @@ import (
 	"context"
 
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
-	"github.com/origadmin/contrib/security" // Import the security package
+	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authz"
 	securityPrincipal "github.com/origadmin/contrib/security/principal"
 	"github.com/origadmin/contrib/security/request"
@@ -46,7 +46,7 @@ func (m *Middleware) Server() middleware.KMiddleware {
 				return nil, err
 			}
 			// Use the embedded SkipChecker
-			if m.SkipChecker(securityReq) {
+			if m.SkipChecker(ctx, securityReq) {
 				return handler(ctx, req)
 			}
 			principal, ok := securityPrincipal.FromContext(ctx)
