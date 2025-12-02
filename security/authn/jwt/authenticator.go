@@ -122,7 +122,11 @@ func (a *Authenticator) Authenticate(ctx context.Context, cred security.Credenti
 
 // Supports returns true if this authenticator can handle the given credential.
 func (a *Authenticator) Supports(cred security.Credential) bool {
-	return cred.Type() == authn.JWT
+	supported := cred.Type() == authn.JWT
+	if !supported {
+		a.log.Debugf("JWT Authenticator does not support credential type: %s", cred.Type())
+	}
+	return supported
 }
 
 // CreateCredential issues a new credential for the given principal.
@@ -314,17 +318,17 @@ func revocationKey(tokenID string) string {
 func mapJWTError(err error) error {
 	switch {
 	case errors.Is(err, jwtv5.ErrTokenMalformed):
-		return securityv1.ErrorTokenInvalid("token is malformed: %v", err)
+		return securityv1.ErrorTokenInvalid("token is malformed")
 	case errors.Is(err, jwtv5.ErrTokenSignatureInvalid):
-		return securityv1.ErrorTokenInvalid("token signature is invalid: %v", err)
+		return securityv1.ErrorTokenInvalid("token signature is invalid")
 	case errors.Is(err, jwtv5.ErrTokenExpired):
-		return securityv1.ErrorTokenExpired("token has expired: %v", err)
+		return securityv1.ErrorTokenExpired("token has expired")
 	case errors.Is(err, jwtv5.ErrTokenNotValidYet):
-		return securityv1.ErrorTokenInvalid("token not valid yet: %v", err)
+		return securityv1.ErrorTokenInvalid("token not valid yet")
 	case errors.Is(err, jwtv5.ErrTokenInvalidIssuer):
-		return securityv1.ErrorClaimsInvalid("invalid issuer: %v", err)
+		return securityv1.ErrorClaimsInvalid("invalid issuer")
 	case errors.Is(err, jwtv5.ErrTokenInvalidAudience):
-		return securityv1.ErrorClaimsInvalid("invalid audience: %v", err)
+		return securityv1.ErrorClaimsInvalid("invalid audience")
 	default:
 		return securityv1.ErrorTokenInvalid("unexpected token error: %v", err)
 	}

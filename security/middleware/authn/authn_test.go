@@ -24,55 +24,24 @@ import (
 	"github.com/origadmin/contrib/security/principal"
 )
 
-// mockHeaderCarrier implements transport.Header
-type mockHeaderCarrier map[string][]string
-
-func (m mockHeaderCarrier) Get(key string) string {
-	if v := m[key]; len(v) > 0 {
-		return v[0]
-	}
-	return ""
-}
-
-func (m mockHeaderCarrier) Set(key string, value string) {
-	m[key] = []string{value}
-}
-
-func (m mockHeaderCarrier) Add(key string, value string) {
-	m[key] = append(m[key], value)
-}
-
-func (m mockHeaderCarrier) Keys() []string {
-	keys := make([]string, 0, len(m))
-	for k := range m {
-		keys = append(keys, k)
-	}
-	return keys
-}
-
-func (m mockHeaderCarrier) Values(key string) []string {
-	return m[key]
-}
-
 // mockTransport is a mock implementation of transport.Transport and kratoshttp.Transporter
 type mockTransport struct {
-	header mockHeaderCarrier
+	header headerCarrier
 	req    *http.Request
 }
 
 func newMockTransport() *mockTransport {
 	req, _ := http.NewRequest("GET", "/test", nil)
 	return &mockTransport{
-		header: make(mockHeaderCarrier),
-		req:    req,
+		req: req,
 	}
 }
 
 func (m *mockTransport) Kind() transport.Kind            { return transport.KindHTTP }
 func (m *mockTransport) Endpoint() string                { return "" }
 func (m *mockTransport) Operation() string               { return "/test.Service/Test" }
-func (m *mockTransport) RequestHeader() transport.Header { return m.header }
-func (m *mockTransport) ReplyHeader() transport.Header   { return m.header }
+func (m *mockTransport) RequestHeader() transport.Header { return headerCarrier(m.req.Header) }
+func (m *mockTransport) ReplyHeader() transport.Header   { return headerCarrier(m.req.Header) }
 
 // Implement kratoshttp.Transporter interface
 func (m *mockTransport) Request() *http.Request {
@@ -83,14 +52,33 @@ func (m *mockTransport) PathTemplate() string {
 	return "/test.Service/Test"
 }
 
-type header interface {
-	Get(key string) string
-	Set(key string, value string)
-	Add(key string, value string)
-	Keys() []string
-	Values(key string) []string
+type headerCarrier http.Header
+
+func (hc headerCarrier) Get(key string) string {
+	return http.Header(hc).Get(key)
 }
 
+func (hc headerCarrier) Set(key string, value string) {
+	http.Header(hc).Set(key, value)
+}
+
+func (hc headerCarrier) Add(key string, value string) {
+	http.Header(hc).Add(key, value)
+}
+
+func (hc headerCarrier) Keys() []string {
+	keys := make([]string, 0, len(hc))
+	for k := range http.Header(hc) {
+		keys = append(keys, k)
+	}
+	return keys
+}
+
+func (hc headerCarrier) Values(key string) []string {
+	return http.Header(hc).Values(key)
+}
+
+var _ transport.Header = (*headerCarrier)(nil)
 var _ transport.Transporter = (*mockTransport)(nil)
 var _ kratoshttp.Transporter = (*mockTransport)(nil)
 
@@ -227,9 +215,9 @@ func TestAuthNMiddleware_WithJwtAuthenticator_Failure(t *testing.T) {
 		expectedErr   error
 	}{
 		{"No Token", jwtAuthn, "", true, securityv1.ErrorCredentialsInvalid("unsupported credential type: none")},
-		{"Malformed Token", jwtAuthn, "Bearer malformed", true, securityv1.ErrorCredentialsInvalid("unsupported credential type: jwt")},
-		{"Invalid Signature", jwtAuthn, "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c", true, securityv1.ErrorCredentialsInvalid("unsupported credential type: jwt")},
-		{"Expired Token", jwtAuthn, "Bearer " + expiredToken, true, securityv1.ErrorCredentialsInvalid("unsupported credential type: jwt")},
+		{"Malformed Token", jwtAuthn, "Bearer malformed", true, securityv1.ErrorTokenInvalid("token is malformed")},
+		{"Invalid Signature", jwtAuthn, "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c", true, securityv1.ErrorTokenInvalid("token signature is invalid")},
+		{"Expired Token", jwtAuthn, "Bearer " + expiredToken, true, securityv1.ErrorTokenExpired("token has expired")},
 		{
 			"KeyFunc returns error",
 			func() authn.Authenticator {
@@ -244,7 +232,7 @@ func TestAuthNMiddleware_WithJwtAuthenticator_Failure(t *testing.T) {
 			}(),
 			"Bearer " + validToken,
 			true,
-			securityv1.ErrorCredentialsInvalid("unsupported credential type: jwt"),
+			securityv1.ErrorTokenInvalid("unexpected token error: token is unverifiable: error while executing keyfunc: key func error"),
 		},
 		{
 			"Authenticator returns generic error",
@@ -338,7 +326,6 @@ func TestDeploymentMode_Standalone(t *testing.T) {
 		// 1. Setup Noop authenticator
 		noopAuthn, err := noop.NewAuthenticator(nil)
 		require.NoError(t, err)
-
 		// 2. Simulate request handling in a monolithic application (no authentication)
 		tr := newMockTransport()
 		ctx := transport.NewServerContext(context.Background(), tr)

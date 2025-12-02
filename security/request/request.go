@@ -98,7 +98,7 @@ func NewFromServerContext(ctx context.Context) (security.Request, error) {
 		meta          Metadata
 		err           error
 	)
-
+	
 	switch tr.Kind() {
 	case transport.KindHTTP:
 		kind = "http"
