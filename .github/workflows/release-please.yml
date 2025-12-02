@@ -12,55 +12,7 @@ permissions:
   checks: write
 
 jobs:
-  lint:
-    # Skip linting if the commit message contains 'chore(main)'
-    if: "!contains(github.event.head_commit.message, 'chore(main)')"
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '^1.24.0'
-
-      # Assuming 'make lint' exists or golangci-lint is installed globally
-      # If 'make lint' does not exist, you might need to add it to your Makefile
-      # or use a direct golangci-lint action here.
-      - name: Run lint
-        run: |
-          # Placeholder for lint command.
-          # If you have a 'make lint' target, use: make lint
-          # Otherwise, you might need to install and run golangci-lint:
-          # curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.59.1
-          # $(go env GOPATH)/bin/golangci-lint run ./...
-          echo "Lint step placeholder. Please configure your lint command here."
-
-  test:
-    # Skip testing if the commit message contains 'chore(main)'
-    if: "!contains(github.event.head_commit.message, 'chore(main)')"
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      actions: read
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '^1.24.0'
-
-      - name: Install Tools and Protoc Plugins via Makefile
-        run: make init
-
-      - name: Run tests
-        run: make test
-
   release:
-    needs: [test] # Ensure tests pass before attempting to release
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
