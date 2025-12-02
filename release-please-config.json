@@ -1,0 +1,15 @@
+{
+  "release-type": "go",
+  "bump-major-pre-major": false,
+  "bump-minor-pre-major": true,
+  "bump-patch-for-minor-pre-major": true,
+  "packages": {
+    ".": {
+      "package-name": "github.com/origadmin/contrib",
+      "include-component-in-tag": false,
+      "include-v-in-tag": true,
+      "major-version-bump-on-breaking-change": false,
+      "changelog-path": "CHANGELOG.md"
+    }
+  }
+}
