@@ -1,7 +1,24 @@
-version: v1
-breaking:
-  use:
-    - FILE
-lint:
-  use:
-    - DEFAULT
+# For details on buf.yaml configuration, visit https://buf.build/docs/configuration/v2/buf-yaml
+version: v2
+
+modules:
+  - path: .
+    lint:
+      use:
+        - DEFAULT
+    breaking:
+      use:
+        - FILE
+#  - path: database/ent/proto
+#    name: buf.build/origadmin/entgen
+#    lint:
+#      use:
+#        - STANDARD
+#      except:
+#        - PACKAGE_VERSION_SUFFIX
+#        - PACKAGE_DIRECTORY_MATCH
+#    breaking:
+#      use:
+#        - FILE
+deps:
+  - buf.build/googleapis/googleapis
