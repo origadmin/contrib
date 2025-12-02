@@ -20,7 +20,7 @@ import (
 	"github.com/origadmin/contrib/security/principal"
 
 	// Import the generated helloworld service
-	helloworld "github.com/origadmin/contrib/examples/security-demo/backend/api/helloworld/v1"
+	helloworld "github.com/origadmin/contrib/security/_examples/security-demo/backend/api/helloworld/v1"
 )
 
 // Greeter Service

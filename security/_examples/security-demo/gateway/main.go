@@ -13,7 +13,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 
 	// Backend client from the security-demo example.
-	backendpb "github.com/origadmin/contrib/examples/security-demo/backend/api/helloworld/v1"
+	backendpb "github.com/origadmin/contrib/security/_examples/security-demo/backend/api/helloworld/v1"
 
 	jwtv1 "github.com/origadmin/contrib/api/gen/go/security/authn/jwt/v1"
 	authnv1 "github.com/origadmin/contrib/api/gen/go/security/authn/v1"

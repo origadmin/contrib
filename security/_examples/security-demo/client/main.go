@@ -11,7 +11,7 @@ import (
 	"github.com/origadmin/contrib/security/principal"
 
 	// Import the generated client from your backend service
-	helloworld "github.com/origadmin/contrib/examples/security-demo/backend/api/helloworld/v1"
+	helloworld "github.com/origadmin/contrib/security/_examples/security-demo/backend/api/helloworld/v1"
 )
 
 func main() {
