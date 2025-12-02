@@ -1,2 +1,0 @@
-p, admin, *, read-only-resource, read
-p, user, specific-domain, read-write-resource, write
