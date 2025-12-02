@@ -4,7 +4,6 @@ import (
 	"context"
 
 	securityPrincipal "github.com/origadmin/contrib/security/principal"
-	securityPrincipalProp "github.com/origadmin/contrib/security/principal" // Alias for propagation functions
 	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/runtime/middleware"
 )
@@ -42,7 +41,7 @@ func (m *Middleware) Server() middleware.KMiddleware {
 			}
 
 			// Extract the encoded principal from the transport (gRPC metadata or HTTP header).
-			encodedPrincipal := securityPrincipalProp.ExtractFromServerContext(m.PropagationType, ctx, req)
+			encodedPrincipal := securityPrincipal.ExtractFromServerContext(m.PropagationType, ctx, req)
 			if encodedPrincipal == "" {
 				// No principal found in the request.
 				return handler(ctx, req)
@@ -84,7 +83,7 @@ func (m *Middleware) Client() middleware.KMiddleware {
 			}
 
 			// 3. Inject the encoded Principal into the outgoing request context.
-			newCtx := securityPrincipalProp.PropagateToClientContext(m.PropagationType, ctx, req, encodedPrincipal)
+			newCtx := securityPrincipal.PropagateToClientContext(m.PropagationType, ctx, req, encodedPrincipal)
 
 			// 4. Call the next handler in the chain with the new context.
 			return handler(newCtx, req)
