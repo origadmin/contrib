@@ -22,7 +22,7 @@ func (f *factory) NewMiddlewareClient(cfg *middlewarev1.Middleware, opts ...opti
 	if !cfg.GetEnabled() || cfg.GetName() != MiddlewareName {
 		return nil, false
 	}
-	o := fromOptions(opts...)
+	o := fromOptions(opts)
 	return newMiddleware(o).Client(), true
 }
 
@@ -31,6 +31,6 @@ func (f *factory) NewMiddlewareServer(cfg *middlewarev1.Middleware, opts ...opti
 	if !cfg.GetEnabled() || cfg.GetName() != MiddlewareName {
 		return nil, false
 	}
-	o := fromOptions(opts...)
+	o := fromOptions(opts)
 	return newMiddleware(o).Server(), true
 }

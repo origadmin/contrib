@@ -13,7 +13,7 @@ type Options struct {
 }
 
 // fromOptions parses the provided options and returns an Options struct.
-func fromOptions(opts ...options.Option) *Options {
+func fromOptions(opts []options.Option) *Options {
 	o := &Options{
 		// Default propagation type is gRPC metadata.
 		PropagationType: principal.PropagationTypeGRPC,

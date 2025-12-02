@@ -16,7 +16,7 @@ type Middleware struct {
 
 // New is a convenience function for creating a new principal propagation middleware.
 func New(opts ...options.Option) *Middleware {
-	o := fromOptions(opts...)
+	o := fromOptions(opts)
 	return newMiddleware(o)
 }
 

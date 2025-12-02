@@ -28,7 +28,7 @@ func WithSkipChecker(skipChecker security.SkipChecker) options.Option {
 }
 
 // fromOptions creates a new Options instance by parsing a slice of generic runtime options.
-func fromOptions(opts ...options.Option) *Options {
+func fromOptions(opts []options.Option) *Options {
 	return optionutil.NewT[Options](opts...)
 }
 

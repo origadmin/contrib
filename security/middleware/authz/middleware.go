@@ -21,7 +21,7 @@ type Middleware struct {
 // New is a convenience function for creating a new authorization middleware for manual use.
 func New(authorizer authz.Authorizer, opts ...options.Option) *Middleware {
 	allOpts := append([]options.Option{WithAuthorizer(authorizer)}, opts...)
-	o := fromOptions(allOpts...)
+	o := fromOptions(allOpts)
 	return newMiddleware(o)
 }
 
