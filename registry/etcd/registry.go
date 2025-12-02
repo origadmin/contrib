@@ -11,14 +11,14 @@ import (
 	"github.com/origadmin/toolkits/errors"
 )
 
-type etcdBuilder struct {
+type factory struct {
 }
 
 func init() {
-	registry.Register(Type, &etcdBuilder{})
+	registry.Register(Type, &factory{})
 }
 
-func (c *etcdBuilder) NewDiscovery(cfg *discoveryv1.Discovery, opts ...options.Option) (registry.KDiscovery, error) {
+func (c *factory) NewDiscovery(cfg *discoveryv1.Discovery, opts ...options.Option) (registry.KDiscovery, error) {
 	if cfg.GetEtcd() == nil {
 		return nil, errors.New("etcd config is nil")
 	}
@@ -31,7 +31,7 @@ func (c *etcdBuilder) NewDiscovery(cfg *discoveryv1.Discovery, opts ...options.O
 	return r, nil
 }
 
-func (c *etcdBuilder) NewRegistrar(cfg *discoveryv1.Discovery, opts ...options.Option) (registry.KRegistrar, error) {
+func (c *factory) NewRegistrar(cfg *discoveryv1.Discovery, opts ...options.Option) (registry.KRegistrar, error) {
 	if cfg.GetEtcd() == nil {
 		return nil, errors.New("etcd config is nil")
 	}
