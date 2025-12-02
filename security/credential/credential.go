@@ -6,9 +6,6 @@ package credential
 
 import (
 	"fmt"
-	"strings" // Added for string manipulation
-
-	"google.golang.org/grpc/metadata" // Added for gRPC metadata extraction
 
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
@@ -113,34 +110,6 @@ func (c *credential) Source() *securityv1.CredentialSource {
 		Payload:  c.payload,
 		Metadata: protoMeta,
 	}
-}
-
-// ExtractFromGRPCMetadata extracts a security.Credential from gRPC incoming metadata.
-// It looks for the "authorization" header (case-insensitive) and attempts to parse a Bearer token.
-// If a Bearer token is found, it returns a credential of BearerCredentialType.
-// If no valid credential is found, it returns NewEmptyCredential().
-func ExtractFromGRPCMetadata(md metadata.MD) (securityifaces.Credential, error) {
-	authHeaders := md.Get("authorization")
-	if len(authHeaders) == 0 {
-		return NewEmptyCredential(), nil // No authorization header, return empty credential.
-	}
-
-	authHeader := authHeaders[0]
-	if !strings.HasPrefix(authHeader, "Bearer ") {
-		return NewEmptyCredential(), nil // Not a Bearer token, return empty credential.
-	}
-
-	token := strings.TrimPrefix(authHeader, "Bearer ")
-	if token == "" {
-		return NewEmptyCredential(), nil // Empty token string, return empty credential.
-	}
-
-	bearerPayload := &securityv1.BearerCredential{Token: token}
-	cred, err := NewCredential(BearerCredentialType, token, bearerPayload, nil) // No additional metadata for now
-	if err != nil {
-		return nil, fmt.Errorf("failed to create bearer credential from gRPC metadata: %w", err)
-	}
-	return cred, nil
 }
 
 func PayloadBearerCredential(cred securityifaces.Credential) (*securityv1.BearerCredential, error) { // Use securityifaces.Credential

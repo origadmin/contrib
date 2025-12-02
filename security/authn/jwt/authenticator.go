@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"time"
 
-	uniuri "github.com/dchest/uniuri"
+	"github.com/dchest/uniuri"
 	jwtv5 "github.com/golang-jwt/jwt/v5"
 
 	authnv1 "github.com/origadmin/contrib/api/gen/go/security/authn/v1"
@@ -109,7 +109,7 @@ func (a *Authenticator) Authenticate(ctx context.Context, cred security.Credenti
 	// The Authenticator's issuer is used as the Principal's domain.
 	p := securityPrincipal.New(
 		claims.Subject,
-		a.issuer, // Use the Authenticator's issuer as the Principal's domain
+		securityPrincipal.WithDomain(a.issuer),
 		securityPrincipal.WithRoles(claims.Roles),
 		securityPrincipal.WithPermissions(claims.Permissions),
 		securityPrincipal.WithScopes(claims.Scopes),
@@ -122,7 +122,7 @@ func (a *Authenticator) Authenticate(ctx context.Context, cred security.Credenti
 
 // Supports returns true if this authenticator can handle the given credential.
 func (a *Authenticator) Supports(cred security.Credential) bool {
-	return cred.Type() == "jwt"
+	return cred.Type() == authn.JWT
 }
 
 // CreateCredential issues a new credential for the given principal.

@@ -133,7 +133,7 @@ func TestAuthZMiddleware_Success(t *testing.T) {
 	}{
 		{
 			name:      "Admin user accessing admin operation",
-			principal: principal.New("adminUser", "", principal.WithRoles([]string{"admin"})),
+			principal: principal.New("adminUser", principal.WithRoles([]string{"admin"})),
 			method:    "GET",
 			operation: "/admin.Service/GetData",
 			authorizer: newMockAuthorizer(map[mockRule][]string{
@@ -143,7 +143,7 @@ func TestAuthZMiddleware_Success(t *testing.T) {
 		},
 		{
 			name:      "Regular user accessing public operation",
-			principal: principal.New("regularUser", "", principal.WithRoles([]string{"user"})),
+			principal: principal.New("regularUser", principal.WithRoles([]string{"user"})),
 			method:    "GET",
 			operation: "/public.Service/GetInfo",
 			authorizer: newMockAuthorizer(map[mockRule][]string{
@@ -153,7 +153,7 @@ func TestAuthZMiddleware_Success(t *testing.T) {
 		},
 		{
 			name:      "User with multiple roles accessing allowed operation",
-			principal: principal.New("multiRoleUser", "", principal.WithRoles([]string{"user", "editor"})),
+			principal: principal.New("multiRoleUser", principal.WithRoles([]string{"user", "editor"})),
 			method:    "POST",
 			operation: "/editor.Service/EditDoc",
 			authorizer: newMockAuthorizer(map[mockRule][]string{
@@ -197,7 +197,7 @@ func TestAuthZMiddleware_Failure(t *testing.T) {
 	}{
 		{
 			name:      "Regular user accessing admin operation",
-			principal: principal.New("regularUser", "", principal.WithRoles([]string{"user"})),
+			principal: principal.New("regularUser", principal.WithRoles([]string{"user"})),
 			method:    "GET",
 			operation: "/admin.Service/GetData",
 			authorizer: newMockAuthorizer(map[mockRule][]string{
@@ -217,7 +217,7 @@ func TestAuthZMiddleware_Failure(t *testing.T) {
 		},
 		{
 			name:      "User with no matching role for operation",
-			principal: principal.New("viewer", "", principal.WithRoles([]string{"viewer"})),
+			principal: principal.New("viewer", principal.WithRoles([]string{"viewer"})),
 			method:    "POST",
 			operation: "/editor.Service/EditDoc",
 			authorizer: newMockAuthorizer(map[mockRule][]string{
@@ -237,7 +237,7 @@ func TestAuthZMiddleware_Failure(t *testing.T) {
 		},
 		{
 			name:        "Authorizer returns generic error",
-			principal:   principal.New("user", "", principal.WithRoles([]string{"user"})),
+			principal:   principal.New("user", principal.WithRoles([]string{"user"})),
 			method:      "GET",
 			operation:   "/some.Service/SomeOp",
 			authorizer:  newMockAuthorizerWithError(errors.New("internal authorizer error")), // Use the new constructor

@@ -52,7 +52,6 @@ func TestAuthenticator(t *testing.T) {
 
 	princ := principal.New(
 		claims.Subject,
-		"", // Add domain parameter
 		principal.WithRoles(claims.Roles),
 		principal.WithPermissions(claims.Permissions),
 		principal.WithScopes(claims.Scopes),
@@ -161,7 +160,6 @@ func TestPrincipalIntegration(t *testing.T) {
 
 	princ := principal.New(
 		claims.Subject,
-		"", // Add domain parameter
 		principal.WithRoles(claims.Roles),
 		principal.WithPermissions(claims.Permissions),
 		principal.WithScopes(claims.Scopes),
@@ -256,7 +254,7 @@ func TestAuthenticatorAdvancedFailures(t *testing.T) {
 		WithKeyFunc(keyFunc),
 		WithIssuer(issuer),
 		WithAudience(audience), // Use spread operator for []string
-		WithCache(mockCache),      // Inject mock cache
+		WithCache(mockCache),   // Inject mock cache
 	)
 	require.NoError(t, err, "Failed to create authenticator with cache")
 
@@ -284,7 +282,7 @@ func TestAuthenticatorAdvancedFailures(t *testing.T) {
 			ID:        "token123",
 		},
 	}
-	validPrinc := principal.New(validClaims.Subject, "", principal.WithClaims(validClaims))
+	validPrinc := principal.New(validClaims.Subject, principal.WithClaims(validClaims))
 
 	t.Run("Token Not Valid Yet", func(t *testing.T) {
 		nbfClaims := &Claims{

@@ -157,7 +157,7 @@ func TestAuthNMiddleware_WithJwtAuthenticator_Success(t *testing.T) {
 	// 2. Create a valid token
 	creator, ok := jwtAuthn.(securityCredential.Creator)
 	require.True(t, ok)
-	testPrincipal := principal.New("user123", "", principal.WithRoles([]string{"users"}))
+	testPrincipal := principal.New("user123", principal.WithRoles([]string{"users"}))
 	resp, err := creator.CreateCredential(context.Background(), testPrincipal)
 	require.NoError(t, err)
 	tokenString := resp.Payload().GetToken().GetAccessToken()
@@ -220,11 +220,11 @@ func TestAuthNMiddleware_WithJwtAuthenticator_Failure(t *testing.T) {
 	require.NoError(t, err)
 
 	testCases := []struct {
-		name        string
+		name          string
 		authenticator authn.Authenticator
-		tokenHeader string
-		expectError bool
-		expectedErr error
+		tokenHeader   string
+		expectError   bool
+		expectedErr   error
 	}{
 		{"No Token", jwtAuthn, "", true, securityv1.ErrorCredentialsInvalid("unsupported credential type: none")},
 		{"Malformed Token", jwtAuthn, "Bearer malformed", true, securityv1.ErrorTokenInvalid("token is malformed: token is malformed: token contains an invalid number of segments")},
@@ -309,7 +309,7 @@ func TestDeploymentMode_Standalone(t *testing.T) {
 		// 2. Create a valid token and set it in the request
 		creator, ok := jwtAuthn.(securityCredential.Creator)
 		require.True(t, ok)
-		testPrincipal := principal.New("user123", "", principal.WithRoles([]string{"users", "admin"}), principal.WithPermissions([]string{"read", "write"}))
+		testPrincipal := principal.New("user123", principal.WithRoles([]string{"users", "admin"}), principal.WithPermissions([]string{"read", "write"}))
 		resp, err := creator.CreateCredential(context.Background(), testPrincipal)
 		require.NoError(t, err)
 		tokenCred := resp.Payload().GetToken()
@@ -376,7 +376,7 @@ func TestDeploymentMode_Microservice_Gateway(t *testing.T) {
 		// 2. Simulate client request reaching API Gateway
 		creator, ok := gatewayAuthn.(securityCredential.Creator)
 		require.True(t, ok)
-		userPrincipal := principal.New("user456", "", principal.WithRoles([]string{"api-user"}), principal.WithPermissions([]string{"api:read"}))
+		userPrincipal := principal.New("user456", principal.WithRoles([]string{"api-user"}), principal.WithPermissions([]string{"api:read"}))
 		resp, err := creator.CreateCredential(context.Background(), userPrincipal)
 		require.NoError(t, err)
 		tokenCred := resp.Payload().GetToken()
@@ -459,7 +459,7 @@ func TestDeploymentMode_Microservice_IndependentAuth(t *testing.T) {
 		// 2. Simulate user login to obtain token
 		creator, ok := authServiceAuthn.(securityCredential.Creator)
 		require.True(t, ok)
-		userPrincipal := principal.New("user789", "", principal.WithRoles([]string{"service-user"}), principal.WithPermissions([]string{"service:access"}))
+		userPrincipal := principal.New("user789", principal.WithRoles([]string{"service-user"}), principal.WithPermissions([]string{"service:access"}))
 		resp, err := creator.CreateCredential(context.Background(), userPrincipal)
 		require.NoError(t, err)
 		tokenCred := resp.Payload().GetToken()
@@ -551,7 +551,7 @@ func TestAuthnAuthz_CombinationModes(t *testing.T) {
 		// 2. Create token
 		creator, ok := authnOnly.(securityCredential.Creator)
 		require.True(t, ok)
-		testPrincipal := principal.New("readonly-user", "", principal.WithRoles([]string{"readonly"}))
+		testPrincipal := principal.New("readonly-user", principal.WithRoles([]string{"readonly"}))
 		resp, err := creator.CreateCredential(context.Background(), testPrincipal)
 		require.NoError(t, err)
 		tokenCred := resp.Payload().GetToken()
@@ -617,7 +617,7 @@ func TestCrossService_PrincipalPropagation(t *testing.T) {
 		// 2. Create user token
 		creator, ok := authServiceAuthn.(securityCredential.Creator)
 		require.True(t, ok)
-		userPrincipal := principal.New("cross-service-user", "", principal.WithRoles([]string{"user", "api-access"}), principal.WithPermissions([]string{"cross:call"}))
+		userPrincipal := principal.New("cross-service-user", principal.WithRoles([]string{"user", "api-access"}), principal.WithPermissions([]string{"cross:call"}))
 		resp, err := creator.CreateCredential(context.Background(), userPrincipal)
 		require.NoError(t, err)
 		tokenCred := resp.Payload().GetToken()
@@ -661,7 +661,7 @@ func TestCrossService_PrincipalPropagation(t *testing.T) {
 				userRoles := tr.RequestHeader().Get("X-Forward-User-Roles")
 
 				// Reconstruct Principal and inject into context
-				reconstructedPrincipal := principal.New(userID, "", principal.WithRoles([]string{userRoles}))
+				reconstructedPrincipal := principal.New(userID, principal.WithRoles([]string{userRoles}))
 				ctx = principal.NewContext(ctx, reconstructedPrincipal)
 
 				p, ok := principal.FromContext(ctx)

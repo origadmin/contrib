@@ -3,11 +3,9 @@ package authn
 import (
 	"context"
 
-	"github.com/go-kratos/kratos/v2/transport"
-
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authn"
-	securityCredential "github.com/origadmin/contrib/security/credential"
+	"github.com/origadmin/contrib/security/credential"
 	securityPrincipal "github.com/origadmin/contrib/security/principal"
 	"github.com/origadmin/contrib/security/request"
 	"github.com/origadmin/runtime/interfaces/options"
@@ -53,15 +51,14 @@ func (m *Middleware) Server() middleware.KMiddleware {
 			if m.SkipChecker(ctx, securityReq) {
 				return handler(ctx, req)
 			}
-			var cred security.Credential
-			if tr, ok := transport.FromServerContext(ctx); ok {
-				cred, err = securityCredential.ExtractFromTransport(tr)
-				if err != nil {
-					cred = securityCredential.NewEmptyCredential()
-				}
-			} else {
-				cred = securityCredential.NewEmptyCredential()
+
+			// Extract credential using the package-level function
+			cred, err := credential.ExtractFromRequest(ctx, securityReq)
+			if err != nil {
+				// If credential extraction fails, return the error immediately.
+				return nil, err
 			}
+
 			principal, authErr := m.Authenticator.Authenticate(ctx, cred)
 			if authErr != nil {
 				return nil, authErr

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/goexts/generic/configure"
 	"google.golang.org/protobuf/types/known/structpb"
 
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
@@ -310,23 +311,26 @@ func WithClaims(claims securityifaces.Claims) Option {
 	}
 }
 
+// WithDomain sets the domain for the principal. If the provided domain is empty, this option does nothing,
+// preserving the default empty string set by the New constructor.
+func WithDomain(domain string) Option {
+	return func(p *concretePrincipal) {
+		p.domain = domain
+	}
+}
+
 // New creates a new securityifaces.Principal instance using functional options.
 // It ensures that all fields are initialized to non-nil values.
-func New(id string, domain string, opts ...Option) securityifaces.Principal {
+func New(id string, opts ...Option) securityifaces.Principal {
 	// Initialize with explicit empty values
-	p := &concretePrincipal{
+	p := configure.Apply(&concretePrincipal{
 		id:          id,
-		domain:      domain,
+		domain:      "",
 		roles:       make([]string, 0),
 		permissions: make([]string, 0),
 		scopes:      make(map[string]bool),
 		claims:      newEmptyClaims(), // Use the direct empty claims constructor
-	}
-
-	// Apply all provided options
-	for _, opt := range opts {
-		opt(p)
-	}
+	}, opts)
 
 	return p
 }
@@ -338,7 +342,7 @@ func FromProto(protoP *securityv1.Principal) (securityifaces.Principal, error) {
 	if protoP == nil {
 		// Return a NewPrincipalWithID to avoid nil panics in subsequent calls,
 		// providing a safe default when no Protobuf principal is provided.
-		return NewPrincipalWithID(""), nil
+		return Anonymous(), nil
 	}
 
 	claims := &defaultClaims{data: protoP.GetClaims()}
@@ -368,13 +372,6 @@ func FromProto(protoP *securityv1.Principal) (securityifaces.Principal, error) {
 	}, nil
 }
 
-// NewPrincipalWithID creates a new securityifaces.Principal instance with a specified ID.
-// All other fields (domain, roles, permissions, scopes, claims) are initialized to their default empty values
-// by the underlying New constructor.
-func NewPrincipalWithID(id string) securityifaces.Principal {
-	return New(id, "")
-}
-
 func Anonymous() securityifaces.Principal {
-	return NewPrincipalWithID("anonymous")
+	return New("anonymous")
 }

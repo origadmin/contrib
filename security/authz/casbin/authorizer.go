@@ -63,6 +63,7 @@ func (auth *Authorizer) Authorized(ctx context.Context, principal security.Princ
 	switch auth.authMode {
 	case authModeFastPathNonDomain:
 		// Highest performance path for the most common non-domain model.
+		auth.log.Debugf("Casbin Enforce args: sub=%s, obj=%s, act=%s", principal.GetID(), spec.Resource, spec.Action)
 		allowed, err = auth.enforcer.Enforce(principal.GetID(), spec.Resource, spec.Action)
 
 	case authModeFastPathDomain:
@@ -71,6 +72,7 @@ func (auth *Authorizer) Authorized(ctx context.Context, principal security.Princ
 		if len(domain) == 0 {
 			domain = auth.wildcardItem
 		}
+		auth.log.Debugf("Casbin Enforce args: sub=%s, dom=%s, obj=%s, act=%s", principal.GetID(), domain, spec.Resource, spec.Action)
 		allowed, err = auth.enforcer.Enforce(principal.GetID(), domain, spec.Resource, spec.Action)
 
 	case authModeDynamic:
@@ -84,6 +86,7 @@ func (auth *Authorizer) Authorized(ctx context.Context, principal security.Princ
 		for i, idx := range auth.argIndices {
 			args[i] = sourceArgs[idx]
 		}
+		auth.log.Debugf("Casbin Enforce args: %v", args)
 		allowed, err = auth.enforcer.Enforce(args...)
 
 	default:
