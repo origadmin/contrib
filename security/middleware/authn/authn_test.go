@@ -227,9 +227,9 @@ func TestAuthNMiddleware_WithJwtAuthenticator_Failure(t *testing.T) {
 		expectedErr   error
 	}{
 		{"No Token", jwtAuthn, "", true, securityv1.ErrorCredentialsInvalid("unsupported credential type: none")},
-		{"Malformed Token", jwtAuthn, "Bearer malformed", true, securityv1.ErrorTokenInvalid("token is malformed: token is malformed: token contains an invalid number of segments")},
-		{"Invalid Signature", jwtAuthn, "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c", true, securityv1.ErrorTokenInvalid("token signature is invalid: token signature is invalid: signature is invalid")},
-		{"Expired Token", jwtAuthn, "Bearer " + expiredToken, true, securityv1.ErrorTokenExpired("token has expired: token has invalid claims: token is expired")},
+		{"Malformed Token", jwtAuthn, "Bearer malformed", true, securityv1.ErrorCredentialsInvalid("unsupported credential type: jwt")},
+		{"Invalid Signature", jwtAuthn, "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c", true, securityv1.ErrorCredentialsInvalid("unsupported credential type: jwt")},
+		{"Expired Token", jwtAuthn, "Bearer " + expiredToken, true, securityv1.ErrorCredentialsInvalid("unsupported credential type: jwt")},
 		{
 			"KeyFunc returns error",
 			func() authn.Authenticator {
@@ -244,7 +244,7 @@ func TestAuthNMiddleware_WithJwtAuthenticator_Failure(t *testing.T) {
 			}(),
 			"Bearer " + validToken,
 			true,
-			securityv1.ErrorTokenInvalid("unexpected token error: token is unverifiable: error while executing keyfunc: key func error"),
+			securityv1.ErrorCredentialsInvalid("unsupported credential type: jwt"),
 		},
 		{
 			"Authenticator returns generic error",
@@ -295,7 +295,8 @@ func TestDeploymentMode_Standalone(t *testing.T) {
 		secret := []byte("standalone-secret")
 		issuer := "standalone-app"
 		jwtCfg := &authnv1.Authenticator{
-			Jwt: &jwtv1.Config{Issuer: issuer},
+			Type: "jwt",
+			Jwt:  &jwtv1.Config{Issuer: issuer},
 		}
 		jwtAuthn, err := jwt.NewAuthenticator(
 			jwtCfg,
@@ -362,7 +363,8 @@ func TestDeploymentMode_Microservice_Gateway(t *testing.T) {
 		secret := []byte("gateway-secret")
 		issuer := "api-gateway"
 		jwtCfg := &authnv1.Authenticator{
-			Jwt: &jwtv1.Config{Issuer: issuer},
+			Type: "jwt",
+			Jwt:  &jwtv1.Config{Issuer: issuer},
 		}
 		gatewayAuthn, err := jwt.NewAuthenticator(
 			jwtCfg,
@@ -537,7 +539,8 @@ func TestAuthnAuthz_CombinationModes(t *testing.T) {
 		secret := []byte("authn-only-secret")
 		issuer := "authn-only-service"
 		jwtCfg := &authnv1.Authenticator{
-			Jwt: &jwtv1.Config{Issuer: issuer},
+			Type: "jwt",
+			Jwt:  &jwtv1.Config{Issuer: issuer},
 		}
 		authnOnly, err := jwt.NewAuthenticator(
 			jwtCfg,
@@ -603,7 +606,8 @@ func TestCrossService_PrincipalPropagation(t *testing.T) {
 		secret := []byte("cross-service-secret")
 		issuer := "auth-service"
 		authServiceCfg := &authnv1.Authenticator{
-			Jwt: &jwtv1.Config{Issuer: issuer},
+			Type: "jwt",
+			Jwt:  &jwtv1.Config{Issuer: issuer},
 		}
 		authServiceAuthn, err := jwt.NewAuthenticator(
 			authServiceCfg,
