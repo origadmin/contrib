@@ -77,18 +77,18 @@ func buildKratosOptions(consulCfg *discoveryv1.Consul, opts ...options.Option) [
 		}
 	}
 
-	if progOpts.healthCheck {
-		healthCheck = progOpts.healthCheck
-	}
-	if progOpts.heartbeat {
-		heartbeat = progOpts.heartbeat
-	}
-	if progOpts.healthCheckInterval > 0 {
-		healthCheckInterval = progOpts.healthCheckInterval
-	}
-	if progOpts.deregisterCriticalServiceAfter > 0 {
-		deregisterCriticalServiceAfter = progOpts.deregisterCriticalServiceAfter
-	}
+	//if progOpts.healthCheck {
+	//	healthCheck = progOpts.healthCheck
+	//}
+	//if progOpts.heartbeat {
+	//	heartbeat = progOpts.heartbeat
+	//}
+	//if progOpts.healthCheckInterval > 0 {
+	//	healthCheckInterval = progOpts.healthCheckInterval
+	//}
+	//if progOpts.deregisterCriticalServiceAfter > 0 {
+	//	deregisterCriticalServiceAfter = progOpts.deregisterCriticalServiceAfter
+	//}
 
 	kratosOpts = append(kratosOpts, kratosconsul.WithHealthCheck(healthCheck))
 	kratosOpts = append(kratosOpts, kratosconsul.WithHeartbeat(heartbeat))
@@ -99,7 +99,7 @@ func buildKratosOptions(consulCfg *discoveryv1.Consul, opts ...options.Option) [
 		kratosOpts = append(kratosOpts, kratosconsul.WithDeregisterCriticalServiceAfter(deregisterCriticalServiceAfter))
 	}
 
-	return kratosOpts
+	return append(kratosOpts, progOpts.Options...)
 }
 
 // NewDiscovery creates a new Consul discovery component.

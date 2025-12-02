@@ -5,11 +5,7 @@
 // Package consul implements the functions, types, and interfaces for the module.
 package consul
 
-import (
-	_ "github.com/hashicorp/consul/api"
-)
-
 const Type = "consul"
 
 //go:generate adptool .
-//go:adapter:package github.com/hashicorp/consul/api
+//go:adapter:package github.com/go-kratos/kratos/contrib/registry/consul/v2
