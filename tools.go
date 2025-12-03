@@ -11,5 +11,4 @@ import (
 	_ "github.com/google/gnostic/cmd/protoc-gen-openapi"
 	_ "github.com/google/wire/cmd/wire"
 	_ "google.golang.org/grpc/cmd/protoc-gen-go-grpc"
-	_ "google.golang.org/protobuf/cmd/protoc-gen-go"
 )

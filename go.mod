@@ -7,9 +7,9 @@ require (
 	github.com/casbin/casbin/v2 v2.134.0
 	github.com/dchest/uniuri v1.2.0
 	github.com/envoyproxy/protoc-gen-validate v1.2.1
-	github.com/go-kratos/kratos/cmd/kratos/v2 v2.0.0-20251106012513-9262193e351a
-	github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2 v2.0.0-20251106012513-9262193e351a
-	github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2 v2.0.0-20251106012513-9262193e351a
+	github.com/go-kratos/kratos/cmd/kratos/v2 v2.0.0-20251201062103-6f0b3015b803
+	github.com/go-kratos/kratos/cmd/protoc-gen-go-errors/v2 v2.0.0-20251201062103-6f0b3015b803
+	github.com/go-kratos/kratos/cmd/protoc-gen-go-http/v2 v2.0.0-20251201062103-6f0b3015b803
 	github.com/go-kratos/kratos/contrib/config/consul/v2 v2.0.0-20251201062103-6f0b3015b803
 	github.com/go-kratos/kratos/contrib/registry/consul/v2 v2.0.0-20251201062103-6f0b3015b803
 	github.com/go-kratos/kratos/contrib/registry/etcd/v2 v2.0.0-20251201062103-6f0b3015b803
@@ -23,9 +23,9 @@ require (
 	github.com/origadmin/toolkits/errors v1.1.0
 	github.com/stretchr/testify v1.11.1
 	go.etcd.io/etcd/client/v3 v3.5.11
-	google.golang.org/genproto/googleapis/api v0.0.0-20251124214823-79d6a2a48846
+	google.golang.org/genproto/googleapis/api v0.0.0-20251202230838-ff82c1b0f217
 	google.golang.org/grpc v1.77.0
-	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.5.1
+	google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.6.0
 	google.golang.org/protobuf v1.36.10
 )
 
@@ -85,6 +85,7 @@ require (
 	github.com/gofrs/flock v0.13.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang-cz/devslog v0.0.15 // indirect
+	github.com/golang/mock v1.7.0-rc.1 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/cel-go v0.26.1 // indirect
 	github.com/google/gnostic-models v0.7.0 // indirect
@@ -167,7 +168,7 @@ require (
 	golang.org/x/term v0.37.0 // indirect
 	golang.org/x/text v0.31.0 // indirect
 	golang.org/x/tools v0.39.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20251111163417-95abcf5c77ba // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251124214823-79d6a2a48846 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	pluginrpc.com/pluginrpc v0.5.0 // indirect
