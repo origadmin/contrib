@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.1.0](https://github.com/origadmin/contrib/compare/v1.0.0...v1.1.0) (2025-12-03)
+
+
+### Features
+
+* **config:** add consul config source implementation with options and sync support ([8e05920](https://github.com/origadmin/contrib/commit/8e059205b73b207de8f21318f6f7dfedb38c4b9b))
+* **registry:** add consul adapter generated from consul.go ([c7b0a01](https://github.com/origadmin/contrib/commit/c7b0a01bdfa8d91f293de75e071643ec2dc1ca28))
+* **security:** add security demo with backend, gateway and client implementations ([5d785f3](https://github.com/origadmin/contrib/commit/5d785f33e240936cb44a1d3698ab8625c4305c7d))
+* **security:** implement JWT authentication with token caching and revocation support ([b8b08a6](https://github.com/origadmin/contrib/commit/b8b08a68717023e2f6da51e2e7e7922065e5b233))
+* **tools:** add protoc-gen-go-security plugin for policy registration with version 1.0.8 ([d806801](https://github.com/origadmin/contrib/commit/d806801b569fca654e82edbc8ea0af162f4c7c48))
+
+
+### Bug Fixes
+
+* **tools:** add tools.go for managing build tool dependencies ([5dad397](https://github.com/origadmin/contrib/commit/5dad397fdc185d8e45d513e9e8c4fc0d613675f4))
+
 ## 1.0.0 (2025-12-02)
 
 
