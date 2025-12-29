@@ -37,7 +37,7 @@ var (
 )
 
 func init() {
-	authz.Register(authz.Casbin, authz.FactoryFunc(NewAuthorizer))
+	authz.Register(authz.Casbin, authz.FactoryFunc(newAuthorizer))
 }
 
 // Authorizer is a struct that implements the Authorizer interface.
@@ -52,64 +52,12 @@ type Authorizer struct {
 	log        *log.Helper
 }
 
-// Authorized checks if a principal is authorized. It uses a fast path for standard models
-// and a dynamic path for custom models, ensuring both performance and flexibility.
-func (auth *Authorizer) Authorized(ctx context.Context, principal security.Principal, spec authz.RuleSpec) (bool, error) {
-	auth.log.Debugf("Authorizing user with principal: %+v", principal)
-
-	var allowed bool
-	var err error
-
-	switch auth.authMode {
-	case authModeFastPathNonDomain:
-		// Highest performance path for the most common non-domain model.
-		auth.log.Debugf("Casbin Enforce args: sub=%s, obj=%s, act=%s", principal.GetID(), spec.Resource, spec.Action)
-		allowed, err = auth.enforcer.Enforce(principal.GetID(), spec.Resource, spec.Action)
-
-	case authModeFastPathDomain:
-		// Highest performance path for the most common domain model.
-		domain := spec.Domain
-		if len(domain) == 0 {
-			domain = auth.wildcardItem
-		}
-		auth.log.Debugf("Casbin Enforce args: sub=%s, dom=%s, obj=%s, act=%s", principal.GetID(), domain, spec.Resource, spec.Action)
-		allowed, err = auth.enforcer.Enforce(principal.GetID(), domain, spec.Resource, spec.Action)
-
-	case authModeDynamic:
-		// Flexible path for any custom model definition.
-		domain := spec.Domain
-		if auth.hasDomain && len(domain) == 0 {
-			domain = auth.wildcardItem
-		}
-		sourceArgs := [4]interface{}{principal.GetID(), domain, spec.Resource, spec.Action}
-		args := make([]interface{}, len(auth.argIndices))
-		for i, idx := range auth.argIndices {
-			args[i] = sourceArgs[idx]
-		}
-		auth.log.Debugf("Casbin Enforce args: %v", args)
-		allowed, err = auth.enforcer.Enforce(args...)
-
-	default:
-		// This case should ideally never be reached.
-		return false, fmt.Errorf("internal error: invalid authorization mode")
-	}
-
-	if err != nil {
-		auth.log.Errorf("Authorization failed with error: %v", err)
-		return false, err
-	}
-
-	if allowed {
-		auth.log.Debugf("Authorization successful for user with principal: %+v", principal)
-		return true, nil
-	}
-
-	auth.log.Debugf("Authorization failed for user with principal: %+v", principal)
-	return false, nil
+func newAuthorizer(cfg *authzv1.Authorizer, opts ...Option) (authz.Authorizer, error) {
+	return NewAuthorizer(cfg, opts...)
 }
 
 // NewAuthorizer creates a new Authorizer instance.
-func NewAuthorizer(cfg *authzv1.Authorizer, opts ...Option) (authz.Authorizer, error) {
+func NewAuthorizer(cfg *authzv1.Authorizer, opts ...Option) (*Authorizer, error) {
 	finalOpts, err := newWithOptions(cfg, opts...)
 	if err != nil {
 		return nil, err
@@ -195,6 +143,62 @@ func newWithOptions(cfg *authzv1.Authorizer, opts ...options.Option) (*Options, 
 	}
 
 	return finalOpts, nil
+}
+
+// Authorized checks if a principal is authorized. It uses a fast path for standard models
+// and a dynamic path for custom models, ensuring both performance and flexibility.
+func (auth *Authorizer) Authorized(ctx context.Context, principal security.Principal, spec authz.RuleSpec) (bool, error) {
+	auth.log.Debugf("Authorizing user with principal: %+v", principal)
+
+	var allowed bool
+	var err error
+
+	switch auth.authMode {
+	case authModeFastPathNonDomain:
+		// Highest performance path for the most common non-domain model.
+		auth.log.Debugf("Casbin Enforce args: sub=%s, obj=%s, act=%s", principal.GetID(), spec.Resource, spec.Action)
+		allowed, err = auth.enforcer.Enforce(principal.GetID(), spec.Resource, spec.Action)
+
+	case authModeFastPathDomain:
+		// Highest performance path for the most common domain model.
+		domain := spec.Domain
+		if len(domain) == 0 {
+			domain = auth.wildcardItem
+		}
+		auth.log.Debugf("Casbin Enforce args: sub=%s, dom=%s, obj=%s, act=%s", principal.GetID(), domain, spec.Resource, spec.Action)
+		allowed, err = auth.enforcer.Enforce(principal.GetID(), domain, spec.Resource, spec.Action)
+
+	case authModeDynamic:
+		// Flexible path for any custom model definition.
+		domain := spec.Domain
+		if auth.hasDomain && len(domain) == 0 {
+			domain = auth.wildcardItem
+		}
+		sourceArgs := [4]interface{}{principal.GetID(), domain, spec.Resource, spec.Action}
+		args := make([]interface{}, len(auth.argIndices))
+		for i, idx := range auth.argIndices {
+			args[i] = sourceArgs[idx]
+		}
+		auth.log.Debugf("Casbin Enforce args: %v", args)
+		allowed, err = auth.enforcer.Enforce(args...)
+
+	default:
+		// This case should ideally never be reached.
+		return false, fmt.Errorf("internal error: invalid authorization mode")
+	}
+
+	if err != nil {
+		auth.log.Errorf("Authorization failed with error: %v", err)
+		return false, err
+	}
+
+	if allowed {
+		auth.log.Debugf("Authorization successful for user with principal: %+v", principal)
+		return true, nil
+	}
+
+	auth.log.Debugf("Authorization failed for user with principal: %+v", principal)
+	return false, nil
 }
 
 // initEnforcer acts as a one-time parser to determine the optimal authorization strategy.

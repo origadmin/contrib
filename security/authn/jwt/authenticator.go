@@ -24,7 +24,7 @@ import (
 )
 
 func init() {
-	authn.Register(authn.JWT, authn.FactoryFunc(NewAuthenticator))
+	authn.Register(authn.JWT, authn.FactoryFunc(newAuthenticator))
 }
 
 // Authenticator implements the security interfaces for JWT.
@@ -34,8 +34,12 @@ type Authenticator struct {
 	log               *log.Helper
 }
 
+func newAuthenticator(cfg *authnv1.Authenticator, opts ...Option) (authn.Authenticator, error) {
+	return NewAuthenticator(cfg, opts...)
+}
+
 // NewAuthenticator creates a new JWT Provider from the given configuration and options.
-func NewAuthenticator(cfg *authnv1.Authenticator, opts ...Option) (authn.Authenticator, error) {
+func NewAuthenticator(cfg *authnv1.Authenticator, opts ...Option) (*Authenticator, error) {
 	finalOpts, err := newWithOptions(cfg, opts...)
 	if err != nil {
 		return nil, err
