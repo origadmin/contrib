@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/origadmin/contrib/compare/v1.1.0...v1.2.0) (2025-12-30)
+
+
+### Features
+
+* **auth:** restructure JWT and Casbin authenticators with improved initialization patterns ([86ffad7](https://github.com/origadmin/contrib/commit/86ffad76ecb657fe92be352078424bf2ac2163c5))
+
 ## [1.1.0](https://github.com/origadmin/contrib/compare/v1.0.0...v1.1.0) (2025-12-03)
 
 
