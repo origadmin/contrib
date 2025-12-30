@@ -131,8 +131,7 @@ func New{{.ServiceType}}HTTPBridge(client *http.Client) {{.ServiceType}}HTTPServ
 }
 
 {{range .Methods}}
-    {{- if .Streaming}}
-    {{- else}}
+    {{- if and .Method (not .Streaming)}}
 	func (c *{{$svrType}}HTTPBridgeImpl) {{.Name}}(ctx context.Context, in *{{.Request}}) (*{{.Reply}}, error) {
 	   return c.client.{{.Name}}(ctx, in)
 	}
@@ -190,8 +189,7 @@ func New{{.ServiceType}}GRPC2HTTP(client grpc.ClientConnInterface) {{.ServiceTyp
 }
 
 {{range .Methods}}
-    {{- if .Streaming}}
-    {{- else}}
+    {{- if and .Method (not .Streaming)}}
 	func (c *{{$svrType}}GRPC2HTTPBridgeImpl) {{.Name}}(ctx context.Context, in *{{.Request}}) (*{{.Reply}}, error) {
 			return c.client.{{.Name}}(ctx, in)
 	}
@@ -213,7 +211,11 @@ func (c *{{$svrType}}HTTP2GRPCBridgeImpl) {{.Name}}(request *{{.Request}}, g grp
 }
     {{- else}}
 	func (c *{{$svrType}}HTTP2GRPCBridgeImpl) {{.Name}}(ctx context.Context, in *{{.Request}}) (*{{.Reply}}, error) {
+	{{- if .Method}}
 	return c.client.{{.Name}}(ctx, in)
+	{{- else}}
+	return nil, status.Errorf(codes.Unimplemented, "method {{.Name}} not implemented")
+	{{- end}}
 	}
     {{- end}}
 {{end}}
