@@ -24,7 +24,7 @@ import (
 )
 
 func init() {
-	authn.Register(authn.JWT, authn.FactoryFunc(newAuthenticator))
+	authn.Register(authn.JWT, authn.FactoryFunc(NewAuthenticator))
 }
 
 // Authenticator implements the security interfaces for JWT.
@@ -34,30 +34,41 @@ type Authenticator struct {
 	log               *log.Helper
 }
 
-func newAuthenticator(cfg *authnv1.Authenticator, opts ...Option) (authn.Authenticator, error) {
-	return NewAuthenticator(cfg, opts...)
+// NewOptions creates a new Options object from the given configuration and functional options.
+// It is responsible for parsing the protobuf configuration and merging it with any provided functional options.
+// This function is intended to be used when you need to create the configuration options separately
+// before creating the Authenticator instance.
+func NewOptions(cfg *authnv1.Authenticator, opts ...Option) (*Options, error) {
+	return newWithOptions(cfg, opts...)
 }
 
-// NewAuthenticator creates a new JWT Provider from the given configuration and options.
-func NewAuthenticator(cfg *authnv1.Authenticator, opts ...Option) (*Authenticator, error) {
-	finalOpts, err := newWithOptions(cfg, opts...)
-	if err != nil {
-		return nil, err
-	}
-
-	// Initialize logger
-	logger := log.FromOptions(opts) // Convert jwt.Option to options.Option
+// New creates a new Authenticator instance from a pre-built Options object and a logger.
+// This is the recommended way to create an Authenticator when you need to customize its dependencies
+// or when you are creating it as part of a dependency injection system.
+func New(opts *Options, logger log.Logger) (*Authenticator, error) {
 	helper := log.NewHelper(log.With(logger, "module", "security.authn.jwt"))
 
 	auth := &Authenticator{
-		Options:           finalOpts,
-		skipAudienceCheck: len(finalOpts.audience) == 0, // Calculate derived state here
+		Options:           opts,
+		skipAudienceCheck: len(opts.audience) == 0,
 		log:               helper,
 	}
 
 	auth.log.Debugf("JWT Authenticator initialized with issuer: %s, audience: %v", auth.issuer, auth.audience)
 
 	return auth, nil
+}
+
+// NewAuthenticator creates a new JWT Provider from the given configuration and options.
+func NewAuthenticator(cfg *authnv1.Authenticator, opts ...Option) (authn.Authenticator, error) {
+	finalOpts, err := newWithOptions(cfg, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	// Initialize logger
+	logger := log.FromOptions(opts)
+	return New(finalOpts, logger)
 }
 
 // Authenticate validates the provided credential and returns a Principal if successful.

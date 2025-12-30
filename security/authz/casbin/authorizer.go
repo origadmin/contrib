@@ -37,7 +37,7 @@ var (
 )
 
 func init() {
-	authz.Register(authz.Casbin, authz.FactoryFunc(newAuthorizer))
+	authz.Register(authz.Casbin, authz.FactoryFunc(NewAuthorizer))
 }
 
 // Authorizer is a struct that implements the Authorizer interface.
@@ -47,27 +47,27 @@ type Authorizer struct {
 	// Internal state
 	enforcer   *casbin.SyncedEnforcer
 	hasDomain  bool
-	authMode   int   // The authorization mode (fast path or dynamic).
-	argIndices []int // Stores the mapping for the dynamic mode.
+	authMode   int
+	argIndices []int
 	log        *log.Helper
 }
 
-func newAuthorizer(cfg *authzv1.Authorizer, opts ...Option) (authz.Authorizer, error) {
-	return NewAuthorizer(cfg, opts...)
+// NewOptions creates a new Options object from the given configuration and functional options.
+// It is responsible for parsing the protobuf configuration and merging it with any provided functional options.
+// This function is intended to be used when you need to create the configuration options separately
+// before creating the Authorizer instance.
+func NewOptions(cfg *authzv1.Authorizer, opts ...Option) (*Options, error) {
+	return NewOptions(cfg, opts...)
 }
 
-// NewAuthorizer creates a new Authorizer instance.
-func NewAuthorizer(cfg *authzv1.Authorizer, opts ...Option) (*Authorizer, error) {
-	finalOpts, err := newWithOptions(cfg, opts...)
-	if err != nil {
-		return nil, err
-	}
-
-	logger := log.FromOptions(opts)
+// New creates a new Authorizer instance from a pre-built Options object and a logger.
+// This is the recommended way to create an Authenticator when you need to customize its dependencies
+// or when you are creating it as part of a dependency injection system.
+func New(opts *Options, logger log.Logger) (*Authorizer, error) {
 	helper := log.NewHelper(log.With(logger, "module", "security.authz.casbin"))
 
 	auth := &Authorizer{
-		Options: finalOpts,
+		Options: opts,
 		log:     helper,
 	}
 
@@ -76,6 +76,17 @@ func NewAuthorizer(cfg *authzv1.Authorizer, opts ...Option) (*Authorizer, error)
 	}
 
 	return auth, nil
+}
+
+// NewAuthorizer creates a new Authorizer instance.
+func NewAuthorizer(cfg *authzv1.Authorizer, opts ...Option) (authz.Authorizer, error) {
+	finalOpts, err := newWithOptions(cfg, opts...)
+	if err != nil {
+		return nil, err
+	}
+
+	logger := log.FromOptions(opts)
+	return New(finalOpts, logger)
 }
 
 // newWithOptions merges configurations from all sources.
