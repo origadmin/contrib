@@ -19,6 +19,7 @@ type serviceDesc struct {
 	ServiceName string // helloworld.Greeter
 	Metadata    string // api/helloworld/helloworld.proto
 	Methods     []*methodDesc
+	Prefix      string
 }
 
 type methodDesc struct {

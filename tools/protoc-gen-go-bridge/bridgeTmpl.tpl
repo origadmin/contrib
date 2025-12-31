@@ -42,7 +42,7 @@ type {{.ServiceType}}HookedBridger interface {
 {{- end}}
 
 func Register{{.ServiceType}}BridgeServer(s *http.Server, srv {{.ServiceType}}HookedBridger) {
-r := s.Route("/")
+r := s.Route("{{.Prefix}}")
 {{- range .Methods}}
 	{{- if and .Method (not .Streaming)}}
 	r.{{.Method}}("{{.Path}}", _{{$svrType}}_{{.Name}}{{.Num}}_Bridge_Handler(srv))
