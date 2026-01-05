@@ -23,15 +23,12 @@ import (
 
 const (
 	DefaultWildcardItem = "*"
-
-	// authMode determines the authorization strategy.
-	authModeFastPathNonDomain = 0 // Fast path for "sub, obj, act"
-	authModeFastPathDomain    = 1 // Fast path for "sub, dom, obj, act"
-	authModeDynamic           = 2 // Fallback for custom models
+	authModeFastPathNonDomain = 0
+	authModeFastPathDomain    = 1
+	authModeDynamic           = 2
 )
 
 var (
-	// Pre-defined token sequences for fast path detection.
 	fastPathNonDomainTokens = []string{"sub", "obj", "act"}
 	fastPathDomainTokens    = []string{"sub", "dom", "obj", "act"}
 )
@@ -42,9 +39,7 @@ func init() {
 
 // Authorizer is a struct that implements the Authorizer interface.
 type Authorizer struct {
-	*Options // Embed a pointer to Options
-
-	// Internal state
+	*Options
 	enforcer   *casbin.SyncedEnforcer
 	hasDomain  bool
 	authMode   int
@@ -53,16 +48,11 @@ type Authorizer struct {
 }
 
 // NewOptions creates a new Options object from the given configuration and functional options.
-// It is responsible for parsing the protobuf configuration and merging it with any provided functional options.
-// This function is intended to be used when you need to create the configuration options separately
-// before creating the Authorizer instance.
 func NewOptions(cfg *authzv1.Authorizer, opts ...Option) (*Options, error) {
-	return NewOptions(cfg, opts...)
+	return newWithOptions(cfg, opts...)
 }
 
 // New creates a new Authorizer instance from a pre-built Options object and a logger.
-// This is the recommended way to create an Authenticator when you need to customize its dependencies
-// or when you are creating it as part of a dependency injection system.
 func New(opts *Options, logger log.Logger) (*Authorizer, error) {
 	helper := log.NewHelper(log.With(logger, "module", "security.authz.casbin"))
 
@@ -85,8 +75,7 @@ func NewAuthorizer(cfg *authzv1.Authorizer, opts ...Option) (authz.Authorizer, e
 		return nil, err
 	}
 
-	logger := log.FromOptions(opts)
-	return New(finalOpts, logger)
+	return New(finalOpts, finalOpts.Logger)
 }
 
 // newWithOptions merges configurations from all sources.
@@ -143,10 +132,6 @@ func newWithOptions(cfg *authzv1.Authorizer, opts ...options.Option) (*Options, 
 		finalOpts.model = m
 	}
 	if finalOpts.policy == nil {
-		// If no policy is configured via options, config file, or embedded policies,
-		// default to an empty in-memory adapter. This implements a "default deny"
-		// security posture, meaning no authorization rules are present until explicitly
-		// added or loaded from a source.
 		finalOpts.policy = adapter.NewMemory()
 	}
 	if finalOpts.wildcardItem == "" {
@@ -156,31 +141,27 @@ func newWithOptions(cfg *authzv1.Authorizer, opts ...options.Option) (*Options, 
 	return finalOpts, nil
 }
 
-// Authorized checks if a principal is authorized. It uses a fast path for standard models
-// and a dynamic path for custom models, ensuring both performance and flexibility.
+// Authorized checks if a principal is authorized.
 func (auth *Authorizer) Authorized(ctx context.Context, principal security.Principal, spec authz.RuleSpec) (bool, error) {
-	auth.log.Debugf("Authorizing user with principal: %+v", principal)
-
 	var allowed bool
 	var err error
 
 	switch auth.authMode {
 	case authModeFastPathNonDomain:
-		// Highest performance path for the most common non-domain model.
-		auth.log.Debugf("Casbin Enforce args: sub=%s, obj=%s, act=%s", principal.GetID(), spec.Resource, spec.Action)
-		allowed, err = auth.enforcer.Enforce(principal.GetID(), spec.Resource, spec.Action)
+		args := []interface{}{principal.GetID(), spec.Resource, spec.Action}
+		auth.log.WithContext(ctx).Debugf("[AuthZ] Enforcing with: sub=%v, obj=%v, act=%v", args...)
+		allowed, err = auth.enforcer.Enforce(args...)
 
 	case authModeFastPathDomain:
-		// Highest performance path for the most common domain model.
 		domain := spec.Domain
 		if len(domain) == 0 {
 			domain = auth.wildcardItem
 		}
-		auth.log.Debugf("Casbin Enforce args: sub=%s, dom=%s, obj=%s, act=%s", principal.GetID(), domain, spec.Resource, spec.Action)
-		allowed, err = auth.enforcer.Enforce(principal.GetID(), domain, spec.Resource, spec.Action)
+		args := []interface{}{principal.GetID(), domain, spec.Resource, spec.Action}
+		auth.log.WithContext(ctx).Debugf("[AuthZ] Enforcing with: sub=%v, dom=%v, obj=%v, act=%v", args...)
+		allowed, err = auth.enforcer.Enforce(args...)
 
 	case authModeDynamic:
-		// Flexible path for any custom model definition.
 		domain := spec.Domain
 		if auth.hasDomain && len(domain) == 0 {
 			domain = auth.wildcardItem
@@ -190,26 +171,20 @@ func (auth *Authorizer) Authorized(ctx context.Context, principal security.Princ
 		for i, idx := range auth.argIndices {
 			args[i] = sourceArgs[idx]
 		}
-		auth.log.Debugf("Casbin Enforce args: %v", args)
+		auth.log.WithContext(ctx).Debugf("[AuthZ] Enforcing with dynamic args: %v", args)
 		allowed, err = auth.enforcer.Enforce(args...)
 
 	default:
-		// This case should ideally never be reached.
 		return false, fmt.Errorf("internal error: invalid authorization mode")
 	}
 
 	if err != nil {
-		auth.log.Errorf("Authorization failed with error: %v", err)
+		auth.log.WithContext(ctx).Errorf("[AuthZ] Enforcement failed with error: %v", err)
 		return false, err
 	}
 
-	if allowed {
-		auth.log.Debugf("Authorization successful for user with principal: %+v", principal)
-		return true, nil
-	}
-
-	auth.log.Debugf("Authorization failed for user with principal: %+v", principal)
-	return false, nil
+	// No log on failure, as the middleware already logs the denial.
+	return allowed, nil
 }
 
 // initEnforcer acts as a one-time parser to determine the optimal authorization strategy.

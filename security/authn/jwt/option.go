@@ -17,6 +17,7 @@ import (
 	securitycache "github.com/origadmin/contrib/security/authn/cache"
 	"github.com/origadmin/runtime/extensions/optionutil"
 	"github.com/origadmin/runtime/interfaces/options"
+	"github.com/origadmin/runtime/log"
 )
 
 const (
@@ -40,6 +41,7 @@ type Options struct {
 	extraClaims          map[string]string
 	clock                func() time.Time
 	generateID           func() string
+	Logger               log.Logger
 }
 
 // Option is a functional option type for configuring the JWT authenticator.
@@ -185,10 +187,6 @@ func WithSigningKey(algorithm, keyData string) Option {
 	return optionutil.Update(func(o *Options) {
 		signingMethod, keyFunc, err := configureKeys(algorithm, keyData)
 		if err != nil {
-			// Panic here as functional options should ideally not fail at runtime
-			// if the input is expected to be valid. Or, return an error from the option
-			// if the optionutil.Update function supported it.
-			// For now, following the pattern of WithStringModel in casbin which panics.
 			panic(fmt.Errorf("failed to configure signing key with algorithm '%s': %w", algorithm, err))
 		}
 		o.signingMethod = signingMethod
@@ -238,7 +236,18 @@ func WithGenerateID(g func() string) Option {
 	})
 }
 
+// WithLogger sets the logger for the authenticator.
+func WithLogger(logger log.Logger) Option {
+	return log.WithLogger(logger)
+}
+
 // FromOptions creates a new Options struct from a slice of option functions.
 func FromOptions(opts ...Option) *Options {
-	return optionutil.NewT[Options](opts...)
+	o := &Options{}
+	optionutil.Apply(o, opts...)
+
+	// CORRECTED: Pass the slice directly without the variadic '...' operator.
+	o.Logger = log.FromOptions(opts)
+
+	return o
 }

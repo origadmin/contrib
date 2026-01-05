@@ -3,15 +3,16 @@ package propagation
 import (
 	"context"
 
+	"github.com/go-kratos/kratos/v2/log"
 	securityPrincipal "github.com/origadmin/contrib/security/principal"
 	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/runtime/middleware"
 )
 
 // Middleware is a Kratos middleware for principal propagation.
-// It embeds the Options struct to hold its configuration.
 type Middleware struct {
 	*Options
+	log *log.Helper
 }
 
 // New is a convenience function for creating a new principal propagation middleware.
@@ -24,68 +25,57 @@ func New(opts ...options.Option) *Middleware {
 func newMiddleware(opts *Options) *Middleware {
 	return &Middleware{
 		Options: opts,
+		log:     log.NewHelper(opts.Logger),
 	}
 }
 
 // Server implements the Kratos middleware for server-side principal extraction.
-// It extracts an encoded principal from the incoming request, decodes it, and
-// injects it into the context. This allows downstream middleware (like authz)
-// to act on the propagated principal.
 func (m *Middleware) Server() middleware.KMiddleware {
 	return func(handler middleware.KHandler) middleware.KHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-			// If a principal already exists in the context (e.g., from a local authn middleware),
-			// we do not overwrite it. The local principal takes precedence.
 			if _, ok := securityPrincipal.FromContext(ctx); ok {
+				// This is a normal case if another auth middleware ran first. No log needed.
 				return handler(ctx, req)
 			}
 
-			// Extract the encoded principal from the transport (gRPC metadata or HTTP header).
 			encodedPrincipal := securityPrincipal.ExtractFromServerContext(m.PropagationType, ctx, req)
 			if encodedPrincipal == "" {
-				// No principal found in the request.
+				// This is also a normal case for unauthenticated requests. No log needed.
 				return handler(ctx, req)
 			}
 
-			// Decode the principal.
 			p, err := securityPrincipal.Decode(encodedPrincipal)
 			if err != nil {
-				// If decoding fails, it might be a malformed token.
-				// We proceed without a principal, but could add logging here later.
-				return handler(ctx, req)
+				m.log.WithContext(ctx).Warnf("[Propagation] Failed to decode principal from header: %v", err)
+				return handler(ctx, req) // Proceed without principal on decode failure
 			}
 
-			// Inject the decoded principal into the context.
 			newCtx := securityPrincipal.NewContext(ctx, p)
+			m.log.WithContext(ctx).Debugf("[Propagation] Principal injected into context: ID=%s", p.GetID())
 			return handler(newCtx, req)
 		}
 	}
 }
 
 // Client implements the Kratos middleware for client-side principal propagation.
-// It extracts the Principal from the context, encodes it, and injects it into the
-// outgoing request's metadata (for gRPC) or headers (for HTTP).
 func (m *Middleware) Client() middleware.KMiddleware {
 	return func(handler middleware.KHandler) middleware.KHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-			// 1. Attempt to extract the Principal from the current context.
 			p, ok := securityPrincipal.FromContext(ctx)
 			if !ok {
-				// If no Principal is found, proceed without adding any headers.
+				// Normal case, no principal to propagate.
 				return handler(ctx, req)
 			}
 
-			// 2. Encode the Principal into a string format suitable for transport.
 			encodedPrincipal, err := securityPrincipal.Encode(p)
 			if err != nil {
-				// If encoding fails, it's a critical internal error.
-				return nil, err
+				m.log.WithContext(ctx).Errorf("[Propagation] Failed to encode principal for propagation: %v", err)
+				return nil, err // This is a critical internal error.
 			}
 
-			// 3. Inject the encoded Principal into the outgoing request context.
 			newCtx := securityPrincipal.PropagateToClientContext(m.PropagationType, ctx, req, encodedPrincipal)
-
-			// 4. Call the next handler in the chain with the new context.
+			// This log is redundant as success is confirmed by the receiving service's log.
+			// m.log.WithContext(ctx).Debugf("[Propagation] Propagating principal to client request: ID=%s", p.GetID())
 			return handler(newCtx, req)
 		}
 	}

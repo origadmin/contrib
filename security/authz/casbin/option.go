@@ -11,6 +11,7 @@ import (
 	"github.com/origadmin/contrib/security/authz/casbin/internal/model"
 	"github.com/origadmin/runtime/extensions/optionutil"
 	"github.com/origadmin/runtime/interfaces/options"
+	"github.com/origadmin/runtime/log"
 )
 
 // Options holds configuration for the Casbin Authorizer, used with optionutil.
@@ -21,6 +22,7 @@ type Options struct {
 	policy       persist.Adapter
 	watcher      persist.Watcher
 	wildcardItem string
+	Logger       log.Logger
 }
 
 type Option = options.Option
@@ -94,7 +96,18 @@ func WithWildcardItem(item string) Option {
 	})
 }
 
+// WithLogger sets the logger for the authorizer.
+func WithLogger(logger log.Logger) Option {
+	return log.WithLogger(logger)
+}
+
 // FromOptions creates a new Options struct by applying the given functional options.
 func FromOptions(opts ...Option) *Options {
-	return optionutil.NewT[Options](opts...)
+	o := &Options{}
+	optionutil.Apply(o, opts...)
+
+	// CORRECTED: Pass the slice directly without the variadic '...' operator.
+	o.Logger = log.FromOptions(opts)
+
+	return o
 }
