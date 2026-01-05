@@ -30,7 +30,7 @@ func New(authorizer authz.Authorizer, opts ...options.Option) *Middleware {
 func newMiddleware(opts *Options) *Middleware {
 	m := &Middleware{
 		Options: opts,
-		log:     log.NewHelper(opts.Logger),
+		log:     log.NewHelper(log.With(opts.Logger, "module", "security.middleware.authz")),
 	}
 	if m.SkipChecker == nil {
 		m.SkipChecker = security.NoOpSkipChecker()

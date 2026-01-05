@@ -16,9 +16,9 @@ import (
 	"github.com/origadmin/contrib/security/authz/casbin"
 )
 
-// ExampleFactory_NewGateway demonstrates how to set up a gateway server.
+// ExampleFactoryNewGateway demonstrates how to set up a gateway server.
 // A gateway authenticates requests and then relies on the transport to propagate the principal.
-func ExampleFactory_NewGateway() {
+func ExampleFactoryNewGateway() {
 	// 1. Create the authenticator
 	authenticator, err := jwtAuthn.NewAuthenticator(&authnv1.Authenticator{
 		Type: "jwt",
@@ -50,9 +50,9 @@ func ExampleFactory_NewGateway() {
 	// Output:
 }
 
-// ExampleFactory_NewBackend demonstrates how to set up a backend server.
+// ExampleFactoryNewBackend demonstrates how to set up a backend server.
 // A backend server expects a principal in the context and performs authorization.
-func ExampleFactory_NewBackend() {
+func ExampleFactoryNewBackend() {
 	// 1. Create the authorizer
 	authorizer, err := casbin.NewAuthorizer(&authzv1.Authorizer{Type: authz.Casbin})
 	if err != nil {
@@ -77,9 +77,9 @@ func ExampleFactory_NewBackend() {
 	// Output:
 }
 
-// ExampleFactory_NewStandalone demonstrates how to set up a service that handles both
+// ExampleFactoryNewStandalone demonstrates how to set up a service that handles both
 // authentication and authorization.
-func ExampleFactory_NewStandalone() {
+func ExampleFactoryNewStandalone() {
 	// 1. Create the authenticator
 	authenticator, err := jwtAuthn.NewAuthenticator(&authnv1.Authenticator{
 		Type: "jwt",
@@ -116,8 +116,8 @@ func ExampleFactory_NewStandalone() {
 	// Output:
 }
 
-// ExampleFactory_NewClient demonstrates how to set up a client to propagate credentials.
-func ExampleFactory_NewClient() {
+// ExampleFactoryNewClient demonstrates how to set up a client to propagate credentials.
+func ExampleFactoryNewClient() {
 	// 1. Create a middleware factory with a propagation type *consistent with the servers*.
 	// 2. Create a middleware factory. By default, it uses Kratos propagation.
 	// To use a different type, pass it as an argument, e.g., middleware.NewFactory(principal.PropagationTypeGRPC).

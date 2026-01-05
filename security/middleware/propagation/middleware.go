@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/log"
+
 	securityPrincipal "github.com/origadmin/contrib/security/principal"
 	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/runtime/middleware"
@@ -25,7 +26,7 @@ func New(opts ...options.Option) *Middleware {
 func newMiddleware(opts *Options) *Middleware {
 	return &Middleware{
 		Options: opts,
-		log:     log.NewHelper(opts.Logger),
+		log:     log.NewHelper(log.With(opts.Logger, "module", "security.middleware.propagation")),
 	}
 }
 
