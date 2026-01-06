@@ -19,6 +19,10 @@ func init() {
 
 type authenticator struct{}
 
+func (a authenticator) RefreshCredential(ctx context.Context, refreshToken string) (security.CredentialResponse, error) {
+	return nil, errors.New("noop authenticator does not support credential refresh")
+}
+
 func (a authenticator) CreateCredential(ctx context.Context, p security.Principal) (security.CredentialResponse, error) {
 	return nil, errors.New("noop authenticator does not support credential creation")
 
@@ -49,3 +53,4 @@ func NewAuthenticator(cfg *authnv1.Authenticator, opts ...options.Option) (authn
 
 var _ credential.Revoker = &authenticator{}
 var _ credential.Creator = &authenticator{}
+var _ credential.Refresher = &authenticator{}
