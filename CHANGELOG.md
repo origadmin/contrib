@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0](https://github.com/origadmin/contrib/compare/v1.2.0...v1.3.0) (2026-01-13)
+
+
+### Features
+
+* **authn:** add refresh credential tests and improve mock cache context handling ([5b4dcff](https://github.com/origadmin/contrib/commit/5b4dcff6a64da190fe18daa12edf09c620c4ce00))
+* **authn:** add refresh token support to JWT authenticator and implement Refresher interface ([673321c](https://github.com/origadmin/contrib/commit/673321cc7468dcd1ac751523dbb04d3e8547bad1))
+* **auth:** optimize JWT and Casbin logging with context-aware logging and reduced verbosity ([c35fb5b](https://github.com/origadmin/contrib/commit/c35fb5b4372c7fdfac30a0db75a3bc2d1ae9d17a))
+* **protoc-gen-go-bridge:** add route prefix support for generated HTTP handlers ([bffcb97](https://github.com/origadmin/contrib/commit/bffcb97ba951354da09735f64b6f452f738d4d6f))
+* **security:** enhance middleware logging with module identifiers and update example naming conventions ([de0f7dd](https://github.com/origadmin/contrib/commit/de0f7dddb4dddb3da6386b278a66bd86ca86493f))
+* **tools:** add protoc-gen-go-bridge tool with HTTP/gRPC bridge generation support ([d193132](https://github.com/origadmin/contrib/commit/d1931326fd25afd440e2f884f972d5cc0faf663e))
+* **tools:** improve protoc-gen-go-bridge template with better method handling and unimplemented method support ([dd28cea](https://github.com/origadmin/contrib/commit/dd28cea3f6674f77c133c0a2c76a6db1203f090a))
+
 ## [1.2.0](https://github.com/origadmin/contrib/compare/v1.1.0...v1.2.0) (2025-12-30)
 
 
