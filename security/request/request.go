@@ -98,7 +98,7 @@ func NewFromServerContext(ctx context.Context) (security.Request, error) {
 		meta          Metadata
 		err           error
 	)
-	
+
 	switch tr.Kind() {
 	case transport.KindHTTP:
 		kind = "http"
@@ -110,6 +110,7 @@ func NewFromServerContext(ctx context.Context) (security.Request, error) {
 			// via the transport.Transporter interface or kratoshttp.Transporter.
 			// If route template is needed, it would typically be stored in the request context
 			// by a routing middleware. For now, it remains empty.
+			routeTemplate = ht.PathTemplate()
 		} else {
 			err = kratoserrors.New(500, "INVALID_HTTP_TRANSPORT", "invalid HTTP transport type")
 		}

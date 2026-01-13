@@ -217,22 +217,22 @@ func newMockCache() *mockCache {
 	}
 }
 
-func (m *mockCache) Store(ctx context.Context, key string, ttl time.Duration) error {
+func (m *mockCache) Store(_ context.Context, key string, ttl time.Duration) error {
 	m.data[key] = ttl // In a real cache, this would store the key with an expiration. For mock, just store it.
 	return nil
 }
 
-func (m *mockCache) Exist(ctx context.Context, key string) (bool, error) {
+func (m *mockCache) Exist(_ context.Context, key string) (bool, error) {
 	_, ok := m.data[key]
 	return ok, nil
 }
 
-func (m *mockCache) Remove(ctx context.Context, key string) error {
+func (m *mockCache) Remove(_ context.Context, key string) error {
 	delete(m.data, key)
 	return nil
 }
 
-func (m *mockCache) Close(ctx context.Context) error {
+func (m *mockCache) Close(_ context.Context) error {
 	return nil
 }
 
@@ -471,6 +471,75 @@ func TestAuthenticatorAdvancedFailures(t *testing.T) {
 			err = authWithCache.(credential.Revoker).Revoke(context.Background(), bearerCred)
 			assert.Error(t, err, "Expected error when revoking a malformed token string")
 			assert.True(t, securityv1.IsTokenInvalid(err), "Expected TokenInvalid error for malformed token during revocation")
+		})
+	})
+
+	t.Run("RefreshCredential", func(t *testing.T) {
+		t.Run("Successful Refresh", func(t *testing.T) {
+			// 1. Create initial credentials
+			resp, err := authWithCache.(credential.Creator).CreateCredential(context.Background(), validPrinc)
+			require.NoError(t, err)
+			refreshToken := resp.Payload().GetToken().GetRefreshToken()
+			require.NotEmpty(t, refreshToken)
+
+			// 2. Refresh using the refresh token
+			refreshResp, err := authWithCache.(credential.Refresher).RefreshCredential(context.Background(), refreshToken)
+			require.NoError(t, err, "Failed to refresh credential")
+			require.NotNil(t, refreshResp)
+
+			// 3. Verify the new credentials
+			newToken := refreshResp.Payload().GetToken()
+			require.NotNil(t, newToken)
+			assert.NotEmpty(t, newToken.GetAccessToken())
+			assert.NotEmpty(t, newToken.GetRefreshToken())
+			assert.NotEqual(t, refreshToken, newToken.GetRefreshToken(), "New refresh token should be different")
+		})
+
+		t.Run("Refresh with Invalid Token", func(t *testing.T) {
+			_, err := authWithCache.(credential.Refresher).RefreshCredential(context.Background(), "invalid-refresh-token")
+			assert.Error(t, err)
+			assert.True(t, securityv1.IsTokenInvalid(err))
+		})
+
+		t.Run("Refresh with Expired Token", func(t *testing.T) {
+			expiredClaims := &Claims{
+				RegisteredClaims: jwtv5.RegisteredClaims{
+					Issuer:    issuer,
+					Subject:   "expired-user",
+					ExpiresAt: jwtv5.NewNumericDate(now.Add(-time.Hour)),
+					ID:        "expired-refresh-token",
+				},
+			}
+			token := jwtv5.NewWithClaims(jwtv5.SigningMethodHS256, expiredClaims)
+			expiredTokenString, err := token.SignedString([]byte(secret))
+			require.NoError(t, err)
+
+			_, err = authWithCache.(credential.Refresher).RefreshCredential(context.Background(), expiredTokenString)
+			assert.Error(t, err)
+			assert.True(t, securityv1.IsTokenExpired(err))
+		})
+
+		t.Run("Refresh with Revoked Token", func(t *testing.T) {
+			// 1. Create a valid token first
+			resp, err := authWithCache.(credential.Creator).CreateCredential(context.Background(), validPrinc)
+			require.NoError(t, err)
+			refreshToken := resp.Payload().GetToken().GetRefreshToken()
+
+			// 2. Parse it to get the ID for revocation (simulating manual revocation)
+			parser := jwtv5.NewParser()
+			token, _, err := parser.ParseUnverified(refreshToken, &Claims{})
+			require.NoError(t, err)
+			claims, ok := token.Claims.(*Claims)
+			require.True(t, ok)
+
+			// 3. Revoke it in the cache
+			err = mockCache.Store(context.Background(), revocationKey(claims.ID), time.Hour)
+			require.NoError(t, err)
+
+			// 4. Try to refresh
+			_, err = authWithCache.(credential.Refresher).RefreshCredential(context.Background(), refreshToken)
+			assert.Error(t, err)
+			assert.True(t, securityv1.IsTokenExpired(err), "Revoked refresh token should be treated as expired")
 		})
 	})
 
