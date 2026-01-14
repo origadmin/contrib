@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.0](https://github.com/origadmin/contrib/compare/v1.3.0...v1.4.0) (2026-01-14)
+
+
+### Features
+
+* **security:** deprecate SkipChecker type in favor of Skipper with clear deprecation notice ([1290922](https://github.com/origadmin/contrib/commit/1290922b5fdd6cbba77efcdc464635f5c5c89827))
+* **security:** refactor principal context handling and skip logic into security package ([ab81a24](https://github.com/origadmin/contrib/commit/ab81a24ad33c7d4e3bef85fcc3fe37c2e78c0a53))
+
 ## [1.3.0](https://github.com/origadmin/contrib/compare/v1.2.0...v1.3.0) (2026-01-13)
 
 
