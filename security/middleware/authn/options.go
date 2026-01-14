@@ -3,6 +3,7 @@ package authn
 import (
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authn"
+	"github.com/origadmin/contrib/security/skip"
 	"github.com/origadmin/runtime/extensions/optionutil"
 	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/runtime/log"
@@ -11,7 +12,7 @@ import (
 // Options holds configurations for the authn middleware, parsed from a generic options slice.
 type Options struct {
 	Authenticator authn.Authenticator
-	SkipChecker   security.SkipChecker
+	Skipper       security.Skipper
 	Logger        log.Logger
 }
 
@@ -22,10 +23,10 @@ func WithAuthenticator(authenticator authn.Authenticator) options.Option {
 	})
 }
 
-// WithSkipChecker provides a SkipChecker via a runtime option.
-func WithSkipChecker(skipChecker security.SkipChecker) options.Option {
+// WithSkipper provides a Skipper via a runtime option.
+func WithSkipper(skipChecker security.Skipper) options.Option {
 	return optionutil.Update(func(o *Options) {
-		o.SkipChecker = skipChecker
+		o.Skipper = skipChecker
 	})
 }
 
@@ -45,14 +46,14 @@ func fromOptions(opts []options.Option) *Options {
 	return o
 }
 
-// NoOpSkipChecker creates a SkipChecker that never skips authentication.
+// NoopSkipper creates a Skipper that never skips authentication.
 // This is the default behavior.
-func NoOpSkipChecker() security.SkipChecker {
-	return security.NoOpSkipChecker()
+func NoopSkipper() security.Skipper {
+	return skip.Noop()
 }
 
-// PathSkipChecker creates a SkipChecker that skips authentication for specified operation paths.
+// PathSkipper creates a Skipper that skips authentication for specified operation paths.
 // This is provided for convenience, delegating to the common helper.
-func PathSkipChecker(skipPaths ...string) security.SkipChecker {
-	return security.PathSkipChecker(skipPaths...)
+func PathSkipper(skipPaths ...string) security.Skipper {
+	return skip.Path(skipPaths...)
 }

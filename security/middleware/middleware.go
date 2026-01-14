@@ -4,7 +4,7 @@ import (
 	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/runtime/middleware" // Import the runtime middleware package for Chain
 
-	"github.com/origadmin/contrib/security" // Import security for SkipChecker
+	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authn"
 	"github.com/origadmin/contrib/security/authz"
 	authnMw "github.com/origadmin/contrib/security/middleware/authn"
@@ -34,8 +34,8 @@ func NewFactory(propType ...principal.PropagationType) *Factory {
 // NewGateway creates a server-side middleware for services that act as a gateway.
 // It performs authentication and then propagates the resulting principal.
 // It does not perform authorization.
-func (f *Factory) NewGateway(authenticator authn.Authenticator, skipChecker security.SkipChecker) middleware.KMiddleware {
-	authnOpts := []options.Option{authnMw.WithSkipChecker(skipChecker)}
+func (f *Factory) NewGateway(authenticator authn.Authenticator, skipChecker security.Skipper) middleware.KMiddleware {
+	authnOpts := []options.Option{authnMw.WithSkipper(skipChecker)}
 	authnMW := authnMw.New(authenticator, authnOpts...)
 	// Gateway mode authenticates and then implicitly relies on the transport to propagate.
 	return authnMW.Server()
@@ -44,8 +44,8 @@ func (f *Factory) NewGateway(authenticator authn.Authenticator, skipChecker secu
 // NewBackend creates a server-side middleware for backend services.
 // It expects a principal to be propagated in the context (using the factory's propagation type)
 // and performs authorization based on it.
-func (f *Factory) NewBackend(authorizer authz.Authorizer, skipChecker security.SkipChecker) middleware.KMiddleware {
-	authzOpts := []options.Option{authzMw.WithSkipChecker(skipChecker)}
+func (f *Factory) NewBackend(authorizer authz.Authorizer, skipChecker security.Skipper) middleware.KMiddleware {
+	authzOpts := []options.Option{authzMw.WithSkipper(skipChecker)}
 	propagationOpts := []options.Option{propagationMw.WithPropagationType(f.propType)}
 
 	authzMW := authzMw.New(authorizer, authzOpts...)
@@ -56,9 +56,9 @@ func (f *Factory) NewBackend(authorizer authz.Authorizer, skipChecker security.S
 }
 
 // NewStandalone creates a server-side middleware for services that perform both authentication and authorization.
-func (f *Factory) NewStandalone(authenticator authn.Authenticator, authorizer authz.Authorizer, authnSkip security.SkipChecker, authzSkip security.SkipChecker) middleware.KMiddleware {
-	authnOpts := []options.Option{authnMw.WithSkipChecker(authnSkip)}
-	authzOpts := []options.Option{authzMw.WithSkipChecker(authzSkip)}
+func (f *Factory) NewStandalone(authenticator authn.Authenticator, authorizer authz.Authorizer, authnSkip security.Skipper, authzSkip security.Skipper) middleware.KMiddleware {
+	authnOpts := []options.Option{authnMw.WithSkipper(authnSkip)}
+	authzOpts := []options.Option{authzMw.WithSkipper(authzSkip)}
 
 	authnMW := authnMw.New(authenticator, authnOpts...)
 	authzMW := authzMw.New(authorizer, authzOpts...)

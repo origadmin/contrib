@@ -116,7 +116,7 @@ func TestAuthNMiddleware_WithNoopAuthenticator(t *testing.T) {
 
 	// 3. Run middleware
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		p, ok := principal.FromContext(ctx)
+		p, ok := security.FromContext(ctx)
 		require.True(t, ok, "Principal should be in context")
 		assert.Equal(t, principal.Anonymous().GetID(), p.GetID(), "Principal should be anonymous")
 		return "handler called", nil
@@ -157,7 +157,7 @@ func TestAuthNMiddleware_WithJwtAuthenticator_Success(t *testing.T) {
 
 	// 4. Run middleware and verify principal
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		p, ok := principal.FromContext(ctx)
+		p, ok := security.FromContext(ctx)
 		require.True(t, ok, "Principal should be in context")
 		assert.Equal(t, "user123", p.GetID())
 		assert.Equal(t, []string{"users"}, p.GetRoles())
@@ -265,7 +265,7 @@ func TestAuthNMiddleware_WithJwtAuthenticator_Failure(t *testing.T) {
 				}
 			} else {
 				assert.NoError(t, err, "Expected no error for case: %s", tc.name)
-				p, ok := principal.FromContext(ctx)
+				p, ok := security.FromContext(ctx)
 				require.True(t, ok)
 				assert.Equal(t, principal.Anonymous().GetID(), p.GetID())
 			}
@@ -310,7 +310,7 @@ func TestDeploymentMode_Standalone(t *testing.T) {
 
 		// 4. Execute middleware and verify Principal
 		handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-			p, ok := principal.FromContext(ctx)
+			p, ok := security.FromContext(ctx)
 			require.True(t, ok, "Principal should be in context")
 			assert.Equal(t, "user123", p.GetID())
 			assert.Equal(t, []string{"users", "admin"}, p.GetRoles())
@@ -332,7 +332,7 @@ func TestDeploymentMode_Standalone(t *testing.T) {
 
 		// 3. Execute middleware and verify anonymous Principal
 		handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-			p, ok := principal.FromContext(ctx)
+			p, ok := security.FromContext(ctx)
 			require.True(t, ok, "Principal should be in context")
 			assert.Equal(t, principal.Anonymous().GetID(), p.GetID())
 			return "handler called", nil
@@ -377,7 +377,7 @@ func TestDeploymentMode_Microservice_Gateway(t *testing.T) {
 
 		// 4. Gateway middleware performs authentication
 		handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-			p, ok := principal.FromContext(ctx)
+			p, ok := security.FromContext(ctx)
 			require.True(t, ok, "Gateway should authenticate and set Principal")
 			assert.Equal(t, "user456", p.GetID())
 			// 5. Simulate serializing Principal information to Headers for downstream services
@@ -478,7 +478,7 @@ func TestDeploymentMode_Microservice_IndependentAuth(t *testing.T) {
 		// 6. Simulate gateway middleware (lightweight proxy)
 		handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 			// In actual implementation, this would call the auth service instead of validating directly
-			p, ok := principal.FromContext(ctx)
+			p, ok := security.FromContext(ctx)
 			require.True(t, ok, "Principal should be in context")
 			assert.Equal(t, "user789", p.GetID())
 
@@ -552,7 +552,7 @@ func TestAuthnAuthz_CombinationModes(t *testing.T) {
 		ctx := transport.NewServerContext(context.Background(), tr)
 
 		handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-			p, ok := principal.FromContext(ctx)
+			p, ok := security.FromContext(ctx)
 			require.True(t, ok, "Authentication-only mode should set Principal")
 			assert.Equal(t, "readonly-user", p.GetID())
 			// Business logic can personalize based on Principal but doesn't check permissions
@@ -574,7 +574,7 @@ func TestAuthnAuthz_CombinationModes(t *testing.T) {
 		ctx := transport.NewServerContext(context.Background(), tr)
 
 		handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-			p, ok := principal.FromContext(ctx)
+			p, ok := security.FromContext(ctx)
 			require.True(t, ok, "Should have anonymous Principal")
 			assert.Equal(t, principal.Anonymous().GetID(), p.GetID())
 			return "public data", nil
@@ -620,7 +620,7 @@ func TestCrossService_PrincipalPropagation(t *testing.T) {
 
 		// Service A middleware
 		serviceAHandler := func(ctx context.Context, req interface{}) (interface{}, error) {
-			p, ok := principal.FromContext(ctx)
+			p, ok := security.FromContext(ctx)
 			require.True(t, ok)
 			assert.Equal(t, "cross-service-user", p.GetID())
 
@@ -653,9 +653,9 @@ func TestCrossService_PrincipalPropagation(t *testing.T) {
 
 				// Reconstruct Principal and inject into context
 				reconstructedPrincipal := principal.New(userID, principal.WithRoles([]string{userRoles}))
-				ctx = principal.NewContext(ctx, reconstructedPrincipal)
+				ctx = security.NewContext(ctx, reconstructedPrincipal)
 
-				p, ok := principal.FromContext(ctx)
+				p, ok := security.FromContext(ctx)
 				require.True(t, ok)
 				assert.Equal(t, "cross-service-user", p.GetID())
 

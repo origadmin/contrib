@@ -5,7 +5,8 @@ import (
 
 	"github.com/go-kratos/kratos/v2/log"
 
-	securityPrincipal "github.com/origadmin/contrib/security/principal"
+	"github.com/origadmin/contrib/security"
+	"github.com/origadmin/contrib/security/principal"
 	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/runtime/middleware"
 )
@@ -34,24 +35,24 @@ func newMiddleware(opts *Options) *Middleware {
 func (m *Middleware) Server() middleware.KMiddleware {
 	return func(handler middleware.KHandler) middleware.KHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-			if _, ok := securityPrincipal.FromContext(ctx); ok {
+			if _, ok := security.FromContext(ctx); ok {
 				// This is a normal case if another auth middleware ran first. No log needed.
 				return handler(ctx, req)
 			}
 
-			encodedPrincipal := securityPrincipal.ExtractFromServerContext(m.PropagationType, ctx, req)
+			encodedPrincipal := principal.ExtractFromServerContext(m.PropagationType, ctx, req)
 			if encodedPrincipal == "" {
 				// This is also a normal case for unauthenticated requests. No log needed.
 				return handler(ctx, req)
 			}
 
-			p, err := securityPrincipal.Decode(encodedPrincipal)
+			p, err := principal.Decode(encodedPrincipal)
 			if err != nil {
 				m.log.WithContext(ctx).Warnf("[Propagation] Failed to decode principal from header: %v", err)
 				return handler(ctx, req) // Proceed without principal on decode failure
 			}
 
-			newCtx := securityPrincipal.NewContext(ctx, p)
+			newCtx := security.NewContext(ctx, p)
 			m.log.WithContext(ctx).Debugf("[Propagation] Principal injected into context: ID=%s", p.GetID())
 			return handler(newCtx, req)
 		}
@@ -62,19 +63,19 @@ func (m *Middleware) Server() middleware.KMiddleware {
 func (m *Middleware) Client() middleware.KMiddleware {
 	return func(handler middleware.KHandler) middleware.KHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-			p, ok := securityPrincipal.FromContext(ctx)
+			p, ok := security.FromContext(ctx)
 			if !ok {
 				// Normal case, no principal to propagate.
 				return handler(ctx, req)
 			}
 
-			encodedPrincipal, err := securityPrincipal.Encode(p)
+			encodedPrincipal, err := principal.Encode(p)
 			if err != nil {
 				m.log.WithContext(ctx).Errorf("[Propagation] Failed to encode principal for propagation: %v", err)
 				return nil, err // This is a critical internal error.
 			}
 
-			newCtx := securityPrincipal.PropagateToClientContext(m.PropagationType, ctx, req, encodedPrincipal)
+			newCtx := principal.PropagateToClientContext(m.PropagationType, ctx, req, encodedPrincipal)
 			// This log is redundant as success is confirmed by the receiving service's log.
 			// m.log.WithContext(ctx).Debugf("[Propagation] Propagating principal to client request: ID=%s", p.GetID())
 			return handler(newCtx, req)

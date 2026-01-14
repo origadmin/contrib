@@ -4,11 +4,12 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/log"
+
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authn"
 	"github.com/origadmin/contrib/security/credential"
-	securityPrincipal "github.com/origadmin/contrib/security/principal"
 	"github.com/origadmin/contrib/security/request"
+	"github.com/origadmin/contrib/security/skip"
 	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/runtime/middleware"
 )
@@ -32,8 +33,8 @@ func newMiddleware(opts *Options) *Middleware {
 		Options: opts,
 		log:     log.NewHelper(log.With(opts.Logger, "module", "security.middleware.authn")),
 	}
-	if m.SkipChecker == nil {
-		m.SkipChecker = security.NoOpSkipChecker()
+	if m.Skipper == nil {
+		m.Skipper = skip.Noop()
 	}
 	return m
 }
@@ -42,7 +43,7 @@ func newMiddleware(opts *Options) *Middleware {
 func (m *Middleware) Server() middleware.KMiddleware {
 	return func(handler middleware.KHandler) middleware.KHandler {
 		return func(ctx context.Context, req interface{}) (reply interface{}, err error) {
-			if _, ok := securityPrincipal.FromContext(ctx); ok {
+			if _, ok := security.FromContext(ctx); ok {
 				// This is a normal case if propagation middleware ran first. No log needed.
 				return handler(ctx, req)
 			}
@@ -53,7 +54,7 @@ func (m *Middleware) Server() middleware.KMiddleware {
 				return nil, err
 			}
 
-			if m.SkipChecker(ctx, securityReq) {
+			if m.Skipper(ctx, securityReq) {
 				m.log.WithContext(ctx).Debugf("[AuthN] Skipped for operation: %s", securityReq.GetOperation())
 				return handler(ctx, req)
 			}
@@ -72,7 +73,7 @@ func (m *Middleware) Server() middleware.KMiddleware {
 				return nil, authErr
 			}
 
-			ctx = securityPrincipal.NewContext(ctx, principal)
+			ctx = security.NewContext(ctx, principal)
 			m.log.WithContext(ctx).Debugf("[AuthN] Authentication successful, principal injected: ID=%s", principal.GetID())
 			return handler(ctx, req)
 		}

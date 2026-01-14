@@ -4,11 +4,12 @@ import (
 	"context"
 
 	"github.com/go-kratos/kratos/v2/log"
+
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authz"
-	securityPrincipal "github.com/origadmin/contrib/security/principal"
 	"github.com/origadmin/contrib/security/request"
+	"github.com/origadmin/contrib/security/skip"
 	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/runtime/middleware"
 )
@@ -32,8 +33,8 @@ func newMiddleware(opts *Options) *Middleware {
 		Options: opts,
 		log:     log.NewHelper(log.With(opts.Logger, "module", "security.middleware.authz")),
 	}
-	if m.SkipChecker == nil {
-		m.SkipChecker = security.NoOpSkipChecker()
+	if m.Skipper == nil {
+		m.Skipper = skip.Noop()
 	}
 	return m
 }
@@ -48,12 +49,12 @@ func (m *Middleware) Server() middleware.KMiddleware {
 				return nil, err
 			}
 
-			if m.SkipChecker(ctx, securityReq) {
+			if m.Skipper(ctx, securityReq) {
 				m.log.WithContext(ctx).Debugf("[AuthZ] Skipped for operation: %s", securityReq.GetOperation())
 				return handler(ctx, req)
 			}
 
-			principal, ok := securityPrincipal.FromContext(ctx)
+			principal, ok := security.FromContext(ctx)
 			if !ok {
 				// This is a critical failure if we've reached the authorization stage.
 				m.log.WithContext(ctx).Warnf("[AuthZ] Principal not found in context for operation %s, denying access.", securityReq.GetOperation())

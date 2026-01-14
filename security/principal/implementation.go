@@ -338,33 +338,33 @@ func New(id string, opts ...Option) securityifaces.Principal {
 // FromProto converts a *securityv1.Principal Protobuf message to a securityifaces.Principal.
 // If the input protoP is nil, it returns a NewPrincipalWithID, ensuring a non-nil Principal is always returned.
 // This function directly constructs the concretePrincipal, optimizing for the structured Protobuf input.
-func FromProto(protoP *securityv1.Principal) (securityifaces.Principal, error) {
-	if protoP == nil {
+func FromProto(p *securityv1.Principal) (securityifaces.Principal, error) {
+	if p == nil {
 		// Return a NewPrincipalWithID to avoid nil panics in subsequent calls,
 		// providing a safe default when no Protobuf principal is provided.
 		return Anonymous(), nil
 	}
 
-	claims := &defaultClaims{data: protoP.GetClaims()}
+	claims := &defaultClaims{data: p.GetClaims()}
 
 	// Explicit nil checks and initialization for fields from Protobuf message.
-	roles := protoP.GetRoles()
+	roles := p.GetRoles()
 	if roles == nil {
 		roles = make([]string, 0)
 	}
-	permissions := protoP.GetPermissions()
+	permissions := p.GetPermissions()
 	if permissions == nil {
 		permissions = make([]string, 0)
 	}
-	scopes := protoP.GetScopes()
+	scopes := p.GetScopes()
 	if scopes == nil {
 		scopes = make(map[string]bool)
 	}
 
 	// Directly construct the concretePrincipal instance.
 	return &concretePrincipal{
-		id:          protoP.GetId(),
-		domain:      protoP.GetDomain(),
+		id:          p.GetId(),
+		domain:      p.GetDomain(),
 		roles:       roles,
 		permissions: permissions,
 		scopes:      scopes,

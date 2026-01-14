@@ -168,10 +168,10 @@ func TestAuthZMiddleware_Success(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tr := newMockTransport(t, tc.method, tc.operation)
 			ctx := transport.NewServerContext(context.Background(), tr)
-			ctx = principal.NewContext(ctx, tc.principal) // Inject principal into context
+			ctx = security.NewContext(ctx, tc.principal) // Inject principal into context
 
 			handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-				p, ok := principal.FromContext(ctx)
+				p, ok := security.FromContext(ctx)
 				require.True(t, ok, "Principal should be in context")
 				assert.Equal(t, tc.principal.GetID(), p.GetID())
 				return "handler called", nil
@@ -252,7 +252,7 @@ func TestAuthZMiddleware_Failure(t *testing.T) {
 			ctx := transport.NewServerContext(context.Background(), tr)
 
 			if tc.principal != nil {
-				ctx = principal.NewContext(ctx, tc.principal)
+				ctx = security.NewContext(ctx, tc.principal)
 			}
 
 			handler := func(ctx context.Context, req interface{}) (interface{}, error) {
@@ -276,7 +276,7 @@ func TestAuthZMiddleware_Failure(t *testing.T) {
 	}
 }
 
-func TestAuthZMiddleware_SkipChecker(t *testing.T) {
+func TestAuthZMiddleware_Skipper(t *testing.T) {
 	alwaysSkip := func(ctx context.Context, req security.Request) bool { return true }
 	neverSkip := func(ctx context.Context, req security.Request) bool { return false }
 
@@ -284,21 +284,21 @@ func TestAuthZMiddleware_SkipChecker(t *testing.T) {
 		{Resource: "/protected.Service/GetData", Action: "read"}: {"admin"},
 	})
 
-	t.Run("SkipChecker allows skipping authorization", func(t *testing.T) {
+	t.Run("Skipper allows skipping authorization", func(t *testing.T) {
 		tr := newMockTransport(t, "GET", "/protected.Service/GetData")
 		ctx := transport.NewServerContext(context.Background(), tr)
-		mw := New(mockAuthz, WithSkipChecker(alwaysSkip))
+		mw := New(mockAuthz, WithSkipper(alwaysSkip))
 		_, err := mw.Server()(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return "handler called", nil
 		})(ctx, nil)
 		assert.NoError(t, err)
 	})
 
-	t.Run("SkipChecker does not skip authorization", func(t *testing.T) {
+	t.Run("Skipper does not skip authorization", func(t *testing.T) {
 		tr := newMockTransport(t, "GET", "/protected.Service/GetData")
 		ctx := transport.NewServerContext(context.Background(), tr)
 
-		mw := New(mockAuthz, WithSkipChecker(neverSkip))
+		mw := New(mockAuthz, WithSkipper(neverSkip))
 		_, err := mw.Server()(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return "handler called", nil
 		})(ctx, nil)
@@ -306,7 +306,7 @@ func TestAuthZMiddleware_SkipChecker(t *testing.T) {
 		assert.True(t, securityv1.IsCredentialsInvalid(err))
 	})
 
-	t.Run("PathSkipChecker skips specific path", func(t *testing.T) {
+	t.Run("PathSkipper skips specific path", func(t *testing.T) {
 		skipPathsMap := map[string]bool{
 			"/public.Service/GetInfo": true,
 		}
@@ -314,8 +314,8 @@ func TestAuthZMiddleware_SkipChecker(t *testing.T) {
 		for path := range skipPathsMap {
 			skipPaths = append(skipPaths, path)
 		}
-		checker := PathSkipChecker(skipPaths...)
-		mw := New(mockAuthz, WithSkipChecker(checker))
+		checker := PathSkipper(skipPaths...)
+		mw := New(mockAuthz, WithSkipper(checker))
 
 		tr := newMockTransport(t, "GET", "/public.Service/GetInfo")
 		ctx := transport.NewServerContext(context.Background(), tr)
@@ -333,9 +333,9 @@ func TestAuthZMiddleware_SkipChecker(t *testing.T) {
 		assert.True(t, securityv1.IsCredentialsInvalid(err))
 	})
 
-	t.Run("CompositeSkipChecker combines checkers", func(t *testing.T) {
-		// Define a simple CompositeSkipChecker for testing purposes if not found in security package
-		compositeSkipChecker := func(checkers ...security.SkipChecker) security.SkipChecker {
+	t.Run("CompositeSkipper combines checkers", func(t *testing.T) {
+		// Define a simple CompositeSkipper for testing purposes if not found in security package
+		compositeSkipper := func(checkers ...security.Skipper) security.Skipper {
 			return func(ctx context.Context, req security.Request) bool {
 				for _, checker := range checkers {
 					if checker(ctx, req) {
@@ -346,10 +346,10 @@ func TestAuthZMiddleware_SkipChecker(t *testing.T) {
 			}
 		}
 
-		checker1 := PathSkipChecker("/path1")
-		checker2 := PathSkipChecker("/path2")
-		composite := compositeSkipChecker(checker1, checker2)
-		mw := New(mockAuthz, WithSkipChecker(composite))
+		checker1 := PathSkipper("/path1")
+		checker2 := PathSkipper("/path2")
+		composite := compositeSkipper(checker1, checker2)
+		mw := New(mockAuthz, WithSkipper(composite))
 
 		tr := newMockTransport(t, "GET", "/path1")
 		ctx := transport.NewServerContext(context.Background(), tr)

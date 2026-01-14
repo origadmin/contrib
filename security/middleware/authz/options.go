@@ -3,6 +3,7 @@ package authz
 import (
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authz"
+	"github.com/origadmin/contrib/security/skip"
 	"github.com/origadmin/runtime/extensions/optionutil"
 	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/runtime/log"
@@ -10,9 +11,9 @@ import (
 
 // Options holds configurations for the authz middleware.
 type Options struct {
-	Authorizer  authz.Authorizer
-	SkipChecker security.SkipChecker
-	Logger      log.Logger
+	Authorizer authz.Authorizer
+	Skipper    security.Skipper
+	Logger     log.Logger
 }
 
 // WithAuthorizer provides an Authorizer via a runtime option.
@@ -22,10 +23,10 @@ func WithAuthorizer(authorizer authz.Authorizer) options.Option {
 	})
 }
 
-// WithSkipChecker provides a SkipChecker via a runtime option.
-func WithSkipChecker(skipChecker security.SkipChecker) options.Option {
+// WithSkipper provides a Skipper via a runtime option.
+func WithSkipper(skipChecker security.Skipper) options.Option {
 	return optionutil.Update(func(o *Options) {
-		o.SkipChecker = skipChecker
+		o.Skipper = skipChecker
 	})
 }
 
@@ -45,12 +46,12 @@ func fromOptions(opts []options.Option) *Options {
 	return o
 }
 
-// NoOpSkipChecker creates a SkipChecker that never skips authorization.
-func NoOpSkipChecker() security.SkipChecker {
-	return security.NoOpSkipChecker()
+// NoopSkipper creates a Skipper that never skips authorization.
+func NoopSkipper() security.Skipper {
+	return skip.Noop()
 }
 
-// PathSkipChecker creates a SkipChecker that skips authorization for specified operation paths.
-func PathSkipChecker(skipPaths ...string) security.SkipChecker {
-	return security.PathSkipChecker(skipPaths...)
+// PathSkipper creates a Skipper that skips authorization for specified operation paths.
+func PathSkipper(skipPaths ...string) security.Skipper {
+	return skip.Path(skipPaths...)
 }
