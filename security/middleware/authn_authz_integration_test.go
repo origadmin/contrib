@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/casbin/casbin/v2/model"
-	stringadapter "github.com/casbin/casbin/v2/persist/string-adapter"
+	"github.com/casbin/casbin/v3/model"
+	stringadapter "github.com/casbin/casbin/v3/persist/string-adapter"
 	"github.com/go-kratos/kratos/v2/transport"
 	kratoshttp "github.com/go-kratos/kratos/v2/transport/http"
 	"github.com/stretchr/testify/assert"

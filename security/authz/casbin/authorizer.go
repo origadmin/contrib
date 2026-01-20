@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/casbin/casbin/v2"
-	"github.com/casbin/casbin/v2/model"
+	"github.com/casbin/casbin/v3"
+	"github.com/casbin/casbin/v3/model"
 
 	casbinv1 "github.com/origadmin/contrib/api/gen/go/security/authz/casbin/v1"
 	authzv1 "github.com/origadmin/contrib/api/gen/go/security/authz/v1"
@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	DefaultWildcardItem = "*"
+	DefaultWildcardItem       = "*"
 	authModeFastPathNonDomain = 0
 	authModeFastPathDomain    = 1
 	authModeDynamic           = 2

@@ -2,7 +2,7 @@
 package adapter
 
 import (
-	fileadapter "github.com/casbin/casbin/v2/persist/file-adapter"
+	fileadapter "github.com/casbin/casbin/v3/persist/file-adapter"
 )
 
 func NewFile(path string) *fileadapter.Adapter {

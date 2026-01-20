@@ -9,8 +9,8 @@ import (
 	"github.com/go-kratos/kratos/v2/middleware/recovery"
 	"github.com/go-kratos/kratos/v2/transport/grpc"
 
-	"github.com/casbin/casbin/v2/model"
-	stringadapter "github.com/casbin/casbin/v2/persist/string-adapter"
+	"github.com/casbin/casbin/v3/model"
+	stringadapter "github.com/casbin/casbin/v3/persist/string-adapter"
 
 	authzv1 "github.com/origadmin/contrib/api/gen/go/security/authz/v1"
 	securityv1 "github.com/origadmin/contrib/api/gen/go/security/v1"

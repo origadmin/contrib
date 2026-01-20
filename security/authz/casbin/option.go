@@ -5,8 +5,8 @@
 package casbin
 
 import (
-	casbinmodel "github.com/casbin/casbin/v2/model"
-	"github.com/casbin/casbin/v2/persist"
+	casbinmodel "github.com/casbin/casbin/v3/model"
+	"github.com/casbin/casbin/v3/persist"
 
 	"github.com/origadmin/contrib/security/authz/casbin/internal/model"
 	"github.com/origadmin/runtime/extensions/optionutil"
