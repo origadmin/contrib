@@ -141,6 +141,10 @@ func newWithOptions(cfg *authzv1.Authorizer, opts ...options.Option) (*Options, 
 	return finalOpts, nil
 }
 
+func (auth *Authorizer) SyncPolicy() error {
+	return auth.watcher.Update()
+}
+
 // Authorized checks if a principal is authorized.
 func (auth *Authorizer) Authorized(ctx context.Context, principal security.Principal, spec authz.RuleSpec) (bool, error) {
 	var allowed bool

@@ -19,7 +19,7 @@ require (
 	github.com/google/gnostic v0.7.1
 	github.com/google/wire v0.7.0
 	github.com/hashicorp/consul/api v1.33.2
-	github.com/origadmin/runtime v0.2.13
+	github.com/origadmin/runtime v0.2.15
 	github.com/origadmin/toolkits/errors v1.1.0
 	github.com/stretchr/testify v1.11.1
 	go.etcd.io/etcd/client/v3 v3.5.11

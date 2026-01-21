@@ -8,8 +8,9 @@ import (
 const (
 	ActionRead   = "read"
 	ActionCreate = "create"
-	ActionUpdate = "update" // Corrected from "create" to "update"
+	ActionUpdate = "update"
 	ActionDelete = "delete"
+	ActionAny    = "*"
 )
 
 // RuleSpec encapsulates the specification of an authorization rule to be checked.
@@ -44,8 +45,7 @@ func NewRuleSpec(p security.Principal, req security.Request) RuleSpec {
 	case "DELETE":
 		ruleSpec.Action = ActionDelete
 	default:
-		// Fallback to the operation name if the HTTP method is not standard.
-		ruleSpec.Action = req.GetOperation()
+		ruleSpec.Action = ActionAny
 	}
 	return ruleSpec
 }
