@@ -11,37 +11,90 @@ option go_package = "github.com/origadmin/contrib/api/gen/go/security/v1;securit
 
 // Security defines the top-level configuration for all security-related components.
 message Security {
-  // List of authentication configurations.
-  AuthenticatorConfigs authn = 1 [
+  // Authentication configurations.
+  optional AuthenticatorConfigs authn = 1 [
     json_name = "authn",
-    (gnostic.openapi.v3.property) = {description: "List of authentication configurations."}
+    (gnostic.openapi.v3.property) = {description: "Authentication configurations."}
   ];
-  // List of authorization configurations.
-  AuthorizerConfigs authz = 2 [
+
+  // Authorization configurations.
+  optional AuthorizerConfigs authz = 2 [
     json_name = "authz",
-    (gnostic.openapi.v3.property) = {description: "List of authorization configurations."}
+    (gnostic.openapi.v3.property) = {description: "Authorization configurations."}
   ];
-  // List of transport layer security (TLS) configurations.
-  TransportSecurityConfigs transport_security = 3 [
+
+  // Transport layer security (TLS) configurations.
+  optional TransportSecurityConfigs transport_security = 3 [
     json_name = "transport_security",
-    (gnostic.openapi.v3.property) = {description: "List of transport layer security (TLS) configurations."}
+    (gnostic.openapi.v3.property) = {description: "Transport layer security (TLS) configurations."}
   ];
 }
 
+// AuthenticatorConfigs defines a set of authenticators and specifies which one is active.
 message AuthenticatorConfigs {
-  optional string default = 1 [json_name = "default"];
-  optional string active = 2 [json_name = "active"];
-  repeated contrib.api.security.authn.v1.Authenticator configs = 3 [json_name = "configs"]; // Changed type to AuthNConfig
+  // The name of the active authenticator to use from the 'configs' list.
+  // If not specified, the 'default' authenticator will be used.
+  optional string active = 1 [
+    json_name = "active",
+    (gnostic.openapi.v3.property) = {description: "The name of the active authenticator to use. Overrides the default if specified."}
+  ];
+
+  // The default authenticator configuration. This is used if 'active' is not set
+  // or if the named authenticator is not found in 'configs'.
+  optional contrib.api.security.authn.v1.Authenticator default = 2 [
+    json_name = "default",
+    (gnostic.openapi.v3.property) = {description: "The default authenticator configuration."}
+  ];
+
+  // A list of named authenticator configurations.
+  repeated contrib.api.security.authn.v1.Authenticator configs = 3 [
+    json_name = "configs",
+    (gnostic.openapi.v3.property) = {description: "A list of available authenticator configurations."}
+  ];
 }
 
+// AuthorizerConfigs defines a set of authorizers and specifies which one is active.
 message AuthorizerConfigs {
-  optional string default = 1 [json_name = "default"];
-  optional string active = 2 [json_name = "active"];
-  repeated contrib.api.security.authz.v1.Authorizer configs = 3 [json_name = "configs"];
+  // The name of the active authorizer to use from the 'configs' list.
+  // If not specified, the 'default' authorizer will be used.
+  optional string active = 1 [
+    json_name = "active",
+    (gnostic.openapi.v3.property) = {description: "The name of the active authorizer to use. Overrides the default if specified."}
+  ];
+
+  // The default authorizer configuration. This is used if 'active' is not set
+  // or if the named authorizer is not found in 'configs'.
+  optional contrib.api.security.authz.v1.Authorizer default = 2 [
+    json_name = "default",
+    (gnostic.openapi.v3.property) = {description: "The default authorizer configuration."}
+  ];
+
+  // A list of named authorizer configurations.
+  repeated contrib.api.security.authz.v1.Authorizer configs = 3 [
+    json_name = "configs",
+    (gnostic.openapi.v3.property) = {description: "A list of available authorizer configurations."}
+  ];
 }
 
+// TransportSecurityConfigs defines a set of TLS configurations and specifies which one is active.
 message TransportSecurityConfigs {
-  optional string default = 1 [json_name = "default"];
-  optional string active = 2 [json_name = "active"];
-  repeated runtime.api.config.transport.tls.v1.TLSConfig configs = 3 [json_name = "configs"];
+  // The name of the active TLS configuration to use from the 'configs' list.
+  // If not specified, the 'default' configuration will be used.
+  optional string active = 1 [
+    json_name = "active",
+    (gnostic.openapi.v3.property) = {description: "The name of the active TLS configuration to use. Overrides the default if specified."}
+  ];
+
+  // The default TLS configuration. This is used if 'active' is not set
+  // or if the named configuration is not found in 'configs'.
+  optional runtime.api.config.transport.tls.v1.TLSConfig default = 2 [
+    json_name = "default",
+    (gnostic.openapi.v3.property) = {description: "The default TLS configuration."}
+  ];
+
+  // A list of named TLS configurations.
+  repeated runtime.api.config.transport.tls.v1.TLSConfig configs = 3 [
+    json_name = "configs",
+    (gnostic.openapi.v3.property) = {description: "A list of available TLS configurations."}
+  ];
 }

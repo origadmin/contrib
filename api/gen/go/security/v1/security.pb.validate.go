@@ -57,91 +57,103 @@ func (m *Security) validate(all bool) error {
 
 	var errors []error
 
-	if all {
-		switch v := interface{}(m.GetAuthn()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, SecurityValidationError{
+	if m.Authn != nil {
+
+		if all {
+			switch v := interface{}(m.GetAuthn()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, SecurityValidationError{
+						field:  "Authn",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, SecurityValidationError{
+						field:  "Authn",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetAuthn()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return SecurityValidationError{
 					field:  "Authn",
 					reason: "embedded message failed validation",
 					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, SecurityValidationError{
-					field:  "Authn",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
+				}
 			}
 		}
-	} else if v, ok := interface{}(m.GetAuthn()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return SecurityValidationError{
-				field:  "Authn",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
+
 	}
 
-	if all {
-		switch v := interface{}(m.GetAuthz()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, SecurityValidationError{
+	if m.Authz != nil {
+
+		if all {
+			switch v := interface{}(m.GetAuthz()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, SecurityValidationError{
+						field:  "Authz",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, SecurityValidationError{
+						field:  "Authz",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetAuthz()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return SecurityValidationError{
 					field:  "Authz",
 					reason: "embedded message failed validation",
 					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, SecurityValidationError{
-					field:  "Authz",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
+				}
 			}
 		}
-	} else if v, ok := interface{}(m.GetAuthz()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return SecurityValidationError{
-				field:  "Authz",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
+
 	}
 
-	if all {
-		switch v := interface{}(m.GetTransportSecurity()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, SecurityValidationError{
-					field:  "TransportSecurity",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
+	if m.TransportSecurity != nil {
+
+		if all {
+			switch v := interface{}(m.GetTransportSecurity()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, SecurityValidationError{
+						field:  "TransportSecurity",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, SecurityValidationError{
+						field:  "TransportSecurity",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
 			}
-		case interface{ Validate() error }:
+		} else if v, ok := interface{}(m.GetTransportSecurity()).(interface{ Validate() error }); ok {
 			if err := v.Validate(); err != nil {
-				errors = append(errors, SecurityValidationError{
+				return SecurityValidationError{
 					field:  "TransportSecurity",
 					reason: "embedded message failed validation",
 					cause:  err,
-				})
+				}
 			}
 		}
-	} else if v, ok := interface{}(m.GetTransportSecurity()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return SecurityValidationError{
-				field:  "TransportSecurity",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
+
 	}
 
 	if len(errors) > 0 {
@@ -277,12 +289,41 @@ func (m *AuthenticatorConfigs) validate(all bool) error {
 
 	}
 
-	if m.Default != nil {
-		// no validation rules for Default
-	}
-
 	if m.Active != nil {
 		// no validation rules for Active
+	}
+
+	if m.Default != nil {
+
+		if all {
+			switch v := interface{}(m.GetDefault()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, AuthenticatorConfigsValidationError{
+						field:  "Default",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, AuthenticatorConfigsValidationError{
+						field:  "Default",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetDefault()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return AuthenticatorConfigsValidationError{
+					field:  "Default",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
 	}
 
 	if len(errors) > 0 {
@@ -421,12 +462,41 @@ func (m *AuthorizerConfigs) validate(all bool) error {
 
 	}
 
-	if m.Default != nil {
-		// no validation rules for Default
-	}
-
 	if m.Active != nil {
 		// no validation rules for Active
+	}
+
+	if m.Default != nil {
+
+		if all {
+			switch v := interface{}(m.GetDefault()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, AuthorizerConfigsValidationError{
+						field:  "Default",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, AuthorizerConfigsValidationError{
+						field:  "Default",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetDefault()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return AuthorizerConfigsValidationError{
+					field:  "Default",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
 	}
 
 	if len(errors) > 0 {
@@ -565,12 +635,41 @@ func (m *TransportSecurityConfigs) validate(all bool) error {
 
 	}
 
-	if m.Default != nil {
-		// no validation rules for Default
-	}
-
 	if m.Active != nil {
 		// no validation rules for Active
+	}
+
+	if m.Default != nil {
+
+		if all {
+			switch v := interface{}(m.GetDefault()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, TransportSecurityConfigsValidationError{
+						field:  "Default",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, TransportSecurityConfigsValidationError{
+						field:  "Default",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetDefault()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return TransportSecurityConfigsValidationError{
+					field:  "Default",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
 	}
 
 	if len(errors) > 0 {

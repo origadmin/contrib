@@ -119,7 +119,7 @@ type Authorizer struct {
 	Casbin *v1.Config `protobuf:"bytes,10,opt,name=casbin,proto3,oneof" json:"casbin,omitempty"`
 	// For custom types, the 'type' field will contain the custom name,
 	// and this 'customize' field will hold its configuration.
-	Customize     *structpb.Struct `protobuf:"bytes,100,opt,name=customize,proto3,oneof" json:"customize,omitempty"`
+	Settings      *structpb.Struct `protobuf:"bytes,100,opt,name=settings,proto3,oneof" json:"settings,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -175,9 +175,9 @@ func (x *Authorizer) GetCasbin() *v1.Config {
 	return nil
 }
 
-func (x *Authorizer) GetCustomize() *structpb.Struct {
+func (x *Authorizer) GetSettings() *structpb.Struct {
 	if x != nil {
-		return x.Customize
+		return x.Settings
 	}
 	return nil
 }
@@ -193,17 +193,16 @@ const file_security_authz_v1_authz_proto_rawDesc = "" +
 	"\x06action\x18\x03 \x01(\tR\x06action\x127\n" +
 	"\n" +
 	"attributes\x18\x04 \x01(\v2\x17.google.protobuf.StructR\n" +
-	"attributes\"\xa4\x03\n" +
+	"attributes\"\xa1\x03\n" +
 	"\n" +
 	"Authorizer\x12C\n" +
 	"\x04name\x18\x01 \x01(\tB/\xbaG,\x92\x02)Unique name for this authorizer instance.R\x04name\x12U\n" +
 	"\x04type\x18\x02 \x01(\tBA\xbaG>\x92\x02;The type of authorization mechanism, e.g., 'casbin', 'opa'.R\x04type\x12w\n" +
 	"\x06casbin\x18\n" +
-	" \x01(\v2,.contrib.api.security.authz.casbin.v1.ConfigB,\xbaG)\x92\x02&Configuration for a Casbin authorizer.H\x00R\x06casbin\x88\x01\x01\x12h\n" +
-	"\tcustomize\x18d \x01(\v2\x17.google.protobuf.StructB,\xbaG)\x92\x02&Configuration for a custom authorizer.H\x01R\tcustomize\x88\x01\x01B\t\n" +
-	"\a_casbinB\f\n" +
-	"\n" +
-	"_customizeB\x8b\x02\n" +
+	" \x01(\v2,.contrib.api.security.authz.casbin.v1.ConfigB,\xbaG)\x92\x02&Configuration for a Casbin authorizer.H\x00R\x06casbin\x88\x01\x01\x12f\n" +
+	"\bsettings\x18d \x01(\v2\x17.google.protobuf.StructB,\xbaG)\x92\x02&Configuration for a custom authorizer.H\x01R\bsettings\x88\x01\x01B\t\n" +
+	"\a_casbinB\v\n" +
+	"\t_settingsB\x8b\x02\n" +
 	"!com.contrib.api.security.authz.v1B\n" +
 	"AuthzProtoP\x01ZAgithub.com/origadmin/contrib/api/gen/go/security/authz/v1;authzv1\xa2\x02\x04CASA\xaa\x02\x1dContrib.Api.Security.Authz.V1\xca\x02\x1dContrib\\Api\\Security\\Authz\\V1\xe2\x02)Contrib\\Api\\Security\\Authz\\V1\\GPBMetadata\xea\x02!Contrib::Api::Security::Authz::V1b\x06proto3"
 
@@ -229,7 +228,7 @@ var file_security_authz_v1_authz_proto_goTypes = []any{
 var file_security_authz_v1_authz_proto_depIdxs = []int32{
 	2, // 0: contrib.api.security.authz.v1.RuleSpec.attributes:type_name -> google.protobuf.Struct
 	3, // 1: contrib.api.security.authz.v1.Authorizer.casbin:type_name -> contrib.api.security.authz.casbin.v1.Config
-	2, // 2: contrib.api.security.authz.v1.Authorizer.customize:type_name -> google.protobuf.Struct
+	2, // 2: contrib.api.security.authz.v1.Authorizer.settings:type_name -> google.protobuf.Struct
 	3, // [3:3] is the sub-list for method output_type
 	3, // [3:3] is the sub-list for method input_type
 	3, // [3:3] is the sub-list for extension type_name

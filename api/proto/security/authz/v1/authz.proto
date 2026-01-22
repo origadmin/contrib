@@ -60,8 +60,8 @@ message Authorizer {
 
   // For custom types, the 'type' field will contain the custom name,
   // and this 'customize' field will hold its configuration.
-  optional google.protobuf.Struct customize = 100 [
-    json_name = "customize",
+  optional google.protobuf.Struct settings = 100 [
+    json_name = "settings",
     (gnostic.openapi.v3.property) = {description: "Configuration for a custom authorizer."}
   ];
 }

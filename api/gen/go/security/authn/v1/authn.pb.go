@@ -51,7 +51,7 @@ type Authenticator struct {
 	Oidc *v13.Config `protobuf:"bytes,13,opt,name=oidc,proto3,oneof" json:"oidc,omitempty"`
 	// For custom types, the 'type' field will contain the custom name,
 	// and this 'customize' field will hold its configuration.
-	Customize     *structpb.Struct `protobuf:"bytes,100,opt,name=customize,proto3,oneof" json:"customize,omitempty"`
+	Settings      *structpb.Struct `protobuf:"bytes,100,opt,name=settings,proto3,oneof" json:"settings,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -128,9 +128,9 @@ func (x *Authenticator) GetOidc() *v13.Config {
 	return nil
 }
 
-func (x *Authenticator) GetCustomize() *structpb.Struct {
+func (x *Authenticator) GetSettings() *structpb.Struct {
 	if x != nil {
-		return x.Customize
+		return x.Settings
 	}
 	return nil
 }
@@ -139,7 +139,7 @@ var File_security_authn_v1_authn_proto protoreflect.FileDescriptor
 
 const file_security_authn_v1_authn_proto_rawDesc = "" +
 	"\n" +
-	"\x1dsecurity/authn/v1/authn.proto\x12\x1dcontrib.api.security.authn.v1\x1a%security/authn/apikey/v1/config.proto\x1a\"security/authn/jwt/v1/config.proto\x1a#security/authn/oidc/v1/config.proto\x1a+security/authn/presharedkey/v1/config.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/protobuf/struct.proto\"\x88\a\n" +
+	"\x1dsecurity/authn/v1/authn.proto\x12\x1dcontrib.api.security.authn.v1\x1a%security/authn/apikey/v1/config.proto\x1a\"security/authn/jwt/v1/config.proto\x1a#security/authn/oidc/v1/config.proto\x1a+security/authn/presharedkey/v1/config.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1cgoogle/protobuf/struct.proto\"\x85\a\n" +
 	"\rAuthenticator\x12H\n" +
 	"\x04name\x18\x01 \x01(\tB4\xbaG1\x92\x02.A unique name for this authenticator instance.R\x04name\x12g\n" +
 	"\x04type\x18\x02 \x01(\tBS\xbaGP\x92\x02MThe type of the authenticator, e.g., 'jwt', 'apikey', 'presharedkey', 'oidc'.R\x04type\x12t\n" +
@@ -147,14 +147,13 @@ const file_security_authn_v1_authn_proto_rawDesc = "" +
 	" \x01(\v2).contrib.api.security.authn.jwt.v1.ConfigB2\xbaG/\x92\x02,Configuration for a JWT-based authenticator.H\x00R\x03jwt\x88\x01\x01\x12\x82\x01\n" +
 	"\x06apikey\x18\v \x01(\v2,.contrib.api.security.authn.apikey.v1.ConfigB7\xbaG4\x92\x021Configuration for an API Key-based authenticator.H\x01R\x06apikey\x88\x01\x01\x12\x99\x01\n" +
 	"\fpresharedkey\x18\f \x01(\v22.contrib.api.security.authn.presharedkey.v1.ConfigB<\xbaG9\x92\x026Configuration for a Preshared Key-based authenticator.H\x02R\fpresharedkey\x88\x01\x01\x12\x84\x01\n" +
-	"\x04oidc\x18\r \x01(\v2*.contrib.api.security.authn.oidc.v1.ConfigB?\xbaG<\x92\x029Configuration for an OpenID Connect (OIDC) authenticator.H\x03R\x04oidc\x88\x01\x01\x12k\n" +
-	"\tcustomize\x18d \x01(\v2\x17.google.protobuf.StructB/\xbaG,\x92\x02)Configuration for a custom authenticator.H\x04R\tcustomize\x88\x01\x01B\x06\n" +
+	"\x04oidc\x18\r \x01(\v2*.contrib.api.security.authn.oidc.v1.ConfigB?\xbaG<\x92\x029Configuration for an OpenID Connect (OIDC) authenticator.H\x03R\x04oidc\x88\x01\x01\x12i\n" +
+	"\bsettings\x18d \x01(\v2\x17.google.protobuf.StructB/\xbaG,\x92\x02)Configuration for a custom authenticator.H\x04R\bsettings\x88\x01\x01B\x06\n" +
 	"\x04_jwtB\t\n" +
 	"\a_apikeyB\x0f\n" +
 	"\r_presharedkeyB\a\n" +
-	"\x05_oidcB\f\n" +
-	"\n" +
-	"_customizeB\x8b\x02\n" +
+	"\x05_oidcB\v\n" +
+	"\t_settingsB\x8b\x02\n" +
 	"!com.contrib.api.security.authn.v1B\n" +
 	"AuthnProtoP\x01ZAgithub.com/origadmin/contrib/api/gen/go/security/authn/v1;authnv1\xa2\x02\x04CASA\xaa\x02\x1dContrib.Api.Security.Authn.V1\xca\x02\x1dContrib\\Api\\Security\\Authn\\V1\xe2\x02)Contrib\\Api\\Security\\Authn\\V1\\GPBMetadata\xea\x02!Contrib::Api::Security::Authn::V1b\x06proto3"
 
@@ -184,7 +183,7 @@ var file_security_authn_v1_authn_proto_depIdxs = []int32{
 	2, // 1: contrib.api.security.authn.v1.Authenticator.apikey:type_name -> contrib.api.security.authn.apikey.v1.Config
 	3, // 2: contrib.api.security.authn.v1.Authenticator.presharedkey:type_name -> contrib.api.security.authn.presharedkey.v1.Config
 	4, // 3: contrib.api.security.authn.v1.Authenticator.oidc:type_name -> contrib.api.security.authn.oidc.v1.Config
-	5, // 4: contrib.api.security.authn.v1.Authenticator.customize:type_name -> google.protobuf.Struct
+	5, // 4: contrib.api.security.authn.v1.Authenticator.settings:type_name -> google.protobuf.Struct
 	5, // [5:5] is the sub-list for method output_type
 	5, // [5:5] is the sub-list for method input_type
 	5, // [5:5] is the sub-list for extension type_name

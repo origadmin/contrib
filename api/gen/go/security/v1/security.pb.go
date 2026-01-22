@@ -28,12 +28,12 @@ const (
 // Security defines the top-level configuration for all security-related components.
 type Security struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// List of authentication configurations.
-	Authn *AuthenticatorConfigs `protobuf:"bytes,1,opt,name=authn,proto3" json:"authn,omitempty"`
-	// List of authorization configurations.
-	Authz *AuthorizerConfigs `protobuf:"bytes,2,opt,name=authz,proto3" json:"authz,omitempty"`
-	// List of transport layer security (TLS) configurations.
-	TransportSecurity *TransportSecurityConfigs `protobuf:"bytes,3,opt,name=transport_security,proto3" json:"transport_security,omitempty"`
+	// Authentication configurations.
+	Authn *AuthenticatorConfigs `protobuf:"bytes,1,opt,name=authn,proto3,oneof" json:"authn,omitempty"`
+	// Authorization configurations.
+	Authz *AuthorizerConfigs `protobuf:"bytes,2,opt,name=authz,proto3,oneof" json:"authz,omitempty"`
+	// Transport layer security (TLS) configurations.
+	TransportSecurity *TransportSecurityConfigs `protobuf:"bytes,3,opt,name=transport_security,proto3,oneof" json:"transport_security,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -89,11 +89,17 @@ func (x *Security) GetTransportSecurity() *TransportSecurityConfigs {
 	return nil
 }
 
+// AuthenticatorConfigs defines a set of authenticators and specifies which one is active.
 type AuthenticatorConfigs struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Default       *string                `protobuf:"bytes,1,opt,name=default,proto3,oneof" json:"default,omitempty"`
-	Active        *string                `protobuf:"bytes,2,opt,name=active,proto3,oneof" json:"active,omitempty"`
-	Configs       []*v1.Authenticator    `protobuf:"bytes,3,rep,name=configs,proto3" json:"configs,omitempty"` // Changed type to AuthNConfig
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the active authenticator to use from the 'configs' list.
+	// If not specified, the 'default' authenticator will be used.
+	Active *string `protobuf:"bytes,1,opt,name=active,proto3,oneof" json:"active,omitempty"`
+	// The default authenticator configuration. This is used if 'active' is not set
+	// or if the named authenticator is not found in 'configs'.
+	Default *v1.Authenticator `protobuf:"bytes,2,opt,name=default,proto3,oneof" json:"default,omitempty"`
+	// A list of named authenticator configurations.
+	Configs       []*v1.Authenticator `protobuf:"bytes,3,rep,name=configs,proto3" json:"configs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -128,18 +134,18 @@ func (*AuthenticatorConfigs) Descriptor() ([]byte, []int) {
 	return file_security_v1_security_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *AuthenticatorConfigs) GetDefault() string {
-	if x != nil && x.Default != nil {
-		return *x.Default
-	}
-	return ""
-}
-
 func (x *AuthenticatorConfigs) GetActive() string {
 	if x != nil && x.Active != nil {
 		return *x.Active
 	}
 	return ""
+}
+
+func (x *AuthenticatorConfigs) GetDefault() *v1.Authenticator {
+	if x != nil {
+		return x.Default
+	}
+	return nil
 }
 
 func (x *AuthenticatorConfigs) GetConfigs() []*v1.Authenticator {
@@ -149,11 +155,17 @@ func (x *AuthenticatorConfigs) GetConfigs() []*v1.Authenticator {
 	return nil
 }
 
+// AuthorizerConfigs defines a set of authorizers and specifies which one is active.
 type AuthorizerConfigs struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Default       *string                `protobuf:"bytes,1,opt,name=default,proto3,oneof" json:"default,omitempty"`
-	Active        *string                `protobuf:"bytes,2,opt,name=active,proto3,oneof" json:"active,omitempty"`
-	Configs       []*v11.Authorizer      `protobuf:"bytes,3,rep,name=configs,proto3" json:"configs,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the active authorizer to use from the 'configs' list.
+	// If not specified, the 'default' authorizer will be used.
+	Active *string `protobuf:"bytes,1,opt,name=active,proto3,oneof" json:"active,omitempty"`
+	// The default authorizer configuration. This is used if 'active' is not set
+	// or if the named authorizer is not found in 'configs'.
+	Default *v11.Authorizer `protobuf:"bytes,2,opt,name=default,proto3,oneof" json:"default,omitempty"`
+	// A list of named authorizer configurations.
+	Configs       []*v11.Authorizer `protobuf:"bytes,3,rep,name=configs,proto3" json:"configs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -188,18 +200,18 @@ func (*AuthorizerConfigs) Descriptor() ([]byte, []int) {
 	return file_security_v1_security_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *AuthorizerConfigs) GetDefault() string {
-	if x != nil && x.Default != nil {
-		return *x.Default
-	}
-	return ""
-}
-
 func (x *AuthorizerConfigs) GetActive() string {
 	if x != nil && x.Active != nil {
 		return *x.Active
 	}
 	return ""
+}
+
+func (x *AuthorizerConfigs) GetDefault() *v11.Authorizer {
+	if x != nil {
+		return x.Default
+	}
+	return nil
 }
 
 func (x *AuthorizerConfigs) GetConfigs() []*v11.Authorizer {
@@ -209,11 +221,17 @@ func (x *AuthorizerConfigs) GetConfigs() []*v11.Authorizer {
 	return nil
 }
 
+// TransportSecurityConfigs defines a set of TLS configurations and specifies which one is active.
 type TransportSecurityConfigs struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Default       *string                `protobuf:"bytes,1,opt,name=default,proto3,oneof" json:"default,omitempty"`
-	Active        *string                `protobuf:"bytes,2,opt,name=active,proto3,oneof" json:"active,omitempty"`
-	Configs       []*v12.TLSConfig       `protobuf:"bytes,3,rep,name=configs,proto3" json:"configs,omitempty"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// The name of the active TLS configuration to use from the 'configs' list.
+	// If not specified, the 'default' configuration will be used.
+	Active *string `protobuf:"bytes,1,opt,name=active,proto3,oneof" json:"active,omitempty"`
+	// The default TLS configuration. This is used if 'active' is not set
+	// or if the named configuration is not found in 'configs'.
+	Default *v12.TLSConfig `protobuf:"bytes,2,opt,name=default,proto3,oneof" json:"default,omitempty"`
+	// A list of named TLS configurations.
+	Configs       []*v12.TLSConfig `protobuf:"bytes,3,rep,name=configs,proto3" json:"configs,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -248,18 +266,18 @@ func (*TransportSecurityConfigs) Descriptor() ([]byte, []int) {
 	return file_security_v1_security_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *TransportSecurityConfigs) GetDefault() string {
-	if x != nil && x.Default != nil {
-		return *x.Default
-	}
-	return ""
-}
-
 func (x *TransportSecurityConfigs) GetActive() string {
 	if x != nil && x.Active != nil {
 		return *x.Active
 	}
 	return ""
+}
+
+func (x *TransportSecurityConfigs) GetDefault() *v12.TLSConfig {
+	if x != nil {
+		return x.Default
+	}
+	return nil
 }
 
 func (x *TransportSecurityConfigs) GetConfigs() []*v12.TLSConfig {
@@ -273,32 +291,35 @@ var File_security_v1_security_proto protoreflect.FileDescriptor
 
 const file_security_v1_security_proto_rawDesc = "" +
 	"\n" +
-	"\x1asecurity/v1/security.proto\x12\x17contrib.api.security.v1\x1a!config/transport/tls/v1/tls.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1dsecurity/authn/v1/authn.proto\x1a\x1dsecurity/authz/v1/authz.proto\"\x8e\x03\n" +
-	"\bSecurity\x12q\n" +
-	"\x05authn\x18\x01 \x01(\v2-.contrib.api.security.v1.AuthenticatorConfigsB,\xbaG)\x92\x02&List of authentication configurations.R\x05authn\x12m\n" +
-	"\x05authz\x18\x02 \x01(\v2*.contrib.api.security.v1.AuthorizerConfigsB+\xbaG(\x92\x02%List of authorization configurations.R\x05authz\x12\x9f\x01\n" +
-	"\x12transport_security\x18\x03 \x01(\v21.contrib.api.security.v1.TransportSecurityConfigsB<\xbaG9\x92\x026List of transport layer security (TLS) configurations.R\x12transport_security\"\xb1\x01\n" +
-	"\x14AuthenticatorConfigs\x12\x1d\n" +
-	"\adefault\x18\x01 \x01(\tH\x00R\adefault\x88\x01\x01\x12\x1b\n" +
-	"\x06active\x18\x02 \x01(\tH\x01R\x06active\x88\x01\x01\x12F\n" +
-	"\aconfigs\x18\x03 \x03(\v2,.contrib.api.security.authn.v1.AuthenticatorR\aconfigsB\n" +
+	"\x1asecurity/v1/security.proto\x12\x17contrib.api.security.v1\x1a!config/transport/tls/v1/tls.proto\x1a$gnostic/openapi/v3/annotations.proto\x1a\x1dsecurity/authn/v1/authn.proto\x1a\x1dsecurity/authz/v1/authz.proto\"\xb0\x03\n" +
+	"\bSecurity\x12n\n" +
+	"\x05authn\x18\x01 \x01(\v2-.contrib.api.security.v1.AuthenticatorConfigsB$\xbaG!\x92\x02\x1eAuthentication configurations.H\x00R\x05authn\x88\x01\x01\x12j\n" +
+	"\x05authz\x18\x02 \x01(\v2*.contrib.api.security.v1.AuthorizerConfigsB#\xbaG \x92\x02\x1dAuthorization configurations.H\x01R\x05authz\x88\x01\x01\x12\x9c\x01\n" +
+	"\x12transport_security\x18\x03 \x01(\v21.contrib.api.security.v1.TransportSecurityConfigsB4\xbaG1\x92\x02.Transport layer security (TLS) configurations.H\x02R\x12transport_security\x88\x01\x01B\b\n" +
+	"\x06_authnB\b\n" +
+	"\x06_authzB\x15\n" +
+	"\x13_transport_security\"\xa0\x03\n" +
+	"\x14AuthenticatorConfigs\x12s\n" +
+	"\x06active\x18\x01 \x01(\tBV\xbaGS\x92\x02PThe name of the active authenticator to use. Overrides the default if specified.H\x00R\x06active\x88\x01\x01\x12{\n" +
+	"\adefault\x18\x02 \x01(\v2,.contrib.api.security.authn.v1.AuthenticatorB.\xbaG+\x92\x02(The default authenticator configuration.H\x01R\adefault\x88\x01\x01\x12\x7f\n" +
+	"\aconfigs\x18\x03 \x03(\v2,.contrib.api.security.authn.v1.AuthenticatorB7\xbaG4\x92\x021A list of available authenticator configurations.R\aconfigsB\t\n" +
+	"\a_activeB\n" +
 	"\n" +
-	"\b_defaultB\t\n" +
-	"\a_active\"\xab\x01\n" +
-	"\x11AuthorizerConfigs\x12\x1d\n" +
-	"\adefault\x18\x01 \x01(\tH\x00R\adefault\x88\x01\x01\x12\x1b\n" +
-	"\x06active\x18\x02 \x01(\tH\x01R\x06active\x88\x01\x01\x12C\n" +
-	"\aconfigs\x18\x03 \x03(\v2).contrib.api.security.authz.v1.AuthorizerR\aconfigsB\n" +
+	"\b_default\"\x8e\x03\n" +
+	"\x11AuthorizerConfigs\x12p\n" +
+	"\x06active\x18\x01 \x01(\tBS\xbaGP\x92\x02MThe name of the active authorizer to use. Overrides the default if specified.H\x00R\x06active\x88\x01\x01\x12u\n" +
+	"\adefault\x18\x02 \x01(\v2).contrib.api.security.authz.v1.AuthorizerB+\xbaG(\x92\x02%The default authorizer configuration.H\x01R\adefault\x88\x01\x01\x12y\n" +
+	"\aconfigs\x18\x03 \x03(\v2).contrib.api.security.authz.v1.AuthorizerB4\xbaG1\x92\x02.A list of available authorizer configurations.R\aconfigsB\t\n" +
+	"\a_activeB\n" +
 	"\n" +
-	"\b_defaultB\t\n" +
-	"\a_active\"\xb7\x01\n" +
-	"\x18TransportSecurityConfigs\x12\x1d\n" +
-	"\adefault\x18\x01 \x01(\tH\x00R\adefault\x88\x01\x01\x12\x1b\n" +
-	"\x06active\x18\x02 \x01(\tH\x01R\x06active\x88\x01\x01\x12H\n" +
-	"\aconfigs\x18\x03 \x03(\v2..runtime.api.config.transport.tls.v1.TLSConfigR\aconfigsB\n" +
+	"\b_default\"\x98\x03\n" +
+	"\x18TransportSecurityConfigs\x12w\n" +
+	"\x06active\x18\x01 \x01(\tBZ\xbaGW\x92\x02TThe name of the active TLS configuration to use. Overrides the default if specified.H\x00R\x06active\x88\x01\x01\x12s\n" +
+	"\adefault\x18\x02 \x01(\v2..runtime.api.config.transport.tls.v1.TLSConfigB$\xbaG!\x92\x02\x1eThe default TLS configuration.H\x01R\adefault\x88\x01\x01\x12w\n" +
+	"\aconfigs\x18\x03 \x03(\v2..runtime.api.config.transport.tls.v1.TLSConfigB-\xbaG*\x92\x02'A list of available TLS configurations.R\aconfigsB\t\n" +
+	"\a_activeB\n" +
 	"\n" +
-	"\b_defaultB\t\n" +
-	"\a_activeB\xeb\x01\n" +
+	"\b_defaultB\xeb\x01\n" +
 	"\x1bcom.contrib.api.security.v1B\rSecurityProtoP\x01Z>github.com/origadmin/contrib/api/gen/go/security/v1;securityv1\xa2\x02\x03CAS\xaa\x02\x17Contrib.Api.Security.V1\xca\x02\x17Contrib\\Api\\Security\\V1\xe2\x02#Contrib\\Api\\Security\\V1\\GPBMetadata\xea\x02\x1aContrib::Api::Security::V1b\x06proto3"
 
 var (
@@ -327,14 +348,17 @@ var file_security_v1_security_proto_depIdxs = []int32{
 	1, // 0: contrib.api.security.v1.Security.authn:type_name -> contrib.api.security.v1.AuthenticatorConfigs
 	2, // 1: contrib.api.security.v1.Security.authz:type_name -> contrib.api.security.v1.AuthorizerConfigs
 	3, // 2: contrib.api.security.v1.Security.transport_security:type_name -> contrib.api.security.v1.TransportSecurityConfigs
-	4, // 3: contrib.api.security.v1.AuthenticatorConfigs.configs:type_name -> contrib.api.security.authn.v1.Authenticator
-	5, // 4: contrib.api.security.v1.AuthorizerConfigs.configs:type_name -> contrib.api.security.authz.v1.Authorizer
-	6, // 5: contrib.api.security.v1.TransportSecurityConfigs.configs:type_name -> runtime.api.config.transport.tls.v1.TLSConfig
-	6, // [6:6] is the sub-list for method output_type
-	6, // [6:6] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	4, // 3: contrib.api.security.v1.AuthenticatorConfigs.default:type_name -> contrib.api.security.authn.v1.Authenticator
+	4, // 4: contrib.api.security.v1.AuthenticatorConfigs.configs:type_name -> contrib.api.security.authn.v1.Authenticator
+	5, // 5: contrib.api.security.v1.AuthorizerConfigs.default:type_name -> contrib.api.security.authz.v1.Authorizer
+	5, // 6: contrib.api.security.v1.AuthorizerConfigs.configs:type_name -> contrib.api.security.authz.v1.Authorizer
+	6, // 7: contrib.api.security.v1.TransportSecurityConfigs.default:type_name -> runtime.api.config.transport.tls.v1.TLSConfig
+	6, // 8: contrib.api.security.v1.TransportSecurityConfigs.configs:type_name -> runtime.api.config.transport.tls.v1.TLSConfig
+	9, // [9:9] is the sub-list for method output_type
+	9, // [9:9] is the sub-list for method input_type
+	9, // [9:9] is the sub-list for extension type_name
+	9, // [9:9] is the sub-list for extension extendee
+	0, // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_security_v1_security_proto_init() }
@@ -342,6 +366,7 @@ func file_security_v1_security_proto_init() {
 	if File_security_v1_security_proto != nil {
 		return
 	}
+	file_security_v1_security_proto_msgTypes[0].OneofWrappers = []any{}
 	file_security_v1_security_proto_msgTypes[1].OneofWrappers = []any{}
 	file_security_v1_security_proto_msgTypes[2].OneofWrappers = []any{}
 	file_security_v1_security_proto_msgTypes[3].OneofWrappers = []any{}
