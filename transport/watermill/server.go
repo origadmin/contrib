@@ -26,7 +26,7 @@ type Server struct {
 }
 
 // NewServer creates a new Watermill server instance.
-func NewServer(cfg *watermillv1.Watermill, _ ...options.Option) (interfaces.Server, error) {
+func NewServer(cfg *watermillv1.Watermill, _ ...options.Option) (*Server, error) {
 	// TODO: Use a proper logger adapter that bridges runtime/log to watermill.LoggerAdapter
 	logger := watermill.NewStdLogger(false, false)
 
@@ -102,8 +102,8 @@ func (s *Server) AddHandler(
 	}
 }
 
-// AddNoPublishHandler adds a handler that does not publish messages.
-func (s *Server) AddNoPublishHandler(
+// AddConsumerHandler adds a handler that does not publish messages.
+func (s *Server) AddConsumerHandler(
 	handlerName string,
 	subscribeTopic string,
 	handlerFunc message.NoPublishHandlerFunc,

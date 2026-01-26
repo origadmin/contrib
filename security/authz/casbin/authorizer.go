@@ -38,6 +38,7 @@ func init() {
 }
 
 // Authorizer is a struct that implements the Authorizer interface.
+// It also implements the authz.Reloader interface to support dynamic policy updates.
 type Authorizer struct {
 	*Options
 	enforcer   *casbin.SyncedEnforcer
@@ -141,8 +142,27 @@ func newWithOptions(cfg *authzv1.Authorizer, opts ...options.Option) (*Options, 
 	return finalOpts, nil
 }
 
-func (auth *Authorizer) SyncPolicy() error {
-	return auth.watcher.Update()
+// Reload implements the authz.Reloader interface.
+// It triggers the watcher to broadcast a policy change notification.
+// It is the responsibility of the watcher's subscribers to then reload their policies.
+func (auth *Authorizer) Reload() error {
+	if auth.watcher == nil {
+		auth.log.Warn("Casbin watcher is not configured, policy reload notification will not be sent.")
+		// In a single-node setup, we might want to force a local reload.
+		// However, in a distributed setup, this could lead to inconsistencies
+		// if other nodes don't reload. The correct approach is to ensure a watcher is configured.
+		return auth.enforcer.LoadPolicy() // Fallback to local load if no watcher
+	}
+
+	// Trigger the watcher to notify all instances (including this one) to reload the policy.
+	// The actual reload is handled by the callback set within the watcher implementation.
+	if err := auth.watcher.Update(); err != nil {
+		auth.log.Errorf("Failed to broadcast policy update via watcher: %v", err)
+		return err
+	}
+	auth.log.Info("Policy update broadcasted via watcher.")
+
+	return nil
 }
 
 // Authorized checks if a principal is authorized.

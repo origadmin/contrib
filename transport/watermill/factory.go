@@ -19,7 +19,7 @@ type factory struct{}
 // NewServer creates a new Watermill server (consumer).
 func (f *factory) NewServer(cfg *transportv1.Server, opts ...options.Option) (interfaces.Server, error) {
 	// 1. Parse the generic 'customize' field into a strongly-typed Watermill configuration.
-	wmConfig, err := protoutil.NewFromStruct[watermillv1.Watermill](cfg.Customize)
+	wmConfig, err := protoutil.NewFromStruct[watermillv1.Watermill](cfg.Settings)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse watermill config: %w", err)
 	}
@@ -31,7 +31,7 @@ func (f *factory) NewServer(cfg *transportv1.Server, opts ...options.Option) (in
 // NewClient creates a new Watermill client (producer).
 func (f *factory) NewClient(ctx context.Context, cfg *transportv1.Client, opts ...options.Option) (interfaces.Client, error) {
 	// 1. Parse the generic 'customize' field into a strongly-typed Watermill configuration.
-	wmConfig, err := protoutil.NewFromStruct[watermillv1.Watermill](cfg.Customize)
+	wmConfig, err := protoutil.NewFromStruct[watermillv1.Watermill](cfg.Settings)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse watermill config: %w", err)
 	}
