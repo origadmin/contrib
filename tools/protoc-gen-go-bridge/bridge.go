@@ -82,6 +82,7 @@ func genService(_ *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFi
 		g.P("//")
 		g.P(deprecationComment)
 	}
+
 	// HTTP Server.
 	sd := &serviceDesc{
 		ServiceType: service.GoName,
@@ -90,6 +91,17 @@ func genService(_ *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFi
 		Methods:     []*methodDesc{},
 		Prefix:      prefix,
 	}
+
+	// Check if any method in the service has HTTP bindings.
+	// This flag will be used in the template to conditionally generate HTTP-related code.
+	var hasHTTPBindings bool
+	for _, method := range service.Methods {
+		if _, ok := proto.GetExtension(method.Desc.Options(), annotations.E_Http).(*annotations.HttpRule); ok {
+			hasHTTPBindings = true
+			break
+		}
+	}
+	sd.HasHTTPBindings = hasHTTPBindings
 
 	for _, method := range service.Methods {
 		if method.Desc.IsStreamingClient() || method.Desc.IsStreamingServer() {

@@ -15,11 +15,12 @@ import (
 var bridge string
 
 type serviceDesc struct {
-	ServiceType string // Greeter
-	ServiceName string // helloworld.Greeter
-	Metadata    string // api/helloworld/helloworld.proto
-	Methods     []*methodDesc
-	Prefix      string
+	ServiceType     string // Greeter
+	ServiceName     string // helloworld.Greeter
+	Metadata        string // api/helloworld/helloworld.proto
+	Methods         []*methodDesc
+	Prefix          string
+	HasHTTPBindings bool // Add this field
 }
 
 type methodDesc struct {

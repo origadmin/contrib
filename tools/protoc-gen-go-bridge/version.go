@@ -5,4 +5,4 @@
 package main
 
 // version is the current protoc-gen-go-bridge version.
-var version = "unknown"
+var version = "v0.0.2"

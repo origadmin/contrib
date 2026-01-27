@@ -41,6 +41,7 @@ type {{.ServiceType}}HookedBridger interface {
     {{- end}}
 {{- end}}
 
+{{if .HasHTTPBindings}}
 func Register{{.ServiceType}}BridgeServer(s *http.Server, srv {{.ServiceType}}HookedBridger) {
 r := s.Route("{{.Prefix}}")
 {{- range .Methods}}
@@ -86,6 +87,7 @@ r := s.Route("{{.Prefix}}")
 	}
 	{{- end}}
 {{end}}
+{{end}}
 
 // Unimplemented{{.ServiceType}}Hooked must be embedded to have
 // forward compatible implementations.
@@ -122,6 +124,7 @@ type {{.ServiceType}}HookedBridge struct{
 {{.ServiceType}}Hooker
 }
 
+{{if .HasHTTPBindings}}
 type {{.ServiceType}}HTTPBridgeImpl struct {
 		client {{.ServiceType}}HTTPClient
 }
@@ -136,6 +139,7 @@ func New{{.ServiceType}}HTTPBridge(client *http.Client) {{.ServiceType}}HTTPServ
 	   return c.client.{{.Name}}(ctx, in)
 	}
     {{- end}}
+{{end}}
 {{end}}
 
 type {{.ServiceType}}BridgeImpl struct {
@@ -180,6 +184,7 @@ func New{{.ServiceType}}Bridge(client grpc.ClientConnInterface) {{.ServiceType}}
 
 func (c *{{.ServiceType}}BridgeImpl) mustEmbedUnimplemented{{.ServiceType}}Server() {}
 
+{{if .HasHTTPBindings}}
 type {{.ServiceType}}GRPC2HTTPBridgeImpl struct {
 client {{.ServiceType}}Client
 }
@@ -221,3 +226,4 @@ func (c *{{$svrType}}HTTP2GRPCBridgeImpl) {{.Name}}(request *{{.Request}}, g grp
 {{end}}
 
 func (c *{{.ServiceType}}HTTP2GRPCBridgeImpl) mustEmbedUnimplemented{{.ServiceType}}Server() {}
+{{end}}
