@@ -15,7 +15,7 @@ import (
 	policyv1 "github.com/origadmin/contrib/api/gen/go/policy/v1" // Corrected import path
 )
 
-const version = "1.0.8"
+const version = "1.1.0"
 
 var showVersion = flag.Bool("version", false, "print the version and exit")
 
@@ -92,7 +92,7 @@ func generateFile(gen *protogen.Plugin, file *protogen.File) {
 
 	// Add necessary imports.
 	g.P("import (")
-	g.P(`	security "github.com/origadmin/contrib/security"`)
+	g.P(`	security "github.com/origadmin/runtime/security"`)
 	g.P(")")
 	g.P()
 
