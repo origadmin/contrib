@@ -95,13 +95,18 @@ func genService(_ *protogen.Plugin, file *protogen.File, g *protogen.GeneratedFi
 	// Check if any method in the service has HTTP bindings.
 	// This flag will be used in the template to conditionally generate HTTP-related code.
 	var hasHTTPBindings bool
+	var hasRoutableMethods bool
 	for _, method := range service.Methods {
-		if _, ok := proto.GetExtension(method.Desc.Options(), annotations.E_Http).(*annotations.HttpRule); ok {
+		rule, ok := proto.GetExtension(method.Desc.Options(), annotations.E_Http).(*annotations.HttpRule)
+		if ok && rule != nil {
 			hasHTTPBindings = true
-			break
+			if !method.Desc.IsStreamingClient() && !method.Desc.IsStreamingServer() {
+				hasRoutableMethods = true
+			}
 		}
 	}
 	sd.HasHTTPBindings = hasHTTPBindings
+	sd.HasRoutableMethods = hasRoutableMethods
 
 	for _, method := range service.Methods {
 		if method.Desc.IsStreamingClient() || method.Desc.IsStreamingServer() {

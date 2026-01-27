@@ -41,7 +41,7 @@ type {{.ServiceType}}HookedBridger interface {
     {{- end}}
 {{- end}}
 
-{{if .HasHTTPBindings}}
+{{if .HasRoutableMethods}}
 func Register{{.ServiceType}}BridgeServer(s *http.Server, srv {{.ServiceType}}HookedBridger) {
 r := s.Route("{{.Prefix}}")
 {{- range .Methods}}

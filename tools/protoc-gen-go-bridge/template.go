@@ -15,12 +15,13 @@ import (
 var bridge string
 
 type serviceDesc struct {
-	ServiceType     string // Greeter
-	ServiceName     string // helloworld.Greeter
-	Metadata        string // api/helloworld/helloworld.proto
-	Methods         []*methodDesc
-	Prefix          string
-	HasHTTPBindings bool // Add this field
+	ServiceType        string // Greeter
+	ServiceName        string // helloworld.Greeter
+	Metadata           string // api/helloworld/helloworld.proto
+	Methods            []*methodDesc
+	Prefix             string
+	HasHTTPBindings    bool // If true, generate HTTP-related code (interfaces, structs)
+	HasRoutableMethods bool // If true, generate Register... function with routes
 }
 
 type methodDesc struct {
