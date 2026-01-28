@@ -8,7 +8,7 @@ import (
 	"github.com/ThreeDotsLabs/watermill/message"
 
 	"github.com/origadmin/runtime/api/gen/go/config/transport/watermill/v1"
-	"github.com/origadmin/runtime/broker"
+	runtimebroker "github.com/origadmin/runtime/broker"
 	"github.com/origadmin/runtime/log"
 )
 
