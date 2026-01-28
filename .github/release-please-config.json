@@ -3,7 +3,11 @@
     ".": {
       "component": "contrib",
       "release-type": "go",
-      "version-file": "go.mod"
+      "version-file": "go.mod",
+      "ignore-paths": [
+        "transport/watermill",
+        "tools"
+      ]
     },
     "transport/watermill": {
       "component": "transport-watermill",
