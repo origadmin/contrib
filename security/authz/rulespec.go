@@ -13,6 +13,13 @@ const (
 	ActionAny    = "*"
 )
 
+// RoleSpec encapsulates the specification of a role assignment.
+type RoleSpec struct {
+	Role       string          // The name of the role.
+	Domain     string          // The domain/tenant where this role applies. Optional.
+	Attributes security.Claims // Optional attributes associated with the role assignment.
+}
+
 // RuleSpec encapsulates the specification of an authorization rule to be checked.
 // It is a pure data container that describes the core elements required for authorization checks.
 type RuleSpec struct {
