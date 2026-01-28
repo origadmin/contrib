@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.4.0](https://github.com/origadmin/contrib/compare/v1.3.0...v1.4.0) (2026-01-28)
+
+
+### Features
+
+* **authz:** add dynamic policy reload support and policy modification interface ([4d22c5b](https://github.com/origadmin/contrib/commit/4d22c5b1d708ef9a8e7b657348a62d476cee6d89))
+* **broker:** add Watermill publisher and subscriber implementations ([abbbd14](https://github.com/origadmin/contrib/commit/abbbd14ff435c0213eeaf7a66bb9f0f19802b57a))
+* **deps:** add Watermill broker adapter and improve registry interfaces ([28fc4e4](https://github.com/origadmin/contrib/commit/28fc4e41e6b523e9da8ca1a43f9bbf7936c12f37))
+* **security:** deprecate SkipChecker type in favor of Skipper with clear deprecation notice ([1290922](https://github.com/origadmin/contrib/commit/1290922b5fdd6cbba77efcdc464635f5c5c89827))
+* **security:** refactor principal context handling and skip logic into security package ([ab81a24](https://github.com/origadmin/contrib/commit/ab81a24ad33c7d4e3bef85fcc3fe37c2e78c0a53))
+* **transport:** add Watermill transport implementation and authz enhancements ([2286e07](https://github.com/origadmin/contrib/commit/2286e07142fe2173acd8b0054c7c62bc5bccf33f))
+
+
+### Bug Fixes
+
+* **generate:** add support for non-streaming HTTP methods in protoc-gen-go-bridge ([b5928c9](https://github.com/origadmin/contrib/commit/b5928c9ee6b838b1262c6b15a491603405db28a5))
+* **generate:** conditionally generate HTTP bridge code based on bindings ([23c2a29](https://github.com/origadmin/contrib/commit/23c2a29b2f5a06c21c93a77597d6297aff2f1c4a))
+
 ## [1.3.0](https://github.com/origadmin/contrib/compare/v1.2.0...v1.3.0) (2026-01-13)
 
 
