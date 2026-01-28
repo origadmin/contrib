@@ -12,9 +12,11 @@ import (
 	"github.com/ThreeDotsLabs/watermill/message/router/middleware"
 	"github.com/redis/go-redis/v9"
 
+	contribwatermill "github.com/origadmin/contrib/broker/watermill"
 	watermillv1 "github.com/origadmin/runtime/api/gen/go/config/transport/watermill/v1"
 	"github.com/origadmin/runtime/interfaces"
 	"github.com/origadmin/runtime/interfaces/options"
+	"github.com/origadmin/runtime/log"
 )
 
 // Server implements interfaces.Server for Watermill.
@@ -26,18 +28,19 @@ type Server struct {
 }
 
 // NewServer creates a new Watermill server instance.
-func NewServer(cfg *watermillv1.Watermill, _ ...options.Option) (*Server, error) {
-	// TODO: Use a proper logger adapter that bridges runtime/log to watermill.LoggerAdapter
-	logger := watermill.NewStdLogger(false, false)
+func NewServer(cfg *watermillv1.Watermill, opts ...options.Option) (*Server, error) {
+	// Get logger from options and adapt to watermill
+	logger := log.FromOptions(opts)
+	wmLogger := contribwatermill.NewLoggerAdapter(logger)
 
 	// 1. Create Subscriber based on config
-	sub, err := createSubscriber(cfg, logger)
+	sub, err := createSubscriber(cfg, wmLogger)
 	if err != nil {
 		return nil, err
 	}
 
 	// 2. Create Router
-	router, err := message.NewRouter(message.RouterConfig{}, logger)
+	router, err := message.NewRouter(message.RouterConfig{}, wmLogger)
 	if err != nil {
 		// Ensure subscriber is closed if router creation fails
 		_ = sub.Close()
@@ -53,7 +56,7 @@ func NewServer(cfg *watermillv1.Watermill, _ ...options.Option) (*Server, error)
 	return &Server{
 		router:     router,
 		subscriber: sub,
-		logger:     logger,
+		logger:     wmLogger,
 	}, nil
 }
 
@@ -154,14 +157,8 @@ func createSubscriber(cfg *watermillv1.Watermill, logger watermill.LoggerAdapter
 		natsConfig := nats.SubscriberConfig{
 			URL: cfg.Broker.Nats.Address,
 		}
-		// TODO: Check if QueueGroup is supported in your version of watermill-nats
-		// if cfg.Broker.Nats.QueueGroup != nil {
-		// 	natsConfig.QueueGroup = *cfg.Broker.Nats.QueueGroup
-		// }
 		if cfg.Broker.Nats.JetstreamEnabled != nil && *cfg.Broker.Nats.JetstreamEnabled {
-			natsConfig.JetStream = nats.JetStreamConfig{
-				// Configure JetStream options if needed
-			}
+			natsConfig.JetStream = nats.JetStreamConfig{}
 		}
 		return nats.NewSubscriber(natsConfig, logger)
 

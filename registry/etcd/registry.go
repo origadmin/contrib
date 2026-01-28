@@ -15,10 +15,10 @@ type factory struct {
 }
 
 func init() {
-	registry.Register(Type, &factory{})
+	discovery.Register(Type, &factory{})
 }
 
-func (c *factory) NewDiscovery(cfg *discoveryv1.Discovery, opts ...options.Option) (registry.KDiscovery, error) {
+func (c *factory) NewDiscovery(cfg *discoveryv1.Discovery, opts ...options.Option) (discovery.KDiscovery, error) {
 	if cfg.GetEtcd() == nil {
 		return nil, errors.New("etcd config is nil")
 	}
@@ -31,7 +31,7 @@ func (c *factory) NewDiscovery(cfg *discoveryv1.Discovery, opts ...options.Optio
 	return r, nil
 }
 
-func (c *factory) NewRegistrar(cfg *discoveryv1.Discovery, opts ...options.Option) (registry.KRegistrar, error) {
+func (c *factory) NewRegistrar(cfg *discoveryv1.Discovery, opts ...options.Option) (discovery.KRegistrar, error) {
 	if cfg.GetEtcd() == nil {
 		return nil, errors.New("etcd config is nil")
 	}

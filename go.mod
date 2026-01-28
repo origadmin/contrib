@@ -3,6 +3,7 @@ module github.com/origadmin/contrib
 go 1.25.5
 
 require (
+	github.com/ThreeDotsLabs/watermill v1.5.1
 	github.com/bufbuild/buf v1.64.0
 	github.com/casbin/casbin/v3 v3.9.0
 	github.com/dchest/uniuri v1.2.0
@@ -19,8 +20,8 @@ require (
 	github.com/google/gnostic v0.7.1
 	github.com/google/wire v0.7.0
 	github.com/hashicorp/consul/api v1.33.2
-	github.com/origadmin/runtime v0.2.15
-	github.com/origadmin/toolkits/errors v1.1.0
+	github.com/origadmin/runtime v0.2.18
+	github.com/origadmin/toolkits/errors v1.4.0
 	github.com/stretchr/testify v1.11.1
 	go.etcd.io/etcd/client/v3 v3.5.11
 	google.golang.org/genproto/googleapis/api v0.0.0-20260114163908-3f89685c29c3
@@ -121,6 +122,7 @@ require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/klauspost/compress v1.18.3 // indirect
 	github.com/klauspost/pgzip v1.2.6 // indirect
+	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/lmittmann/tint v1.1.2 // indirect
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20251013123823-9fd1530e3ec3 // indirect
@@ -138,10 +140,11 @@ require (
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/termenv v0.16.0 // indirect
+	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
 	github.com/origadmin/slog-kratos v1.0.5 // indirect
-	github.com/origadmin/toolkits/slogx v1.1.0 // indirect
+	github.com/origadmin/toolkits/slogx v1.4.0 // indirect
 	github.com/petermattis/goid v0.0.0-20260113132338-7c7de50cc741 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect

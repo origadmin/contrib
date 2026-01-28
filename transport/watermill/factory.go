@@ -29,7 +29,7 @@ func (f *factory) NewServer(cfg *transportv1.Server, opts ...options.Option) (in
 }
 
 // NewClient creates a new Watermill client (producer).
-func (f *factory) NewClient(ctx context.Context, cfg *transportv1.Client, opts ...options.Option) (interfaces.Client, error) {
+func (f *factory) NewClient(_ context.Context, cfg *transportv1.Client, opts ...options.Option) (interfaces.Client, error) {
 	// 1. Parse the generic 'customize' field into a strongly-typed Watermill configuration.
 	wmConfig, err := protoutil.NewFromStruct[watermillv1.Watermill](cfg.Settings)
 	if err != nil {

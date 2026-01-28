@@ -10,9 +10,11 @@ import (
 	"github.com/ThreeDotsLabs/watermill/message"
 	"github.com/redis/go-redis/v9"
 
+	contribwatermill "github.com/origadmin/contrib/broker/watermill"
 	watermillv1 "github.com/origadmin/runtime/api/gen/go/config/transport/watermill/v1"
 	"github.com/origadmin/runtime/interfaces"
 	"github.com/origadmin/runtime/interfaces/options"
+	"github.com/origadmin/runtime/log"
 )
 
 // Client implements interfaces.Client for Watermill.
@@ -23,17 +25,19 @@ type Client struct {
 }
 
 // NewClient creates a new Watermill client (producer).
-func NewClient(cfg *watermillv1.Watermill, _ ...options.Option) (interfaces.Client, error) {
-	logger := watermill.NewStdLogger(false, false)
+func NewClient(cfg *watermillv1.Watermill, opts ...options.Option) (interfaces.Client, error) {
+	// Get logger from options and adapt to watermill
+	logger := log.FromOptions(opts)
+	wmLogger := contribwatermill.NewLoggerAdapter(logger)
 
-	pub, err := createPublisher(cfg, logger)
+	pub, err := createPublisher(cfg, wmLogger)
 	if err != nil {
 		return nil, err
 	}
 
 	return &Client{
 		publisher: pub,
-		logger:    logger,
+		logger:    wmLogger,
 	}, nil
 }
 
@@ -85,11 +89,8 @@ func createPublisher(cfg *watermillv1.Watermill, logger watermill.LoggerAdapter)
 		natsConfig := nats.PublisherConfig{
 			URL: cfg.Broker.Nats.Address,
 		}
-		// Check if JetstreamEnabled is set and true
 		if cfg.Broker.Nats.JetstreamEnabled != nil && *cfg.Broker.Nats.JetstreamEnabled {
-			natsConfig.JetStream = nats.JetStreamConfig{
-				// Configure JetStream options if needed
-			}
+			natsConfig.JetStream = nats.JetStreamConfig{}
 		}
 		return nats.NewPublisher(natsConfig, logger)
 
