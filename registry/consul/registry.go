@@ -19,7 +19,7 @@ type factory struct{}
 
 func init() {
 	// The const 'Type' is defined in 'consul.go' as `const Type = "consul"`.
-	discovery.Register(Type, &factory{})
+	registry.Register(Type, &factory{})
 }
 
 // newClient creates a new Consul API client from the given configuration.
@@ -103,7 +103,7 @@ func buildKratosOptions(consulCfg *discoveryv1.Consul, opts ...options.Option) [
 }
 
 // NewDiscovery creates a new Consul discovery component.
-func (f *factory) NewDiscovery(cfg *discoveryv1.Discovery, opts ...options.Option) (discovery.KDiscovery, error) {
+func (f *factory) NewDiscovery(cfg *discoveryv1.Discovery, opts ...options.Option) (registry.KDiscovery, error) {
 	if cfg.GetConsul() == nil {
 		return nil, errors.New("discovery configuration is missing")
 	}
@@ -117,7 +117,7 @@ func (f *factory) NewDiscovery(cfg *discoveryv1.Discovery, opts ...options.Optio
 }
 
 // NewRegistrar creates a new Consul registrar component.
-func (f *factory) NewRegistrar(cfg *discoveryv1.Discovery, opts ...options.Option) (discovery.KRegistrar, error) {
+func (f *factory) NewRegistrar(cfg *discoveryv1.Discovery, opts ...options.Option) (registry.KRegistrar, error) {
 	if cfg.GetConsul() == nil {
 		return nil, errors.New("discovery configuration is missing")
 	}
