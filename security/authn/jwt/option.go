@@ -21,8 +21,6 @@ import (
 )
 
 const (
-	// DefaultIssuer is the default issuer for JWT tokens.
-	DefaultIssuer = "origadmin"
 	// DefaultAccessTokenTTL is the default time-to-live for access tokens.
 	DefaultAccessTokenTTL = 2 * time.Hour
 	// DefaultRefreshTokenTTL is the default time-to-live for refresh tokens.

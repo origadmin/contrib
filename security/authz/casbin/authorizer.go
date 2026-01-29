@@ -22,10 +22,7 @@ import (
 )
 
 const (
-	DefaultWildcardItem       = "*"
-	authModeFastPathNonDomain = 0
-	authModeFastPathDomain    = 1
-	authModeDynamic           = 2
+	DefaultWildcardItem = "*"
 )
 
 var (
@@ -37,15 +34,19 @@ func init() {
 	authz.Register(authz.Casbin, authz.FactoryFunc(NewAuthorizer))
 }
 
+// preparerArgsFunc defines the function signature for preparing authorization arguments.
+// It abstracts the logic for constructing the arguments for different casbin models
+// (e.g., with or without domain) into a single, callable function.
+type preparerArgsFunc func(principal security.Principal, spec authz.RuleSpec) []interface{}
+
 // Authorizer is a struct that implements the Authorizer interface.
-// It also implements the authz.Reloader interface to support dynamic policy updates.
+// It acts as a pure enforcement engine that trusts the incoming RuleSpec.
 type Authorizer struct {
 	*Options
-	enforcer   *casbin.SyncedEnforcer
-	hasDomain  bool
-	authMode   int
-	argIndices []int
-	log        *log.Helper
+	enforcer     *casbin.SyncedEnforcer
+	hasDomain    bool
+	preparerArgs preparerArgsFunc
+	log          *log.Helper
 }
 
 // NewOptions creates a new Options object from the given configuration and functional options.
@@ -143,19 +144,12 @@ func newWithOptions(cfg *authzv1.Authorizer, opts ...options.Option) (*Options, 
 }
 
 // Reload implements the authz.Reloader interface.
-// It triggers the watcher to broadcast a policy change notification.
-// It is the responsibility of the watcher's subscribers to then reload their policies.
 func (auth *Authorizer) Reload() error {
 	if auth.watcher == nil {
 		auth.log.Warn("Casbin watcher is not configured, policy reload notification will not be sent.")
-		// In a single-node setup, we might want to force a local reload.
-		// However, in a distributed setup, this could lead to inconsistencies
-		// if other nodes don't reload. The correct approach is to ensure a watcher is configured.
-		return auth.enforcer.LoadPolicy() // Fallback to local load if no watcher
+		return auth.enforcer.LoadPolicy()
 	}
 
-	// Trigger the watcher to notify all instances (including this one) to reload the policy.
-	// The actual reload is handled by the callback set within the watcher implementation.
 	if err := auth.watcher.Update(); err != nil {
 		auth.log.Errorf("Failed to broadcast policy update via watcher: %v", err)
 		return err
@@ -165,53 +159,21 @@ func (auth *Authorizer) Reload() error {
 	return nil
 }
 
-// Authorized checks if a principal is authorized.
+// Authorized checks if a principal is authorized by preparing the arguments and then enforcing the policy.
 func (auth *Authorizer) Authorized(ctx context.Context, principal security.Principal, spec authz.RuleSpec) (bool, error) {
-	var allowed bool
-	var err error
+	args := auth.preparerArgs(principal, spec)
+	auth.log.WithContext(ctx).Debugf("[AuthZ] Enforcing with args: %v", args)
 
-	switch auth.authMode {
-	case authModeFastPathNonDomain:
-		args := []interface{}{principal.GetID(), spec.Resource, spec.Action}
-		auth.log.WithContext(ctx).Debugf("[AuthZ] Enforcing with: sub=%v, obj=%v, act=%v", args...)
-		allowed, err = auth.enforcer.Enforce(args...)
-
-	case authModeFastPathDomain:
-		domain := spec.Domain
-		if len(domain) == 0 {
-			domain = auth.wildcardItem
-		}
-		args := []interface{}{principal.GetID(), domain, spec.Resource, spec.Action}
-		auth.log.WithContext(ctx).Debugf("[AuthZ] Enforcing with: sub=%v, dom=%v, obj=%v, act=%v", args...)
-		allowed, err = auth.enforcer.Enforce(args...)
-
-	case authModeDynamic:
-		domain := spec.Domain
-		if auth.hasDomain && len(domain) == 0 {
-			domain = auth.wildcardItem
-		}
-		sourceArgs := [4]interface{}{principal.GetID(), domain, spec.Resource, spec.Action}
-		args := make([]interface{}, len(auth.argIndices))
-		for i, idx := range auth.argIndices {
-			args[i] = sourceArgs[idx]
-		}
-		auth.log.WithContext(ctx).Debugf("[AuthZ] Enforcing with dynamic args: %v", args)
-		allowed, err = auth.enforcer.Enforce(args...)
-
-	default:
-		return false, fmt.Errorf("internal error: invalid authorization mode")
-	}
-
+	allowed, err := auth.enforcer.Enforce(args...)
 	if err != nil {
 		auth.log.WithContext(ctx).Errorf("[AuthZ] Enforcement failed with error: %v", err)
 		return false, err
 	}
-
-	// No log on failure, as the middleware already logs the denial.
 	return allowed, nil
 }
 
-// initEnforcer acts as a one-time parser to determine the optimal authorization strategy.
+// initEnforcer acts as a one-time parser to determine the optimal authorization strategy
+// and sets the preparerArgsFunc accordingly.
 func (auth *Authorizer) initEnforcer() error {
 	if auth.Options == nil {
 		return fmt.Errorf("authorizer options not initialized")
@@ -222,8 +184,6 @@ func (auth *Authorizer) initEnforcer() error {
 		return fmt.Errorf("failed to create casbin enforcer: %w", err)
 	}
 	auth.enforcer = enforcer
-
-	auth.authMode = authModeDynamic
 
 	r, ok := auth.model["r"]
 	if !ok {
@@ -241,31 +201,32 @@ func (auth *Authorizer) initEnforcer() error {
 	}
 
 	if slicesEqual(trimmedTokens, fastPathNonDomainTokens) {
-		auth.authMode = authModeFastPathNonDomain
 		auth.hasDomain = false
 		auth.log.Debug("Using fast path for non-domain model.")
+		auth.preparerArgs = auth.nonDomainArgs
 	} else if slicesEqual(trimmedTokens, fastPathDomainTokens) {
-		auth.authMode = authModeFastPathDomain
 		auth.hasDomain = true
 		auth.log.Debug("Using fast path for domain model.")
+		auth.preparerArgs = auth.domainArgs
 	} else {
 		auth.log.Debug("Using dynamic path for custom model.")
-		auth.argIndices = make([]int, 0, len(trimmedTokens))
+		argIndices := make([]int, 0, len(trimmedTokens))
 		for _, token := range trimmedTokens {
 			switch token {
 			case "sub":
-				auth.argIndices = append(auth.argIndices, 0)
+				argIndices = append(argIndices, 0)
 			case "dom":
-				auth.argIndices = append(auth.argIndices, 1)
+				argIndices = append(argIndices, 1)
 				auth.hasDomain = true
 			case "obj":
-				auth.argIndices = append(auth.argIndices, 2)
+				argIndices = append(argIndices, 2)
 			case "act":
-				auth.argIndices = append(auth.argIndices, 3)
+				argIndices = append(argIndices, 3)
 			default:
 				return fmt.Errorf("unrecognized token '%s' in casbin model", token)
 			}
 		}
+		auth.preparerArgs = auth.dynamicArgs(argIndices)
 	}
 
 	if auth.watcher != nil {
@@ -276,6 +237,36 @@ func (auth *Authorizer) initEnforcer() error {
 	}
 
 	return nil
+}
+
+// nonDomainArgs prepares arguments for models without domains.
+func (auth *Authorizer) nonDomainArgs(principal security.Principal, spec authz.RuleSpec) []interface{} {
+	return []interface{}{principal.GetID(), spec.Resource, spec.Action}
+}
+
+// domainArgs prepares arguments for models with domains.
+func (auth *Authorizer) domainArgs(principal security.Principal, spec authz.RuleSpec) []interface{} {
+	domain := spec.Domain
+	if domain == "" {
+		domain = auth.wildcardItem
+	}
+	return []interface{}{principal.GetID(), domain, spec.Resource, spec.Action}
+}
+
+// dynamicArgs returns an preparerArgsFunc for custom models.
+func (auth *Authorizer) dynamicArgs(argIndices []int) preparerArgsFunc {
+	return func(principal security.Principal, spec authz.RuleSpec) []interface{} {
+		domain := spec.Domain
+		if auth.hasDomain && domain == "" {
+			domain = auth.wildcardItem
+		}
+		sourceArgs := [4]interface{}{principal.GetID(), domain, spec.Resource, spec.Action}
+		args := make([]interface{}, len(argIndices))
+		for i, idx := range argIndices {
+			args[i] = sourceArgs[idx]
+		}
+		return args
+	}
 }
 
 // slicesEqual performs a manual, efficient comparison of two string slices.

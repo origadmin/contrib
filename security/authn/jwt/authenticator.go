@@ -49,7 +49,7 @@ func New(opts *Options, logger log.Logger) (*Authenticator, error) {
 		log:               helper,
 	}
 
-	auth.log.Debugf("JWT Authenticator initialized with issuer: %s", auth.issuer)
+	auth.log.Debugf("JWT Authenticator initialized with issuer validation: '%s' (empty means skip)", auth.issuer)
 
 	return auth, nil
 }
@@ -82,7 +82,6 @@ func (a *Authenticator) Authenticate(ctx context.Context, cred security.Credenti
 
 	claims, err := a.parseAndValidateToken(ctx, tokenStr, false)
 	if err != nil {
-		// The parse function already logs the specific error, no need for duplicate logging.
 		return nil, err
 	}
 
@@ -109,7 +108,7 @@ func (a *Authenticator) Authenticate(ctx context.Context, cred security.Credenti
 
 	p := securityPrincipal.New(
 		claims.Subject,
-		securityPrincipal.WithDomain(a.issuer),
+		securityPrincipal.WithDomain(claims.Issuer),
 		securityPrincipal.WithRoles(claims.Roles),
 		securityPrincipal.WithPermissions(claims.Permissions),
 		securityPrincipal.WithScopes(claims.Scopes),
@@ -178,13 +177,11 @@ func (a *Authenticator) CreateCredential(ctx context.Context, p security.Princip
 
 // RefreshCredential issues a new credential based on a valid refresh token.
 func (a *Authenticator) RefreshCredential(ctx context.Context, refreshToken string) (security.CredentialResponse, error) {
-	// 1. Parse and validate the refresh token.
 	claims, err := a.parseAndValidateToken(ctx, refreshToken, false)
 	if err != nil {
 		return nil, err
 	}
 
-	// 2. Check if the refresh token has been revoked.
 	if a.cache != nil {
 		if claims.ID == "" {
 			return nil, securityv1.ErrorClaimsInvalid("missing 'jti' claim in refresh token")
@@ -198,24 +195,19 @@ func (a *Authenticator) RefreshCredential(ctx context.Context, refreshToken stri
 		}
 	}
 
-	// 3. Ensure the subject exists.
 	if claims.Subject == "" {
 		return nil, securityv1.ErrorClaimsInvalid("missing 'sub' claim in refresh token")
 	}
 
-	// 4. Create a Principal from the refresh token claims.
-	// Note: We trust the claims in the valid refresh token.
 	p := securityPrincipal.New(
 		claims.Subject,
-		securityPrincipal.WithDomain(a.issuer),
+		securityPrincipal.WithDomain(claims.Issuer),
 		securityPrincipal.WithRoles(claims.Roles),
 		securityPrincipal.WithPermissions(claims.Permissions),
 		securityPrincipal.WithScopes(claims.Scopes),
 		securityPrincipal.WithClaims(claims),
 	)
 
-	// 5. Issue a new credential (access token + new refresh token).
-	// This automatically handles generating new IDs, expiration times, etc.
 	return a.CreateCredential(ctx, p)
 }
 
@@ -279,8 +271,10 @@ func (a *Authenticator) isTokenRevoked(ctx context.Context, tokenID string) (boo
 func (a *Authenticator) parseAndValidateToken(ctx context.Context, tokenStr string, skipExpCheck bool) (*Claims, error) {
 	claims := &Claims{}
 	parserOpts := []jwtv5.ParserOption{
-		jwtv5.WithIssuer(a.issuer),
 		jwtv5.WithTimeFunc(a.clock),
+	}
+	if a.issuer != "" {
+		parserOpts = append(parserOpts, jwtv5.WithIssuer(a.issuer))
 	}
 	if !a.skipAudienceCheck {
 		parserOpts = append(parserOpts, jwtv5.WithAudience(a.audience...))
@@ -296,8 +290,6 @@ func (a *Authenticator) parseAndValidateToken(ctx context.Context, tokenStr stri
 		return nil, mapJWTError(err)
 	}
 
-	// No need to check parsedToken.Valid as the parser options handle all validations.
-	// If err is nil, the token is valid.
 	a.log.WithContext(ctx).Debug("Token is valid.")
 	return claims, nil
 }
@@ -361,8 +353,6 @@ func newWithOptions(cfg *authnv1.Authenticator, opts ...Option) (*Options, error
 	if finalOpts.issuer == "" {
 		if configProvided && jwtCfg.Issuer != "" {
 			finalOpts.issuer = jwtCfg.Issuer
-		} else {
-			finalOpts.issuer = DefaultIssuer
 		}
 	}
 
@@ -402,9 +392,9 @@ func newWithOptions(cfg *authnv1.Authenticator, opts ...Option) (*Options, error
 
 // Interface compliance checks.
 var (
-	_ authn.Authenticator        = (*Authenticator)(nil)
-	_ securityCredential.Creator = (*Authenticator)(nil)
-	_ securityCredential.Revoker = (*Authenticator)(nil)
+	_ authn.Authenticator          = (*Authenticator)(nil)
+	_ securityCredential.Creator   = (*Authenticator)(nil)
+	_ securityCredential.Revoker   = (*Authenticator)(nil)
 	_ securityCredential.Refresher = (*Authenticator)(nil)
-	_ security.Claims            = (*Claims)(nil)
+	_ security.Claims              = (*Claims)(nil)
 )

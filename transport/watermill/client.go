@@ -90,7 +90,11 @@ func createPublisher(cfg *watermillv1.Watermill, logger watermill.LoggerAdapter)
 			URL: cfg.Broker.Nats.Address,
 		}
 		if cfg.Broker.Nats.JetstreamEnabled != nil && *cfg.Broker.Nats.JetstreamEnabled {
-			natsConfig.JetStream = nats.JetStreamConfig{}
+			natsConfig.JetStream = nats.JetStreamConfig{
+				Disabled: !cfg.Broker.Nats.GetJetstreamEnabled(),
+				//AutoProvision: cfg.Broker.Nats.GetJetstreamEnabled() && cfg.Broker.Nats.GetAutoProvision(),
+				AutoProvision: cfg.Broker.Nats.GetJetstreamEnabled(),
+			}
 		}
 		return nats.NewPublisher(natsConfig, logger)
 
