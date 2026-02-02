@@ -52,5 +52,6 @@ type PolicyModifier interface {
 	// Use with caution: this cannot be undone.
 	// Examples:
 	// - ClearPolicies(ctx, "user1"): Removes all policies for user1 across all domains.
-	ClearPolicies(ctx context.Context, subject string) (bool, error)
+	// - ClearPolicies(ctx): Removes all policies for all subjects across all domains.
+	ClearPolicies(ctx context.Context, subjects ...string) (bool, error)
 }
