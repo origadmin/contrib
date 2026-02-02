@@ -36,6 +36,9 @@ func newMiddleware(opts *Options) *Middleware {
 	if m.Skipper == nil {
 		m.Skipper = skip.Noop()
 	}
+	if m.RuleSpec == nil {
+		m.RuleSpec = authz.NewRuleSpec
+	}
 	return m
 }
 
@@ -61,7 +64,7 @@ func (m *Middleware) Server() middleware.KMiddleware {
 				return nil, securityv1.ErrorCredentialsInvalid("principal not found in context")
 			}
 
-			ruleSpec := authz.NewRuleSpec(principal, securityReq)
+			ruleSpec := m.RuleSpec(ctx, principal, securityReq)
 			// This is the most critical log for debugging permissions.
 			m.log.WithContext(ctx).Debugf("[AuthZ] Checking: Principal=%s, Domain=%s, Resource=%s, Action=%s", principal.GetID(), ruleSpec.Domain, ruleSpec.Resource, ruleSpec.Action)
 

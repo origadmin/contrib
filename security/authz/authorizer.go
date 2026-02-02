@@ -44,4 +44,13 @@ type PolicyModifier interface {
 	// UpdatePermission updates a single permission grant for a subject.
 	// This is an atomic operation that replaces the old permission specification with the new one.
 	UpdatePermission(ctx context.Context, subject string, oldPerm RuleSpec, newPerm RuleSpec) (bool, error)
+
+	// ClearPolicies removes all policies (both roles and permissions) for a subject.
+	// This is a comprehensive cleanup operation that removes:
+	// - All role assignments (g-rules) for the subject
+	// - All permission grants (p-rules) for the subject
+	// Use with caution: this cannot be undone.
+	// Examples:
+	// - ClearPolicies(ctx, "user1"): Removes all policies for user1 across all domains.
+	ClearPolicies(ctx context.Context, subject string) (bool, error)
 }

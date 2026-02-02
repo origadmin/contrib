@@ -2,6 +2,7 @@ package authz
 
 import (
 	"github.com/origadmin/contrib/security"
+	"github.com/origadmin/runtime/context"
 )
 
 // Define standard authorization actions as constants.
@@ -33,7 +34,7 @@ type RuleSpec struct {
 
 // NewRuleSpec creates an authz.RuleSpec from a principal and a security.Request.
 // It maps HTTP methods to standard authorization actions (read, create, update, delete).
-func NewRuleSpec(p security.Principal, req security.Request) RuleSpec {
+func NewRuleSpec(_ context.Context, p security.Principal, req security.Request) RuleSpec {
 	ruleSpec := RuleSpec{
 		Resource: req.GetOperation(),
 	}

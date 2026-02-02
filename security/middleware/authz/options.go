@@ -4,6 +4,7 @@ import (
 	"github.com/origadmin/contrib/security"
 	"github.com/origadmin/contrib/security/authz"
 	"github.com/origadmin/contrib/security/skip"
+	"github.com/origadmin/runtime/context"
 	"github.com/origadmin/runtime/extensions/optionutil"
 	"github.com/origadmin/runtime/interfaces/options"
 	"github.com/origadmin/runtime/log"
@@ -12,8 +13,19 @@ import (
 // Options holds configurations for the authz middleware.
 type Options struct {
 	Authorizer authz.Authorizer
+	RuleSpec   RuleSpecFunc
 	Skipper    security.Skipper
 	Logger     log.Logger
+}
+
+// RuleSpecFunc is a function that returns a RuleSpec for a given request.
+type RuleSpecFunc func(ctx context.Context, p security.Principal, req security.Request) authz.RuleSpec
+
+// WithRuleSpec provides a RuleSpecFunc via a runtime option.
+func WithRuleSpec(ruleSpecFunc RuleSpecFunc) options.Option {
+	return optionutil.Update(func(o *Options) {
+		o.RuleSpec = ruleSpecFunc
+	})
 }
 
 // WithAuthorizer provides an Authorizer via a runtime option.

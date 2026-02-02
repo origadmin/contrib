@@ -34,8 +34,9 @@ func NewFactory(propType ...principal.PropagationType) *Factory {
 // NewGateway creates a server-side middleware for services that act as a gateway.
 // It performs authentication and then propagates the resulting principal.
 // It does not perform authorization.
-func (f *Factory) NewGateway(authenticator authn.Authenticator, skipChecker security.Skipper) middleware.KMiddleware {
+func (f *Factory) NewGateway(authenticator authn.Authenticator, skipChecker security.Skipper, opts ...options.Option) middleware.KMiddleware {
 	authnOpts := []options.Option{authnMw.WithSkipper(skipChecker)}
+	authnOpts = append(authnOpts, opts...)
 	authnMW := authnMw.New(authenticator, authnOpts...)
 	// Gateway mode authenticates and then implicitly relies on the transport to propagate.
 	return authnMW.Server()
@@ -44,10 +45,11 @@ func (f *Factory) NewGateway(authenticator authn.Authenticator, skipChecker secu
 // NewBackend creates a server-side middleware for backend services.
 // It expects a principal to be propagated in the context (using the factory's propagation type)
 // and performs authorization based on it.
-func (f *Factory) NewBackend(authorizer authz.Authorizer, skipChecker security.Skipper) middleware.KMiddleware {
+func (f *Factory) NewBackend(authorizer authz.Authorizer, skipChecker security.Skipper, opts ...options.Option) middleware.KMiddleware {
 	authzOpts := []options.Option{authzMw.WithSkipper(skipChecker)}
+	authzOpts = append(authzOpts, opts...)
 	propagationOpts := []options.Option{propagationMw.WithPropagationType(f.propType)}
-
+	propagationOpts = append(propagationOpts, opts...)
 	authzMW := authzMw.New(authorizer, authzOpts...)
 	propagationMW := propagationMw.New(propagationOpts...)
 
@@ -56,10 +58,11 @@ func (f *Factory) NewBackend(authorizer authz.Authorizer, skipChecker security.S
 }
 
 // NewStandalone creates a server-side middleware for services that perform both authentication and authorization.
-func (f *Factory) NewStandalone(authenticator authn.Authenticator, authorizer authz.Authorizer, authnSkip security.Skipper, authzSkip security.Skipper) middleware.KMiddleware {
+func (f *Factory) NewStandalone(authenticator authn.Authenticator, authorizer authz.Authorizer, authnSkip security.Skipper, authzSkip security.Skipper, opts ...options.Option) middleware.KMiddleware {
 	authnOpts := []options.Option{authnMw.WithSkipper(authnSkip)}
 	authzOpts := []options.Option{authzMw.WithSkipper(authzSkip)}
-
+	authnOpts = append(authnOpts, opts...)
+	authzOpts = append(authzOpts, opts...)
 	authnMW := authnMw.New(authenticator, authnOpts...)
 	authzMW := authzMw.New(authorizer, authzOpts...)
 
@@ -69,8 +72,9 @@ func (f *Factory) NewStandalone(authenticator authn.Authenticator, authorizer au
 
 // NewClient creates the client-side security middleware.
 // It uses the factory's propagation type to propagate the principal from the context to the outgoing request.
-func (f *Factory) NewClient() middleware.KMiddleware {
+func (f *Factory) NewClient(opts ...options.Option) middleware.KMiddleware {
 	propagationOpts := []options.Option{propagationMw.WithPropagationType(f.propType)}
+	propagationOpts = append(propagationOpts, opts...)
 	propagationMW := propagationMw.New(propagationOpts...)
 	return propagationMW.Client()
 }
