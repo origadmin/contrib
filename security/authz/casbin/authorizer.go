@@ -145,18 +145,17 @@ func newWithOptions(cfg *authzv1.Authorizer, opts ...options.Option) (*Options, 
 
 // Reload implements the authz.Reloader interface.
 func (auth *Authorizer) Reload() error {
-	if auth.watcher == nil {
-		auth.log.Warn("Casbin watcher is not configured, policy reload notification will not be sent.")
-		return auth.enforcer.LoadPolicy()
-	}
-
-	if err := auth.watcher.Update(); err != nil {
-		auth.log.Errorf("Failed to broadcast policy update via watcher: %v", err)
-		return err
+	if auth.watcher != nil {
+		auth.log.Info("Skip reloading casbin policy due to watcher set")
+		return nil
 	}
 	auth.log.Info("Policy update broadcasted via watcher.")
+	return auth.enforcer.LoadPolicy()
+}
 
-	return nil
+// GetEnforcer returns the underlying casbin enforcer.
+func (auth *Authorizer) GetEnforcer() *casbin.SyncedEnforcer {
+	return auth.enforcer
 }
 
 // Authorized checks if a principal is authorized by preparing the arguments and then enforcing the policy.
