@@ -13,7 +13,12 @@ type Authorizer interface {
 
 // Reloader defines an optional interface for authorizers that support dynamic policy reloading.
 type Reloader interface {
-	Reload() error
+	// Reload forces the authorizer to reload its policies from the underlying storage.
+	// The 'force' parameter is crucial:
+	// - If force is true, the reload must happen regardless of whether a watcher is configured.
+	// - If force is false, the implementation may choose to skip the reload if a watcher
+	//   is active, assuming the watcher will handle updates.
+	Reload(force bool) error
 }
 
 // PolicyModifier defines a generic, pattern-based interface for modifying authorization policies.

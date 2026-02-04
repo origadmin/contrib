@@ -143,13 +143,22 @@ func newWithOptions(cfg *authzv1.Authorizer, opts ...options.Option) (*Options, 
 	return finalOpts, nil
 }
 
-// Reload implements the authz.Reloader interface.
-func (auth *Authorizer) Reload() error {
+// Reload implements the authz.Reloader interface with force-reload capability.
+func (auth *Authorizer) Reload(force bool) error {
+	// If force is true, we must reload regardless of the watcher.
+	if force {
+		auth.log.Info("Forcing policy reload from storage.")
+		return auth.enforcer.LoadPolicy()
+	}
+
+	// If not forcing, check if a watcher is active.
 	if auth.watcher != nil {
-		auth.log.Info("Skip reloading casbin policy due to watcher set")
+		auth.log.Info("Skipping policy reload because a watcher is active.")
 		return nil
 	}
-	auth.log.Info("Policy update broadcasted via watcher.")
+
+	// If no watcher and not forcing, perform a standard reload.
+	auth.log.Info("Performing standard policy reload (no watcher active).")
 	return auth.enforcer.LoadPolicy()
 }
 
