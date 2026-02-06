@@ -113,30 +113,40 @@ func (x *RuleSpec) GetAttributes() *structpb.Struct {
 // PolicySpec includes subject and is used for storage and retrieval.
 type PolicySpec struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
-	// Policy type identifier (e.g., "access", "grouping", "opa:rego", "iam:statement", "relation").
+	// Policy type identifier.
+	// For Casbin: "p" (policy/permission), "g" (grouping/role), "g2", "g3", etc.
+	// For OPA: "opa:rego"
+	// For IAM: "iam:statement"
+	// For Zanzibar: "zanzibar:relation"
 	Type string `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
 	// The subject of this policy (who the policy applies to).
 	// e.g., "user:123", "role:admin", "service:payment-service"
 	// NOTE: During authorization checks, this field is ignored and replaced with Principal's identity.
 	Subject string `protobuf:"bytes,2,opt,name=subject,proto3" json:"subject,omitempty"`
 	// Actions that this policy grants or restricts.
+	// Used for type="p" (permission) policies.
 	// Multiple actions can be specified (e.g., ["read", "write"] for IAM-style policies).
 	Actions []string `protobuf:"bytes,3,rep,name=actions,proto3" json:"actions,omitempty"`
 	// Resources that this policy applies to.
+	// Used for type="p" (permission) policies.
 	// Multiple resources can be specified (e.g., ["s3:*", "s3:bucket/*"] for IAM-style policies).
 	Resources []string `protobuf:"bytes,4,rep,name=resources,proto3" json:"resources,omitempty"`
+	// Roles that the subject is assigned to.
+	// Used for type="g" (grouping/role) policies in RBAC.
+	// Multiple roles can be specified (e.g., ["admin", "editor", "viewer"]).
+	Roles []string `protobuf:"bytes,5,rep,name=roles,proto3" json:"roles,omitempty"`
 	// Effect of the policy (e.g., "allow", "deny").
 	// Recommended values: "allow", "deny"
-	Effect *string `protobuf:"bytes,5,opt,name=effect,proto3,oneof" json:"effect,omitempty"`
+	Effect *string `protobuf:"bytes,6,opt,name=effect,proto3,oneof" json:"effect,omitempty"`
 	// Domain or namespace for this policy.
 	// Used for multi-tenant isolation (Casbin) or resource namespacing (Zanzibar).
-	Domain *string `protobuf:"bytes,6,opt,name=domain,proto3,oneof" json:"domain,omitempty"`
+	Domain *string `protobuf:"bytes,7,opt,name=domain,proto3,oneof" json:"domain,omitempty"`
 	// Condition expression for the policy.
 	// Supports multiple formats:
 	// - Casbin: simple conditions (e.g., "r.sub == p.sub")
 	// - OPA: Rego code (e.g., "allow { input.user == data.roles.admin }")
 	// - IAM: JSON conditions (e.g., {"StringEquals": {"aws:UserAgent": "MyApp"}})
-	Condition *string `protobuf:"bytes,7,opt,name=condition,proto3,oneof" json:"condition,omitempty"`
+	Condition *string `protobuf:"bytes,8,opt,name=condition,proto3,oneof" json:"condition,omitempty"`
 	// Valid from timestamp (Unix epoch in seconds).
 	ValidFrom *int64 `protobuf:"varint,20,opt,name=valid_from,json=validFrom,proto3,oneof" json:"valid_from,omitempty"`
 	// Expires at timestamp (Unix epoch in seconds).
@@ -212,6 +222,13 @@ func (x *PolicySpec) GetActions() []string {
 func (x *PolicySpec) GetResources() []string {
 	if x != nil {
 		return x.Resources
+	}
+	return nil
+}
+
+func (x *PolicySpec) GetRoles() []string {
+	if x != nil {
+		return x.Roles
 	}
 	return nil
 }
@@ -361,16 +378,17 @@ const file_security_authz_v1_authz_proto_rawDesc = "" +
 	"\x06action\x18\x03 \x01(\tR\x06action\x127\n" +
 	"\n" +
 	"attributes\x18\x04 \x01(\v2\x17.google.protobuf.StructR\n" +
-	"attributes\"\xea\x03\n" +
+	"attributes\"\x80\x04\n" +
 	"\n" +
 	"PolicySpec\x12\x12\n" +
 	"\x04type\x18\x01 \x01(\tR\x04type\x12\x18\n" +
 	"\asubject\x18\x02 \x01(\tR\asubject\x12\x18\n" +
 	"\aactions\x18\x03 \x03(\tR\aactions\x12\x1c\n" +
-	"\tresources\x18\x04 \x03(\tR\tresources\x12\x1b\n" +
-	"\x06effect\x18\x05 \x01(\tH\x00R\x06effect\x88\x01\x01\x12\x1b\n" +
-	"\x06domain\x18\x06 \x01(\tH\x01R\x06domain\x88\x01\x01\x12!\n" +
-	"\tcondition\x18\a \x01(\tH\x02R\tcondition\x88\x01\x01\x12\"\n" +
+	"\tresources\x18\x04 \x03(\tR\tresources\x12\x14\n" +
+	"\x05roles\x18\x05 \x03(\tR\x05roles\x12\x1b\n" +
+	"\x06effect\x18\x06 \x01(\tH\x00R\x06effect\x88\x01\x01\x12\x1b\n" +
+	"\x06domain\x18\a \x01(\tH\x01R\x06domain\x88\x01\x01\x12!\n" +
+	"\tcondition\x18\b \x01(\tH\x02R\tcondition\x88\x01\x01\x12\"\n" +
 	"\n" +
 	"valid_from\x18\x14 \x01(\x03H\x03R\tvalidFrom\x88\x01\x01\x12\"\n" +
 	"\n" +
