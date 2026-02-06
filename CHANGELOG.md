@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.7.1](https://github.com/origadmin/contrib/compare/contrib-v1.7.0...contrib-v1.7.1) (2026-02-06)
+
+
+### Bug Fixes
+
+* **authz:** add roles field to PolicySpec and update Go version ([2951a88](https://github.com/origadmin/contrib/commit/2951a889f37db6aa27824fae8da9e955a36cd685))
+* **ci:** simplify release-please workflow by removing redundant go work commands ([88863a3](https://github.com/origadmin/contrib/commit/88863a3d85d79a839f706b78ea4f2138101b3027))
+
 ## [1.7.0](https://github.com/origadmin/contrib/compare/contrib-v1.6.0...contrib-v1.7.0) (2026-02-06)
 
 
