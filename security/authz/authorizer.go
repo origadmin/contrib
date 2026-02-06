@@ -55,7 +55,6 @@ type PolicyWriter interface {
 }
 
 // PolicyModifier combines PolicyReader and PolicyWriter for full CRUD operations.
-// Deprecated: Use PolicyReader and PolicyWriter separately for better control over access permissions.
 type PolicyModifier interface {
 	PolicyReader
 	PolicyWriter
