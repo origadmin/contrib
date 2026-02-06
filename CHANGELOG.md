@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0](https://github.com/origadmin/contrib/compare/contrib-v1.6.0...contrib-v1.7.0) (2026-02-06)
+
+
+### Features
+
+* **ci:** simplify release-please workflow by removing redundant go work commands ([523aafa](https://github.com/origadmin/contrib/commit/523aafa067db8d30e5f9e9705de083d1ac8baa51))
+
 ## [1.6.0](https://github.com/origadmin/contrib/compare/contrib-v1.5.0...contrib-v1.6.0) (2026-02-06)
 
 
