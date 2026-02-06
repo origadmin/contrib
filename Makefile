@@ -141,7 +141,7 @@ init: install-protoc ## 🔧 Install tools from tools.go, ensuring reproducible 
 	@go install github.com/google/wire/cmd/wire
 	@go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
 	@go install google.golang.org/protobuf/cmd/protoc-gen-go
-	@go install ./tools/protoc-gen-go-security
+	#	@go install ./tools/protoc-gen-go-security
 
 deps: ## 📦 Export and install all third-party protobuf dependencies
 	@echo "Updating buf dependencies..."
