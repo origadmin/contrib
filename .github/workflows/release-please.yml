@@ -33,7 +33,11 @@ jobs:
 
       - name: Install Tools and Protoc Plugins via Makefile
         if: ${{ steps.release.outputs.release_created }}
-        run: make init
+        run: |
+          go work init
+          go work use .
+          go work use ./tools/protoc-gen-go-security
+          make init
 
       - name: Push to Buf Schema Registry
         if: ${{ steps.release.outputs.release_created }}

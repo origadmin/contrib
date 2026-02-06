@@ -92,7 +92,7 @@ endif
 #                           LIFECYCLE TARGETS
 # ============================================================================ #
 
-.PHONY: all init deps update update-tools protos example-protos test-protos generate test clean clean-api-gen clean-example-protos clean-test-protos buf-push install-protoc
+.PHONY: all init install-local-protoc deps update update-tools protos example-protos test-protos generate test clean clean-api-gen clean-example-protos clean-test-protos buf-push install-protoc
 
 install-protoc: ## ⬇️ Install protoc compiler
 ifeq ($(GOHOSTOS), windows)
@@ -128,7 +128,14 @@ endif
 
 all: init deps protos example-protos test-protos generate ## ✅ Run the full build process
 
-init: install-protoc ## 🔧 Install tools from tools.go, ensuring reproducible builds
+install-local-protoc: ## 🔧 Install local protoc plugin (protoc-gen-go-security)
+ifeq ($(GOHOSTOS), windows)
+	@cd ./tools/protoc-gen-go-security; go install .
+else
+	@cd ./tools/protoc-gen-go-security && go install .
+endif
+
+init: install-protoc install-local-protoc ## 🔧 Install tools from tools.go, ensuring reproducible builds
 	@echo "Ensuring tool dependencies are in go.mod..."
 	@go mod tidy
 	@echo "Installing tools listed in tools.go..."
@@ -141,7 +148,6 @@ init: install-protoc ## 🔧 Install tools from tools.go, ensuring reproducible 
 	@go install github.com/google/wire/cmd/wire
 	@go install google.golang.org/grpc/cmd/protoc-gen-go-grpc
 	@go install google.golang.org/protobuf/cmd/protoc-gen-go
-	#	@go install ./tools/protoc-gen-go-security
 
 deps: ## 📦 Export and install all third-party protobuf dependencies
 	@echo "Updating buf dependencies..."
