@@ -130,9 +130,9 @@ all: init deps protos example-protos test-protos generate ## ✅ Run the full bu
 
 install-local-protoc: ## 🔧 Install local protoc plugin (protoc-gen-go-security)
 ifeq ($(GOHOSTOS), windows)
-	@cd ./tools/protoc-gen-go-security; go install .
+	@cd ./tools/protoc-gen-go-security; go mod tidy; go install .
 else
-	@cd ./tools/protoc-gen-go-security && go install .
+	@cd ./tools/protoc-gen-go-security && go mod tidy && go install .
 endif
 
 init: install-protoc install-local-protoc ## 🔧 Install tools from tools.go, ensuring reproducible builds
