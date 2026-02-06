@@ -4,6 +4,8 @@
       "component": "contrib",
       "release-type": "go",
       "version-file": "go.mod",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true,
       "ignore-paths": [
         "transport/watermill",
         "tools"
