@@ -3,6 +3,7 @@ package authz
 import (
 	"context"
 
+	authzv1 "github.com/origadmin/contrib/api/gen/go/security/authz/v1"
 	"github.com/origadmin/contrib/security"
 )
 
@@ -23,40 +24,52 @@ type Reloader interface {
 
 // PolicyModifier defines a generic, pattern-based interface for modifying authorization policies.
 // It is implementation-agnostic (Casbin, OPA, etc.) and uses a "Query by Example" style for removals.
+//
+// Field Semantics:
+// - String fields ("", "") act as wildcards (match any value)
+// - repeated string fields (nil, []) act as wildcards (match any value)
+// - optional fields (nil) act as wildcards (match any value)
 type PolicyModifier interface {
-	// AddRoles assigns one or more roles to a subject.
-	AddRoles(ctx context.Context, subject string, roles ...RoleSpec) (bool, error)
+	// AddPolicies adds one or more policies.
+	AddPolicies(ctx context.Context, policies ...*authzv1.PolicySpec) (bool, error)
 
-	// RemoveRoles revokes roles from a subject based on patterns.
-	// - RemoveRoles(ctx, "user1"): Removes all roles from user1 across all domains.
-	// - RemoveRoles(ctx, "user1", RoleSpec{Domain: "d1"}): Removes all roles from user1 within domain d1.
-	// - RemoveRoles(ctx, "user1", RoleSpec{Role: "admin"}): Removes the "admin" role from user1 across all domains.
-	// - RemoveRoles(ctx, "user1", RoleSpec{Role: "admin", Domain: "d1"}): Removes the specific role-domain assignment.
-	RemoveRoles(ctx context.Context, subject string, roles ...RoleSpec) (bool, error)
+	// UpdatePolicies updates policies in batch.
+	// The oldPolicies and newPolicies arrays must have the same length.
+	// Each oldPolicies[i] is matched by type+subject+domain+actions+resources combination
+	// and replaced with newPolicies[i].
+	UpdatePolicies(ctx context.Context, oldPolicies []*authzv1.PolicySpec, newPolicies []*authzv1.PolicySpec) (bool,
+		error)
 
-	// UpdateRole updates a single role assignment for a subject.
-	// This is an atomic operation that replaces the old role specification with the new one.
-	UpdateRole(ctx context.Context, subject string, oldRole RoleSpec, newRole RoleSpec) (bool, error)
+	// RemovePolicies removes policies matching the pattern (Query by Example).
+	// Zero-value fields in the pattern act as wildcards.
+	// Examples:
+	// - RemovePolicies(ctx, PolicySpec{Subject: "user1"}): Removes all policies for user1
+	// - RemovePolicies(ctx, PolicySpec{Domain: "d1"}): Removes all policies in domain d1
+	// - RemovePolicies(ctx, PolicySpec{}): Removes all policies
+	RemovePolicies(ctx context.Context, pattern *authzv1.PolicySpec) (bool, error)
 
-	// AddPermissions grants one or more permissions to a subject.
-	AddPermissions(ctx context.Context, subject string, permissions ...RuleSpec) (bool, error)
-
-	// RemovePermissions revokes permissions from a subject based on patterns.
-	// The logic mirrors RemoveRoles, using the fields of RuleSpec as filters.
-	// An empty or zero-value field in a RuleSpec acts as a wildcard.
-	RemovePermissions(ctx context.Context, subject string, permissions ...RuleSpec) (bool, error)
-
-	// UpdatePermission updates a single permission grant for a subject.
-	// This is an atomic operation that replaces the old permission specification with the new one.
-	UpdatePermission(ctx context.Context, subject string, oldPerm RuleSpec, newPerm RuleSpec) (bool, error)
-
-	// ClearPolicies removes all policies (both roles and permissions) for a subject.
-	// This is a comprehensive cleanup operation that removes:
-	// - All role assignments (g-rules) for the subject
-	// - All permission grants (p-rules) for the subject
-	// Use with caution: this cannot be undone.
+	// ClearPolicies removes all policies for the given subjects.
+	// This is a comprehensive cleanup operation that removes all policy types.
 	// Examples:
 	// - ClearPolicies(ctx, "user1"): Removes all policies for user1 across all domains.
 	// - ClearPolicies(ctx): Removes all policies for all subjects across all domains.
 	ClearPolicies(ctx context.Context, subjects ...string) (bool, error)
+
+	// Deprecated: Use AddPolicies with PolicySpec instead.
+	AddRoles(ctx context.Context, subject string, roles ...RoleSpec) (bool, error)
+
+	// Deprecated: Use RemovePolicies with PolicySpec instead.
+	RemoveRoles(ctx context.Context, subject string, roles ...RoleSpec) (bool, error)
+
+	// Deprecated: Use UpdatePolicies with PolicySpec instead.
+	UpdateRole(ctx context.Context, subject string, oldRole RoleSpec, newRole RoleSpec) (bool, error)
+
+	// Deprecated: Use AddPolicies with PolicySpec instead.
+	AddPermissions(ctx context.Context, subject string, permissions ...RuleSpec) (bool, error)
+
+	// Deprecated: Use RemovePolicies with PolicySpec instead.
+	RemovePermissions(ctx context.Context, subject string, permissions ...RuleSpec) (bool, error)
+
+	// Deprecated: Use UpdatePolicies with PolicySpec instead.
+	UpdatePermission(ctx context.Context, subject string, oldPerm RuleSpec, newPerm RuleSpec) (bool, error)
 }

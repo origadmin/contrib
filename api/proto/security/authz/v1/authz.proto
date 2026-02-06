@@ -4,12 +4,16 @@ package contrib.api.security.authz.v1;
 
 import "gnostic/openapi/v3/annotations.proto";
 import "google/protobuf/struct.proto";
+import "google/protobuf/timestamp.proto";
 import "security/authz/casbin/v1/config.proto";
 
 option go_package = "github.com/origadmin/contrib/api/gen/go/security/authz/v1;authzv1";
 
 // RuleSpec is the data transfer object for an authorization rule specification.
-// It encapsulates the core components of a rule to be checked against the policy engine.
+// It encapsulates the core components of a rule to be checked against a policy engine.
+// NOTE: subject is NOT included here as it is provided by Principal during authorization checks.
+//
+// Deprecated: Use RuleSpec instead.
 message RuleSpec {
   // The domain or tenant for this rule check. Can be empty for non-multi-tenant models.
   // e.g., "project-a", "tenant-blue-ocean"
@@ -25,9 +29,81 @@ message RuleSpec {
 
   // Attributes contains additional, dynamic properties related to this rule check,
   // enabling Attribute-Based Access Control (ABAC).
-  // This can include properties of the resource (e.g., {"owner": "user-xyz", "status": "draft"})
-  // or the context (e.g., {"ip_address": "192.168.1.100"}).
+  // This can include properties of resource (e.g., {"owner": "user-xyz", "status": "draft"})
+  // or context (e.g., {"ip_address": "192.168.1.100"}).
   google.protobuf.Struct attributes = 4;
+}
+
+// PolicySpec is the data transfer object for a complete policy specification.
+// Unlike RuleSpec (used for authorization checks without subject),
+// PolicySpec includes subject and is used for storage and retrieval.
+message PolicySpec {
+  // Policy type identifier (e.g., "access", "grouping", "opa:rego", "iam:statement", "relation").
+  string type = 1;
+
+  // The subject of this policy (who the policy applies to).
+  // e.g., "user:123", "role:admin", "service:payment-service"
+  // NOTE: During authorization checks, this field is ignored and replaced with Principal's identity.
+  optional string subject = 2;
+
+  // Actions that this policy grants or restricts.
+  // Multiple actions can be specified (e.g., ["read", "write"] for IAM-style policies).
+  repeated string actions = 3;
+
+  // Resources that this policy applies to.
+  // Multiple resources can be specified (e.g., ["s3:*", "s3:bucket/*"] for IAM-style policies).
+  repeated string resources = 4;
+
+  // Effect of the policy (e.g., "allow", "deny").
+  // Recommended values: "allow", "deny"
+  optional string effect = 5;
+
+  // Domain or namespace for this policy.
+  // Used for multi-tenant isolation (Casbin) or resource namespacing (Zanzibar).
+  optional string domain = 6;
+
+  // Condition expression for the policy.
+  // Supports multiple formats:
+  // - Casbin: simple conditions (e.g., "r.sub == p.sub")
+  // - OPA: Rego code (e.g., "allow { input.user == data.roles.admin }")
+  // - IAM: JSON conditions (e.g., {"StringEquals": {"aws:UserAgent": "MyApp"}})
+  optional string condition = 7;
+
+  // Valid from timestamp (Unix epoch in seconds).
+  optional int64 valid_from = 20;
+
+  // Expires at timestamp (Unix epoch in seconds).
+  optional int64 expires_at = 21;
+
+  // Priority of the policy.
+  // Default is 0 (lowest priority). Higher numbers have higher priority.
+  optional int32 priority = 22;
+
+  // Whether the policy is disabled.
+  // Default is false (policy is enabled).
+  optional bool disabled = 23;
+
+  // Metadata for framework-specific extensions.
+  // This field allows arbitrary key-value pairs for framework-specific data.
+  // Examples:
+  // - OPA: {"rego_package": "auth", "rego_entrypoint": "allow", "data": {...}}
+  // - Zanzibar: {"namespace": "document", "object_id": "123", "relation": "viewer"}
+  // - Custom: any additional fields needed by specific implementations
+  google.protobuf.Struct metadata = 30;
+
+  // === Audit Fields (Optional) ===
+
+  // ID of the user who created this policy.
+  optional int64 create_author = 40;
+
+  // Timestamp when this policy was created.
+  optional google.protobuf.Timestamp create_time = 41;
+
+  // ID of the user who last updated this policy.
+  optional int64 update_author = 42;
+
+  // Timestamp when this policy was last updated.
+  optional google.protobuf.Timestamp update_time = 43;
 }
 
 // Authorizer defines the configuration for a single authorization mechanism.

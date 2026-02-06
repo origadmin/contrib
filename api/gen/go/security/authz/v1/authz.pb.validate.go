@@ -169,6 +169,242 @@ var _ interface {
 	ErrorName() string
 } = RuleSpecValidationError{}
 
+// Validate checks the field values on PolicySpec with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *PolicySpec) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on PolicySpec with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in PolicySpecMultiError, or
+// nil if none found.
+func (m *PolicySpec) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *PolicySpec) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Type
+
+	if all {
+		switch v := interface{}(m.GetMetadata()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, PolicySpecValidationError{
+					field:  "Metadata",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, PolicySpecValidationError{
+					field:  "Metadata",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetMetadata()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return PolicySpecValidationError{
+				field:  "Metadata",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if m.Subject != nil {
+		// no validation rules for Subject
+	}
+
+	if m.Effect != nil {
+		// no validation rules for Effect
+	}
+
+	if m.Domain != nil {
+		// no validation rules for Domain
+	}
+
+	if m.Condition != nil {
+		// no validation rules for Condition
+	}
+
+	if m.ValidFrom != nil {
+		// no validation rules for ValidFrom
+	}
+
+	if m.ExpiresAt != nil {
+		// no validation rules for ExpiresAt
+	}
+
+	if m.Priority != nil {
+		// no validation rules for Priority
+	}
+
+	if m.Disabled != nil {
+		// no validation rules for Disabled
+	}
+
+	if m.CreateAuthor != nil {
+		// no validation rules for CreateAuthor
+	}
+
+	if m.CreateTime != nil {
+
+		if all {
+			switch v := interface{}(m.GetCreateTime()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, PolicySpecValidationError{
+						field:  "CreateTime",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, PolicySpecValidationError{
+						field:  "CreateTime",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetCreateTime()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return PolicySpecValidationError{
+					field:  "CreateTime",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if m.UpdateAuthor != nil {
+		// no validation rules for UpdateAuthor
+	}
+
+	if m.UpdateTime != nil {
+
+		if all {
+			switch v := interface{}(m.GetUpdateTime()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, PolicySpecValidationError{
+						field:  "UpdateTime",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, PolicySpecValidationError{
+						field:  "UpdateTime",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetUpdateTime()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return PolicySpecValidationError{
+					field:  "UpdateTime",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return PolicySpecMultiError(errors)
+	}
+
+	return nil
+}
+
+// PolicySpecMultiError is an error wrapping multiple validation errors
+// returned by PolicySpec.ValidateAll() if the designated constraints aren't met.
+type PolicySpecMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m PolicySpecMultiError) Error() string {
+	msgs := make([]string, 0, len(m))
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m PolicySpecMultiError) AllErrors() []error { return m }
+
+// PolicySpecValidationError is the validation error returned by
+// PolicySpec.Validate if the designated constraints aren't met.
+type PolicySpecValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e PolicySpecValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e PolicySpecValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e PolicySpecValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e PolicySpecValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e PolicySpecValidationError) ErrorName() string { return "PolicySpecValidationError" }
+
+// Error satisfies the builtin error interface
+func (e PolicySpecValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sPolicySpec.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = PolicySpecValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = PolicySpecValidationError{}
+
 // Validate checks the field values on Authorizer with the rules defined in the
 // proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.
