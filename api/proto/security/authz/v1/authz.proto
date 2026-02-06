@@ -38,7 +38,11 @@ message RuleSpec {
 // Unlike RuleSpec (used for authorization checks without subject),
 // PolicySpec includes subject and is used for storage and retrieval.
 message PolicySpec {
-  // Policy type identifier (e.g., "access", "grouping", "opa:rego", "iam:statement", "relation").
+  // Policy type identifier.
+  // For Casbin: "p" (policy/permission), "g" (grouping/role), "g2", "g3", etc.
+  // For OPA: "opa:rego"
+  // For IAM: "iam:statement"
+  // For Zanzibar: "zanzibar:relation"
   string type = 1;
 
   // The subject of this policy (who the policy applies to).
@@ -47,27 +51,34 @@ message PolicySpec {
   string subject = 2;
 
   // Actions that this policy grants or restricts.
+  // Used for type="p" (permission) policies.
   // Multiple actions can be specified (e.g., ["read", "write"] for IAM-style policies).
   repeated string actions = 3;
 
   // Resources that this policy applies to.
+  // Used for type="p" (permission) policies.
   // Multiple resources can be specified (e.g., ["s3:*", "s3:bucket/*"] for IAM-style policies).
   repeated string resources = 4;
 
+  // Roles that the subject is assigned to.
+  // Used for type="g" (grouping/role) policies in RBAC.
+  // Multiple roles can be specified (e.g., ["admin", "editor", "viewer"]).
+  repeated string roles = 5;
+
   // Effect of the policy (e.g., "allow", "deny").
   // Recommended values: "allow", "deny"
-  optional string effect = 5;
+  optional string effect = 6;
 
   // Domain or namespace for this policy.
   // Used for multi-tenant isolation (Casbin) or resource namespacing (Zanzibar).
-  optional string domain = 6;
+  optional string domain = 7;
 
   // Condition expression for the policy.
   // Supports multiple formats:
   // - Casbin: simple conditions (e.g., "r.sub == p.sub")
   // - OPA: Rego code (e.g., "allow { input.user == data.roles.admin }")
   // - IAM: JSON conditions (e.g., {"StringEquals": {"aws:UserAgent": "MyApp"}})
-  optional string condition = 7;
+  optional string condition = 8;
 
   // Valid from timestamp (Unix epoch in seconds).
   optional int64 valid_from = 20;
