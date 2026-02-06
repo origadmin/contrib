@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.6.0](https://github.com/origadmin/contrib/compare/contrib-v1.5.0...contrib-v1.6.0) (2026-02-06)
+
+
+### Features
+
+* **authz:** add ClearPolicies method and enhance authz middleware ([63354f7](https://github.com/origadmin/contrib/commit/63354f7b2d9d80dfe7bdab2d5c5af5d5d87b5af6))
+* **authz:** add ClearPolicies method and enhance authz middleware ([76d4516](https://github.com/origadmin/contrib/commit/76d45167768905a85c59a489dff9155ac1aa574c))
+* **authz:** add force reload capability to authz.Reloader interface ([8c37aaf](https://github.com/origadmin/contrib/commit/8c37aaf3630c5b484c5fb8153960eefd81f84aeb))
+* **authz:** add PolicySpec for authorization policy storage and retrieval ([96a56f4](https://github.com/origadmin/contrib/commit/96a56f483bab40c699069b14f6e2386a2f974b94))
+* **casbin:** add GetEnforcer method and refactor Reload logic ([2ac3375](https://github.com/origadmin/contrib/commit/2ac33759ec7a43bc305153039dc365c43c2aec51))
+
+
+### Bug Fixes
+
+* **security:** improve JWT authenticator and casbin authorizer logic ([717c149](https://github.com/origadmin/contrib/commit/717c149a43e643e3e841db3775d401a398adb03d))
+
 ## [1.5.0](https://github.com/origadmin/contrib/compare/contrib-v1.4.0...contrib-v1.5.0) (2026-01-28)
 
 

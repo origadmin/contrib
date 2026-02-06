@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/origadmin/contrib/compare/transport-watermill-v0.2.0...transport-watermill-v0.2.1) (2026-02-06)
+
+
+### Bug Fixes
+
+* **security:** improve JWT authenticator and casbin authorizer logic ([717c149](https://github.com/origadmin/contrib/commit/717c149a43e643e3e841db3775d401a398adb03d))
+
 ## [0.2.0](https://github.com/origadmin/contrib/compare/transport-watermill-v0.1.0...transport-watermill-v0.2.0) (2026-01-28)
 
 
