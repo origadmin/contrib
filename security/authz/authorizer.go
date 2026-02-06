@@ -22,43 +22,48 @@ type Reloader interface {
 	Reload(force bool) error
 }
 
-// PolicyModifier defines a generic, pattern-based interface for modifying authorization policies.
-// It is implementation-agnostic (Casbin, OPA, etc.) and uses a "Query by Example" style for removals.
-//
-// Field Semantics:
-// - String fields ("", "") act as wildcards (match any value)
-// - repeated string fields (nil, []) act as wildcards (match any value)
-// - optional fields (nil) act as wildcards (match any value)
-type PolicyModifier interface {
+// PolicyReader defines the read-only interface for querying policies.
+type PolicyReader interface {
+	// ListPolicies queries policies matching the filter criteria.
+	// The filter can be constructed from a PolicySpec and/or PolicyFilterOption(s).
+	// Examples:
+	// - ListPolicies(ctx, nil, WithFilterSubject("user1")): List all policies for user1
+	// - ListPolicies(ctx, &authzv1.PolicySpec{Domain: ptr("d1")}): List all policies in domain d1
+	// - ListPolicies(ctx, &authzv1.PolicySpec{Type: "rbac:role"}, WithFilterDomain("d1")): Combine
+	ListPolicies(ctx context.Context, base *authzv1.PolicySpec, opts ...PolicyFilterOption) ([]*authzv1.PolicySpec, error)
+}
+
+// PolicyWriter defines the write interface for modifying policies.
+type PolicyWriter interface {
 	// AddPolicies adds one or more policies.
 	AddPolicies(ctx context.Context, policies ...*authzv1.PolicySpec) (bool, error)
 
 	// UpdatePolicies updates policies in batch.
 	// The oldPolicies and newPolicies arrays must have the same length.
-	// Each oldPolicies[i] is matched by type+subject+domain+actions+resources combination
-	// and replaced with newPolicies[i].
-	UpdatePolicies(ctx context.Context, oldPolicies []*authzv1.PolicySpec, newPolicies []*authzv1.PolicySpec) (bool,
-		error)
+	// Each oldPolicies[i] is matched and replaced with newPolicies[i].
+	UpdatePolicies(ctx context.Context, oldPolicies []*authzv1.PolicySpec, newPolicies []*authzv1.PolicySpec) (bool, error)
 
-	// RemovePolicies removes policies matching the pattern (Query by Example).
-	// Zero-value fields in the pattern act as wildcards.
+	// RemovePolicies removes policies matching the filter criteria.
+	// The filter can be constructed from a PolicySpec and/or PolicyFilterOption(s).
 	// Examples:
-	// - RemovePolicies(ctx, PolicySpec{Subject: "user1"}): Removes all policies for user1
-	// - RemovePolicies(ctx, PolicySpec{Domain: "d1"}): Removes all policies in domain d1
-	// - RemovePolicies(ctx, PolicySpec{}): Removes all policies
-	RemovePolicies(ctx context.Context, pattern *authzv1.PolicySpec) (bool, error)
+	// - RemovePolicies(ctx, nil, WithFilterSubject("user1")): Remove all policies for user1
+	// - RemovePolicies(ctx, &authzv1.PolicySpec{Domain: ptr("d1")}): Remove all policies in domain d1
+	RemovePolicies(ctx context.Context, base *authzv1.PolicySpec, opts ...PolicyFilterOption) (bool, error)
 
-	// ClearPolicies removes all policies for the given subjects.
-	// This is a comprehensive cleanup operation that removes all policy types.
-	// Examples:
-	// - ClearPolicies(ctx, "user1"): Removes all policies for user1 across all domains.
-	// - ClearPolicies(ctx): Removes all policies for all subjects across all domains.
-	ClearPolicies(ctx context.Context, subjects ...string) (bool, error)
+	// ClearPolicies removes all policies.
+	ClearPolicies(ctx context.Context) (bool, error)
+}
+
+// PolicyModifier combines PolicyReader and PolicyWriter for full CRUD operations.
+// Deprecated: Use PolicyReader and PolicyWriter separately for better control over access permissions.
+type PolicyModifier interface {
+	PolicyReader
+	PolicyWriter
 
 	// Deprecated: Use AddPolicies with PolicySpec instead.
 	AddRoles(ctx context.Context, subject string, roles ...RoleSpec) (bool, error)
 
-	// Deprecated: Use RemovePolicies with PolicySpec instead.
+	// Deprecated: Use RemovePolicies with PolicySpec and PolicyFilterOption instead.
 	RemoveRoles(ctx context.Context, subject string, roles ...RoleSpec) (bool, error)
 
 	// Deprecated: Use UpdatePolicies with PolicySpec instead.
@@ -67,9 +72,14 @@ type PolicyModifier interface {
 	// Deprecated: Use AddPolicies with PolicySpec instead.
 	AddPermissions(ctx context.Context, subject string, permissions ...RuleSpec) (bool, error)
 
-	// Deprecated: Use RemovePolicies with PolicySpec instead.
+	// Deprecated: Use RemovePolicies with PolicySpec and PolicyFilterOption instead.
 	RemovePermissions(ctx context.Context, subject string, permissions ...RuleSpec) (bool, error)
 
 	// Deprecated: Use UpdatePolicies with PolicySpec instead.
 	UpdatePermission(ctx context.Context, subject string, oldPerm RuleSpec, newPerm RuleSpec) (bool, error)
+}
+
+// Helper function for creating string pointers (used with PolicySpec optional fields)
+func strPtr(s string) *string {
+	return &s
 }

@@ -44,7 +44,7 @@ message PolicySpec {
   // The subject of this policy (who the policy applies to).
   // e.g., "user:123", "role:admin", "service:payment-service"
   // NOTE: During authorization checks, this field is ignored and replaced with Principal's identity.
-  optional string subject = 2;
+  string subject = 2;
 
   // Actions that this policy grants or restricts.
   // Multiple actions can be specified (e.g., ["read", "write"] for IAM-style policies).
@@ -90,20 +90,6 @@ message PolicySpec {
   // - Zanzibar: {"namespace": "document", "object_id": "123", "relation": "viewer"}
   // - Custom: any additional fields needed by specific implementations
   google.protobuf.Struct metadata = 30;
-
-  // === Audit Fields (Optional) ===
-
-  // ID of the user who created this policy.
-  optional int64 create_author = 40;
-
-  // Timestamp when this policy was created.
-  optional google.protobuf.Timestamp create_time = 41;
-
-  // ID of the user who last updated this policy.
-  optional int64 update_author = 42;
-
-  // Timestamp when this policy was last updated.
-  optional google.protobuf.Timestamp update_time = 43;
 }
 
 // Authorizer defines the configuration for a single authorization mechanism.

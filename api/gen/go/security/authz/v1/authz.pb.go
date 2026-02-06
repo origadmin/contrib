@@ -12,7 +12,7 @@ import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	structpb "google.golang.org/protobuf/types/known/structpb"
-	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	_ "google.golang.org/protobuf/types/known/timestamppb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -28,6 +28,8 @@ const (
 // RuleSpec is the data transfer object for an authorization rule specification.
 // It encapsulates the core components of a rule to be checked against a policy engine.
 // NOTE: subject is NOT included here as it is provided by Principal during authorization checks.
+//
+// Deprecated: Use RuleSpec instead.
 type RuleSpec struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// The domain or tenant for this rule check. Can be empty for non-multi-tenant models.
@@ -116,7 +118,7 @@ type PolicySpec struct {
 	// The subject of this policy (who the policy applies to).
 	// e.g., "user:123", "role:admin", "service:payment-service"
 	// NOTE: During authorization checks, this field is ignored and replaced with Principal's identity.
-	Subject *string `protobuf:"bytes,2,opt,name=subject,proto3,oneof" json:"subject,omitempty"`
+	Subject string `protobuf:"bytes,2,opt,name=subject,proto3" json:"subject,omitempty"`
 	// Actions that this policy grants or restricts.
 	// Multiple actions can be specified (e.g., ["read", "write"] for IAM-style policies).
 	Actions []string `protobuf:"bytes,3,rep,name=actions,proto3" json:"actions,omitempty"`
@@ -151,15 +153,7 @@ type PolicySpec struct {
 	// - OPA: {"rego_package": "auth", "rego_entrypoint": "allow", "data": {...}}
 	// - Zanzibar: {"namespace": "document", "object_id": "123", "relation": "viewer"}
 	// - Custom: any additional fields needed by specific implementations
-	Metadata *structpb.Struct `protobuf:"bytes,30,opt,name=metadata,proto3" json:"metadata,omitempty"`
-	// ID of the user who created this policy.
-	CreateAuthor *int64 `protobuf:"varint,40,opt,name=create_author,json=createAuthor,proto3,oneof" json:"create_author,omitempty"`
-	// Timestamp when this policy was created.
-	CreateTime *timestamppb.Timestamp `protobuf:"bytes,41,opt,name=create_time,json=createTime,proto3,oneof" json:"create_time,omitempty"`
-	// ID of the user who last updated this policy.
-	UpdateAuthor *int64 `protobuf:"varint,42,opt,name=update_author,json=updateAuthor,proto3,oneof" json:"update_author,omitempty"`
-	// Timestamp when this policy was last updated.
-	UpdateTime    *timestamppb.Timestamp `protobuf:"bytes,43,opt,name=update_time,json=updateTime,proto3,oneof" json:"update_time,omitempty"`
+	Metadata      *structpb.Struct `protobuf:"bytes,30,opt,name=metadata,proto3" json:"metadata,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -202,8 +196,8 @@ func (x *PolicySpec) GetType() string {
 }
 
 func (x *PolicySpec) GetSubject() string {
-	if x != nil && x.Subject != nil {
-		return *x.Subject
+	if x != nil {
+		return x.Subject
 	}
 	return ""
 }
@@ -274,34 +268,6 @@ func (x *PolicySpec) GetDisabled() bool {
 func (x *PolicySpec) GetMetadata() *structpb.Struct {
 	if x != nil {
 		return x.Metadata
-	}
-	return nil
-}
-
-func (x *PolicySpec) GetCreateAuthor() int64 {
-	if x != nil && x.CreateAuthor != nil {
-		return *x.CreateAuthor
-	}
-	return 0
-}
-
-func (x *PolicySpec) GetCreateTime() *timestamppb.Timestamp {
-	if x != nil {
-		return x.CreateTime
-	}
-	return nil
-}
-
-func (x *PolicySpec) GetUpdateAuthor() int64 {
-	if x != nil && x.UpdateAuthor != nil {
-		return *x.UpdateAuthor
-	}
-	return 0
-}
-
-func (x *PolicySpec) GetUpdateTime() *timestamppb.Timestamp {
-	if x != nil {
-		return x.UpdateTime
 	}
 	return nil
 }
@@ -395,32 +361,23 @@ const file_security_authz_v1_authz_proto_rawDesc = "" +
 	"\x06action\x18\x03 \x01(\tR\x06action\x127\n" +
 	"\n" +
 	"attributes\x18\x04 \x01(\v2\x17.google.protobuf.StructR\n" +
-	"attributes\"\x97\x06\n" +
+	"attributes\"\xea\x03\n" +
 	"\n" +
 	"PolicySpec\x12\x12\n" +
-	"\x04type\x18\x01 \x01(\tR\x04type\x12\x1d\n" +
-	"\asubject\x18\x02 \x01(\tH\x00R\asubject\x88\x01\x01\x12\x18\n" +
+	"\x04type\x18\x01 \x01(\tR\x04type\x12\x18\n" +
+	"\asubject\x18\x02 \x01(\tR\asubject\x12\x18\n" +
 	"\aactions\x18\x03 \x03(\tR\aactions\x12\x1c\n" +
 	"\tresources\x18\x04 \x03(\tR\tresources\x12\x1b\n" +
-	"\x06effect\x18\x05 \x01(\tH\x01R\x06effect\x88\x01\x01\x12\x1b\n" +
-	"\x06domain\x18\x06 \x01(\tH\x02R\x06domain\x88\x01\x01\x12!\n" +
-	"\tcondition\x18\a \x01(\tH\x03R\tcondition\x88\x01\x01\x12\"\n" +
+	"\x06effect\x18\x05 \x01(\tH\x00R\x06effect\x88\x01\x01\x12\x1b\n" +
+	"\x06domain\x18\x06 \x01(\tH\x01R\x06domain\x88\x01\x01\x12!\n" +
+	"\tcondition\x18\a \x01(\tH\x02R\tcondition\x88\x01\x01\x12\"\n" +
 	"\n" +
-	"valid_from\x18\x14 \x01(\x03H\x04R\tvalidFrom\x88\x01\x01\x12\"\n" +
+	"valid_from\x18\x14 \x01(\x03H\x03R\tvalidFrom\x88\x01\x01\x12\"\n" +
 	"\n" +
-	"expires_at\x18\x15 \x01(\x03H\x05R\texpiresAt\x88\x01\x01\x12\x1f\n" +
-	"\bpriority\x18\x16 \x01(\x05H\x06R\bpriority\x88\x01\x01\x12\x1f\n" +
-	"\bdisabled\x18\x17 \x01(\bH\aR\bdisabled\x88\x01\x01\x123\n" +
-	"\bmetadata\x18\x1e \x01(\v2\x17.google.protobuf.StructR\bmetadata\x12(\n" +
-	"\rcreate_author\x18( \x01(\x03H\bR\fcreateAuthor\x88\x01\x01\x12@\n" +
-	"\vcreate_time\x18) \x01(\v2\x1a.google.protobuf.TimestampH\tR\n" +
-	"createTime\x88\x01\x01\x12(\n" +
-	"\rupdate_author\x18* \x01(\x03H\n" +
-	"R\fupdateAuthor\x88\x01\x01\x12@\n" +
-	"\vupdate_time\x18+ \x01(\v2\x1a.google.protobuf.TimestampH\vR\n" +
-	"updateTime\x88\x01\x01B\n" +
-	"\n" +
-	"\b_subjectB\t\n" +
+	"expires_at\x18\x15 \x01(\x03H\x04R\texpiresAt\x88\x01\x01\x12\x1f\n" +
+	"\bpriority\x18\x16 \x01(\x05H\x05R\bpriority\x88\x01\x01\x12\x1f\n" +
+	"\bdisabled\x18\x17 \x01(\bH\x06R\bdisabled\x88\x01\x01\x123\n" +
+	"\bmetadata\x18\x1e \x01(\v2\x17.google.protobuf.StructR\bmetadataB\t\n" +
 	"\a_effectB\t\n" +
 	"\a_domainB\f\n" +
 	"\n" +
@@ -428,11 +385,7 @@ const file_security_authz_v1_authz_proto_rawDesc = "" +
 	"\v_valid_fromB\r\n" +
 	"\v_expires_atB\v\n" +
 	"\t_priorityB\v\n" +
-	"\t_disabledB\x10\n" +
-	"\x0e_create_authorB\x0e\n" +
-	"\f_create_timeB\x10\n" +
-	"\x0e_update_authorB\x0e\n" +
-	"\f_update_time\"\xa1\x03\n" +
+	"\t_disabled\"\xa1\x03\n" +
 	"\n" +
 	"Authorizer\x12C\n" +
 	"\x04name\x18\x01 \x01(\tB/\xbaG,\x92\x02)Unique name for this authorizer instance.R\x04name\x12U\n" +
@@ -459,25 +412,22 @@ func file_security_authz_v1_authz_proto_rawDescGZIP() []byte {
 
 var file_security_authz_v1_authz_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_security_authz_v1_authz_proto_goTypes = []any{
-	(*RuleSpec)(nil),              // 0: contrib.api.security.authz.v1.RuleSpec
-	(*PolicySpec)(nil),            // 1: contrib.api.security.authz.v1.PolicySpec
-	(*Authorizer)(nil),            // 2: contrib.api.security.authz.v1.Authorizer
-	(*structpb.Struct)(nil),       // 3: google.protobuf.Struct
-	(*timestamppb.Timestamp)(nil), // 4: google.protobuf.Timestamp
-	(*v1.Config)(nil),             // 5: contrib.api.security.authz.casbin.v1.Config
+	(*RuleSpec)(nil),        // 0: contrib.api.security.authz.v1.RuleSpec
+	(*PolicySpec)(nil),      // 1: contrib.api.security.authz.v1.PolicySpec
+	(*Authorizer)(nil),      // 2: contrib.api.security.authz.v1.Authorizer
+	(*structpb.Struct)(nil), // 3: google.protobuf.Struct
+	(*v1.Config)(nil),       // 4: contrib.api.security.authz.casbin.v1.Config
 }
 var file_security_authz_v1_authz_proto_depIdxs = []int32{
 	3, // 0: contrib.api.security.authz.v1.RuleSpec.attributes:type_name -> google.protobuf.Struct
 	3, // 1: contrib.api.security.authz.v1.PolicySpec.metadata:type_name -> google.protobuf.Struct
-	4, // 2: contrib.api.security.authz.v1.PolicySpec.create_time:type_name -> google.protobuf.Timestamp
-	4, // 3: contrib.api.security.authz.v1.PolicySpec.update_time:type_name -> google.protobuf.Timestamp
-	5, // 4: contrib.api.security.authz.v1.Authorizer.casbin:type_name -> contrib.api.security.authz.casbin.v1.Config
-	3, // 5: contrib.api.security.authz.v1.Authorizer.settings:type_name -> google.protobuf.Struct
-	6, // [6:6] is the sub-list for method output_type
-	6, // [6:6] is the sub-list for method input_type
-	6, // [6:6] is the sub-list for extension type_name
-	6, // [6:6] is the sub-list for extension extendee
-	0, // [0:6] is the sub-list for field type_name
+	4, // 2: contrib.api.security.authz.v1.Authorizer.casbin:type_name -> contrib.api.security.authz.casbin.v1.Config
+	3, // 3: contrib.api.security.authz.v1.Authorizer.settings:type_name -> google.protobuf.Struct
+	4, // [4:4] is the sub-list for method output_type
+	4, // [4:4] is the sub-list for method input_type
+	4, // [4:4] is the sub-list for extension type_name
+	4, // [4:4] is the sub-list for extension extendee
+	0, // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_security_authz_v1_authz_proto_init() }

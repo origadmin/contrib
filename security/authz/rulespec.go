@@ -14,6 +14,7 @@ const (
 	ActionAny    = "*"
 )
 
+// Deprecated: Use PolicySpec with type="rbac:role" instead.
 // RoleSpec encapsulates the specification of a role assignment.
 type RoleSpec struct {
 	Role       string          // The name of the role.

@@ -193,6 +193,8 @@ func (m *PolicySpec) validate(all bool) error {
 
 	// no validation rules for Type
 
+	// no validation rules for Subject
+
 	if all {
 		switch v := interface{}(m.GetMetadata()).(type) {
 		case interface{ ValidateAll() error }:
@@ -222,10 +224,6 @@ func (m *PolicySpec) validate(all bool) error {
 		}
 	}
 
-	if m.Subject != nil {
-		// no validation rules for Subject
-	}
-
 	if m.Effect != nil {
 		// no validation rules for Effect
 	}
@@ -252,80 +250,6 @@ func (m *PolicySpec) validate(all bool) error {
 
 	if m.Disabled != nil {
 		// no validation rules for Disabled
-	}
-
-	if m.CreateAuthor != nil {
-		// no validation rules for CreateAuthor
-	}
-
-	if m.CreateTime != nil {
-
-		if all {
-			switch v := interface{}(m.GetCreateTime()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, PolicySpecValidationError{
-						field:  "CreateTime",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, PolicySpecValidationError{
-						field:  "CreateTime",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetCreateTime()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return PolicySpecValidationError{
-					field:  "CreateTime",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
-	}
-
-	if m.UpdateAuthor != nil {
-		// no validation rules for UpdateAuthor
-	}
-
-	if m.UpdateTime != nil {
-
-		if all {
-			switch v := interface{}(m.GetUpdateTime()).(type) {
-			case interface{ ValidateAll() error }:
-				if err := v.ValidateAll(); err != nil {
-					errors = append(errors, PolicySpecValidationError{
-						field:  "UpdateTime",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			case interface{ Validate() error }:
-				if err := v.Validate(); err != nil {
-					errors = append(errors, PolicySpecValidationError{
-						field:  "UpdateTime",
-						reason: "embedded message failed validation",
-						cause:  err,
-					})
-				}
-			}
-		} else if v, ok := interface{}(m.GetUpdateTime()).(interface{ Validate() error }); ok {
-			if err := v.Validate(); err != nil {
-				return PolicySpecValidationError{
-					field:  "UpdateTime",
-					reason: "embedded message failed validation",
-					cause:  err,
-				}
-			}
-		}
-
 	}
 
 	if len(errors) > 0 {
